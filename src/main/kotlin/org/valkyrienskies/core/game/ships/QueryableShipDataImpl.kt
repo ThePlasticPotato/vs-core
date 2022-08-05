@@ -33,6 +33,7 @@ open class QueryableShipDataImpl<ShipType : Ship>(
 
     private val _idToShipData: HashMap<ShipId, ShipType> = HashMap()
 
+    @Deprecated("Use the specific functions instead, such as #getById or #iterator")
     override val idToShipData: Map<ShipId, ShipType> = _idToShipData
 
     /**
