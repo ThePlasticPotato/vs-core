@@ -47,6 +47,8 @@ class ShipObjectServerWorld @Inject constructor(
     }
 
     private val enforcer = TickStageEnforcer(PRE_TICK) {
+        ignoreUntilFirstReset()
+
         requireOrder {
             single(PRE_TICK)
             anyOf(UPDATE_DIMENSIONS, UPDATE_BLOCKS, UPDATE_CHUNKS)

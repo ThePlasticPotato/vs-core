@@ -47,11 +47,7 @@ interface TickStageEnforcer<S> {
  * @see TickStageEnforcer
  */
 fun <S> TickStageEnforcer(resetStage: S, vararg constraints: StageConstraint<S>): TickStageEnforcer<S> =
-    TickStageEnforcerImpl(resetStage, constraints.asList())
+    TickStageEnforcerImpl(resetStage, constraints.asList(), false)
 
-/**
- * @see TickStageEnforcer
- */
-fun <S> TickStageEnforcer(resetStage: S, block: StageConstraintsBuilder<S>.() -> Unit): TickStageEnforcer<S> =
-    TickStageEnforcerImpl(resetStage, StageConstraintsBuilder<S>().apply(block).build())
-
+fun <S> TickStageEnforcer(resetStage: S, block: TickStageEnforcerBuilder<S>.() -> Unit): TickStageEnforcer<S> =
+    TickStageEnforcerBuilder(resetStage).apply(block).buildEnforcer()

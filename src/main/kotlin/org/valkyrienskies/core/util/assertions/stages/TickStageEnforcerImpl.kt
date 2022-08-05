@@ -1,37 +1,38 @@
 package org.valkyrienskies.core.util.assertions.stages
 
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet
+import it.unimi.dsi.fastutil.ints.IntSet
 import org.valkyrienskies.core.util.assertions.stages.constraints.StageConstraint
 
-class TickStageEnforcerImpl<S>(
+internal class TickStageEnforcerImpl<S>(
     private val resetStage: S,
-    private val constraints: List<StageConstraint<S>>
+    private val constraints: List<StageConstraint<S>>,
+    private val ignoreUntilFirstReset: Boolean = false,
+    private val ignoreRepeatFailures: Boolean = true,
 ) : TickStageEnforcer<S> {
 
     private val stagesSinceReset = ArrayList<S>()
+    private val failedConstraintsSinceReset: IntSet = IntOpenHashSet()
 
     override fun stage(stage: S) {
         val reset = stage == resetStage
         val isFirstStage = stagesSinceReset.isEmpty()
 
+        if (ignoreUntilFirstReset && !reset && isFirstStage) {
+            return
+        }
+
         if (!reset && isFirstStage) {
-            throw IllegalArgumentException("First executed stage must be a reset!")
-        }
-
-        if (!reset && stage == resetStage) {
-            throw IllegalArgumentException("Stage $stage was previously used as a reset stage but now is not.")
-        }
-
-        if (reset && stage != resetStage) {
-            throw IllegalArgumentException(
-                "Enforcer must be reset on the same stage each time! " +
-                    "Was reset on $stage, last reset on $resetStage"
-            )
+            throw IllegalArgumentException("First executed stage must be the reset ($resetStage) but was $stage")
         }
 
         val errors = mutableListOf<String>()
 
         if (reset && !isFirstStage) {
-            constraints.mapNotNullTo(errors) { it.check(stagesSinceReset, true) }
+            constraints
+                .asSequence()
+                .filterIndexed { i, _ -> !failedConstraintsSinceReset.contains(i) }
+                .mapNotNullTo(errors) { it.check(stagesSinceReset, true) }
 
             if (errors.isNotEmpty()) {
                 throw ConstraintFailedException(
@@ -40,11 +41,18 @@ class TickStageEnforcerImpl<S>(
                 )
             }
 
+            failedConstraintsSinceReset.clear()
             stagesSinceReset.clear()
         }
 
         stagesSinceReset.add(stage)
-        constraints.mapNotNullTo(errors) { it.check(stagesSinceReset, false) }
+        constraints.mapIndexedNotNullTo(errors) { index, constraint ->
+            constraint.check(stagesSinceReset, false)?.also {
+                if (ignoreRepeatFailures) {
+                    failedConstraintsSinceReset.add(index)
+                }
+            }
+        }
 
         if (errors.isNotEmpty()) {
             throw ConstraintFailedException(

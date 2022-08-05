@@ -158,6 +158,40 @@ class TickStageEnforcerTest : StringSpec({
         enforcer.stage("a")
     }
 
+    "require exact order" {
+        val enforcer = TickStageEnforcer("a") {
+            requireExactOrder("a", "b", "c")
+        }
+
+        repeat(2) {
+            enforcer.stage("a")
+            enforcer.stage("b")
+            shouldThrow<ConstraintFailedException> {
+                enforcer.stage("d")
+            }
+        }
+    }
+
+    "ignores until first reset" {
+        val enforcer = TickStageEnforcer("a") {
+            ignoreUntilFirstReset()
+
+            requireExactOrder("a", "b", "c")
+        }
+
+        repeat(3) {
+            enforcer.stage("b")
+            enforcer.stage("d")
+        }
+
+        enforcer.stage("a")
+        enforcer.stage("b")
+
+        shouldThrow<ConstraintFailedException> {
+            enforcer.stage("d")
+        }
+    }
+
     "allows full cycle of correct oder" {
         val enforcer = TickStageEnforcer("a", StageConstraint.requireStagesAndOrder("a", "b", "c"))
 
