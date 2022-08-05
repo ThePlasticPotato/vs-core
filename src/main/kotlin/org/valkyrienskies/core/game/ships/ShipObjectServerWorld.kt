@@ -23,7 +23,7 @@ import org.valkyrienskies.core.game.ships.types.ShipVoxelUpdates
 import org.valkyrienskies.core.hooks.VSEvents
 import org.valkyrienskies.core.hooks.VSEvents.ShipLoadEvent
 import org.valkyrienskies.core.networking.VSNetworking
-import org.valkyrienskies.core.util.Internal
+import org.valkyrienskies.core.util.InternalInject
 import org.valkyrienskies.core.util.assertions.stages.TickStageEnforcer
 import org.valkyrienskies.core.util.names.NounListNameGenerator
 import org.valkyrienskies.physics_api.voxel_updates.DenseVoxelShapeUpdate
@@ -38,7 +38,7 @@ import javax.inject.Singleton
 @Singleton
 class ShipObjectServerWorld @Inject constructor(
     @AllShips override val queryableShipData: MutableQueryableShipDataServer,
-    @Internal private val chunkAllocator: ChunkAllocator,
+    @InternalInject private val chunkAllocator: ChunkAllocator,
     private val loadManager: ShipLoadManagerServer
 ) : ShipObjectWorld<ShipObjectServer>() {
 
@@ -69,10 +69,10 @@ class ShipObjectServerWorld @Inject constructor(
 
     val playersToTrackedShips by loadManager::playersToTrackedShips
 
-    private val shipObjectMap = HashMap<ShipId, ShipObjectServer>()
+    private val _loadedShips = QueryableShipDataImpl<ShipObjectServer>()
 
-    // Explicitly make [shipObjects] a MutableMap so that we can use Iterator::remove()
-    override val shipObjects: MutableMap<ShipId, ShipObjectServer> = shipObjectMap
+    override val loadedShips: QueryableShipData<ShipObjectServer>
+        get() = _loadedShips
 
     private val dimensionToGroundBodyId: MutableMap<DimensionId, ShipId> = HashMap()
 
@@ -212,10 +212,10 @@ class ShipObjectServerWorld @Inject constructor(
     fun postTick() {
         enforcer.stage(POST_TICK)
 
-        val loadedShips = mutableListOf<ShipObjectServer>()
-        val it = shipObjects.iterator()
+        val shipsLoadedThisTick = mutableListOf<ShipObjectServer>()
+        val it = _loadedShips.iterator()
         while (it.hasNext()) {
-            val shipObjectServer = it.next().value
+            val shipObjectServer = it.next()
             if (shipObjectServer.shipData.inertiaData.getShipMass() < 1e-8) {
                 // Delete this ship
                 _deletedShipObjects.add(shipObjectServer.shipData)
@@ -233,11 +233,11 @@ class ShipObjectServerWorld @Inject constructor(
         // For now, just make a [ShipObject] for every [ShipData]
         for (shipData in queryableShipData) {
             val shipID = shipData.id
-            if (!shipObjectMap.containsKey(shipID)) {
+            if (!_loadedShips.contains(shipID)) {
                 val newShipObject = ShipObjectServer(shipData)
                 newShipObjects.add(newShipObject)
-                shipObjectMap[shipID] = newShipObject
-                loadedShips.add(newShipObject)
+                _loadedShips.addShipData(newShipObject)
+                shipsLoadedThisTick.add(newShipObject)
             }
         }
 
@@ -258,7 +258,7 @@ class ShipObjectServerWorld @Inject constructor(
         }
         // endregion
 
-        loadedShips.forEach { VSEvents.shipLoadEvent.emit(ShipLoadEvent(it)) }
+        shipsLoadedThisTick.forEach { VSEvents.shipLoadEvent.emit(ShipLoadEvent(it)) }
 
         loadManager.postTick(players)
     }

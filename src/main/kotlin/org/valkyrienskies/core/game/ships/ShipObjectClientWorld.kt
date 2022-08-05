@@ -14,10 +14,12 @@ class ShipObjectClientWorld @Inject constructor(
         fun make(): ShipObjectClientWorld
     }
 
-    override val queryableShipData: MutableQueryableShipDataCommon = QueryableShipDataImpl()
+    override val queryableShipData: QueryableShipData<ShipObjectClient> get() = loadedShips
 
-    private val shipObjectMap = HashMap<ShipId, ShipObjectClient>()
-    override val shipObjects: Map<ShipId, ShipObjectClient> = shipObjectMap
+    private val _loadedShips: MutableQueryableShipData<ShipObjectClient> = QueryableShipDataImpl()
+
+    override val loadedShips: QueryableShipData<ShipObjectClient>
+        get() = _loadedShips
 
     val networkManager: ShipObjectNetworkManagerClient = networkManagerFactory.make(this)
 
@@ -26,13 +28,11 @@ class ShipObjectClientWorld @Inject constructor(
     }
 
     fun addShip(ship: ShipDataCommon) {
-        queryableShipData.addShipData(ship)
-        shipObjectMap[ship.id] = ShipObjectClient(ship)
+        _loadedShips.addShipData(ShipObjectClient(ship))
     }
 
     fun removeShip(shipId: ShipId) {
-        queryableShipData.removeShipData(shipId)
-        shipObjectMap.remove(shipId)
+        _loadedShips.removeShipData(shipId)
     }
 
     public override fun preTick() {

@@ -5,4 +5,4 @@ import kotlin.annotation.AnnotationRetention.BINARY
 
 @Retention(BINARY)
 @Qualifier
-internal annotation class Internal()
+internal annotation class InternalInject()

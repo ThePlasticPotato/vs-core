@@ -7,19 +7,21 @@ import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.util.intersectsAABB
 
 typealias QueryableShipDataServer = QueryableShipData<ShipData>
-typealias QueryableShipDataCommon = QueryableShipData<ShipDataCommon>
 typealias MutableQueryableShipDataServer = MutableQueryableShipData<ShipData>
-typealias MutableQueryableShipDataCommon = MutableQueryableShipData<ShipDataCommon>
 
 interface QueryableShipData<out ShipType : Ship> : Iterable<ShipType> {
+    @Deprecated(message = "Use the specific functions instead, such as #getById or #iterator")
     val idToShipData: Map<ShipId, ShipType>
+
     override fun iterator(): Iterator<ShipType>
     fun getById(shipId: ShipId): ShipType?
     fun getShipDataFromChunkPos(chunkX: Int, chunkZ: Int, dimensionId: DimensionId): ShipType?
     fun getShipDataIntersecting(aabb: AABBdc): Iterable<ShipType>
+
+    fun contains(shipId: ShipId): Boolean = getById(shipId) != null
 }
 
-interface MutableQueryableShipData<ShipType : Ship> : QueryableShipData<ShipType> {
+interface MutableQueryableShipData<ShipType : Ship> : QueryableShipData<ShipType>, MutableIterable<ShipType> {
     fun addShipData(shipData: ShipType)
     fun removeShipData(shipData: ShipType)
     fun removeShipData(id: ShipId)
@@ -43,8 +45,30 @@ open class QueryableShipDataImpl<ShipType : Ship>(
         data.forEach(::addShipData)
     }
 
-    override fun iterator(): Iterator<ShipType> {
-        return _idToShipData.values.iterator()
+    override fun iterator(): MutableIterator<ShipType> {
+        val iter = _idToShipData.values.iterator()
+
+        return object : MutableIterator<ShipType> {
+            lateinit var last: ShipType
+            override fun hasNext(): Boolean = iter.hasNext()
+            override fun next(): ShipType = iter.next()
+            override fun remove() {
+                iter.remove()
+                chunkClaimToShipData.remove(last.chunkClaim)
+            }
+        }
+    }
+
+    override fun addShipData(shipData: ShipType) {
+        if (getById(shipData.id) != null) {
+            throw IllegalArgumentException("Adding shipData $shipData failed because of duplicated UUID.")
+        }
+        _idToShipData[shipData.id] = shipData
+        chunkClaimToShipData[shipData.chunkClaim] = shipData
+    }
+
+    override fun removeShipData(shipData: ShipType) {
+        removeShipData(shipData.id)
     }
 
     override fun getById(shipId: ShipId): ShipType? {
@@ -60,18 +84,6 @@ open class QueryableShipDataImpl<ShipType : Ship>(
             // [shipData] is null, or has a different dimension
             null
         }
-    }
-
-    override fun addShipData(shipData: ShipType) {
-        if (getById(shipData.id) != null) {
-            throw IllegalArgumentException("Adding shipData $shipData failed because of duplicated UUID.")
-        }
-        _idToShipData[shipData.id] = shipData
-        chunkClaimToShipData[shipData.chunkClaim] = shipData
-    }
-
-    override fun removeShipData(shipData: ShipType) {
-        removeShipData(shipData.id)
     }
 
     override fun removeShipData(id: ShipId) {

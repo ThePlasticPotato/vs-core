@@ -5,20 +5,22 @@ import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
 import org.valkyrienskies.core.game.ChunkClaim
 import org.valkyrienskies.core.game.DimensionId
+import org.valkyrienskies.core.game.VSBlockType
 import org.valkyrienskies.core.game.ships.ShipId
-import org.valkyrienskies.core.game.ships.ShipObjectClient
 import org.valkyrienskies.core.game.ships.ShipTransform
+import org.valkyrienskies.core.util.PrivateApi
 
 /**
  * Abstraction of a ship, there are many types such as offline ships
  *  or loaded ships so this is the generic interface for all ships.
- *
- *  But this is for Server side only see [ShipObjectClient] for client side.
  */
 interface Ship : ShipProvider {
 
     val id: ShipId
+
     val shipTransform: ShipTransform
+    val prevTickShipTransform: ShipTransform
+
     val chunkClaim: ChunkClaim
     val chunkClaimDimension: DimensionId
     val shipAABB: AABBdc
@@ -51,6 +53,18 @@ interface Ship : ShipProvider {
 
     override val ship: Ship
         get() = this
+
+    @PrivateApi
+    @JvmSynthetic
+    fun onSetBlock(
+        posX: Int,
+        posY: Int,
+        posZ: Int,
+        oldBlockType: VSBlockType,
+        newBlockType: VSBlockType,
+        oldBlockMass: Double,
+        newBlockMass: Double
+    )
 }
 
 inline fun <reified T> Ship.getAttachment() = getAttachment(T::class.java)

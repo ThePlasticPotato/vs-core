@@ -45,7 +45,7 @@ open class ShipDataCommon(
         }
 
     @PacketIgnore
-    var prevTickShipTransform: ShipTransform = prevTickShipTransform
+    final override var prevTickShipTransform: ShipTransform = prevTickShipTransform
         private set
 
     @DeltaIgnore
@@ -59,7 +59,7 @@ open class ShipDataCommon(
     /**
      * Updates the [IBlockPosSet] and [ShipInertiaData] for this [ShipData]
      */
-    internal open fun onSetBlock(
+    override fun onSetBlock(
         posX: Int,
         posY: Int,
         posZ: Int,

@@ -2,6 +2,7 @@ package org.valkyrienskies.core.game.ships
 
 import org.joml.primitives.AABBd
 import org.joml.primitives.AABBdc
+import org.valkyrienskies.core.api.Ship
 import org.valkyrienskies.core.networking.delta.JsonDiffDeltaAlgorithm
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
 
@@ -13,7 +14,7 @@ import org.valkyrienskies.core.util.serialization.VSJacksonUtil
  */
 open class ShipObject(
     shipData: ShipDataCommon
-) {
+) : Ship by shipData {
     @Suppress("CanBePrimaryConstructorProperty") // don't want to refer to open val in constructor
     open val shipData: ShipDataCommon = shipData
 

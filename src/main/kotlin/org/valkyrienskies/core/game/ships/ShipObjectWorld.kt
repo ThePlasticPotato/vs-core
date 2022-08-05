@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.plus
 import org.joml.primitives.AABBdc
+import org.valkyrienskies.core.api.Ship
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.game.VSBlockType
 import org.valkyrienskies.core.util.coroutines.TickableCoroutineDispatcher
@@ -15,9 +16,13 @@ import org.valkyrienskies.core.util.logger
  */
 abstract class ShipObjectWorld<ShipObjectType : ShipObject> {
 
-    abstract val queryableShipData: QueryableShipDataCommon
+    abstract val queryableShipData: QueryableShipData<Ship>
+    // abstract val loadedShips: QueryableShipData<LoadedShip>
 
-    abstract val shipObjects: Map<ShipId, ShipObjectType>
+    abstract val loadedShips: QueryableShipData<ShipObjectType>
+
+    @Deprecated(message = "use loadedShips", replaceWith = ReplaceWith("loadedShips"))
+    val shipObjects: Map<ShipId, ShipObjectType> get() = loadedShips.idToShipData
 
     private val _dispatcher = TickableCoroutineDispatcher()
     val dispatcher: CoroutineDispatcher = _dispatcher
