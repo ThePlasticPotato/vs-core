@@ -127,7 +127,7 @@ class ShipObjectNetworkManagerClient(
                 val shipId = buf.readLong()
                 val ship = shipObjects[shipId]
                 if (ship == null) {
-                    logger.warn("Received ship transform for ship with unknown ID!")
+                    logger.visWarn("Received ship transform for ship with unknown ID!")
                     buf.skipBytes(VSNetworkPipelineStage.TRANSFORM_SIZE - 8)
                 } else if (ship.latestNetworkTTick >= tickNum) {
                     // Skip the transform if we already have it

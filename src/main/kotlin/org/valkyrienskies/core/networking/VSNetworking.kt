@@ -58,7 +58,7 @@ object VSNetworking {
 
             return udpServer
         } catch (e: SocketException) {
-            logger.error("Tried to bind to ${VSCoreConfig.SERVER.udpPort} but failed!", e)
+            logger.visError("Tried to bind to ${VSCoreConfig.SERVER.udpPort} but failed!", e)
         } catch (e: Exception) {
             logger.error("Tried to setup udp with port: ${VSCoreConfig.SERVER.udpPort} but failed!", e)
         }
@@ -103,13 +103,13 @@ object VSNetworking {
             UdpClientImpl(udpSocket, UDP, socketAddress, id)
             return true
         } catch (e: Exception) {
-            logger.error("Tried to setup udp client with socket address: $socketAddress but failed!", e)
+            logger.visError("Tried to setup udp client with socket address: $socketAddress but failed!", e)
             return false
         }
     }
 
     private fun tcp4udpFallback() {
-        logger.warn("Failed to create UDP socket, falling back to TCP")
+        logger.visWarn("Failed to create UDP socket, falling back to TCP")
         clientUsesUDP = false
         serverUsesUDP = false
 

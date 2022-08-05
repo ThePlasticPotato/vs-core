@@ -66,9 +66,9 @@ class VSPhysicsPipelineBackgroundTask(private val vsPipeline: VSPipeline, privat
             }
         } catch (e: Exception) {
             logger.error("Error in physics pipeline background task", e)
-            repeat(10) { logger.error("!!!!!!! VS PHYSICS THREAD CRASHED !!!!!!!") }
+            repeat(10) { logger.visError("!!!!!!! VS PHYSICS THREAD CRASHED !!!!!!!") }
         }
-        logger.warn("Physics pipeline ending")
+        logger.visWarn("Physics pipeline ending")
     }
 
     fun tellTaskToKillItself() {

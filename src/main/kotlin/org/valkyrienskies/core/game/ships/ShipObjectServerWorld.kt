@@ -16,6 +16,7 @@ import org.valkyrienskies.core.game.ships.networking.ShipObjectNetworkManagerSer
 import org.valkyrienskies.core.hooks.VSEvents
 import org.valkyrienskies.core.hooks.VSEvents.ShipLoadEvent
 import org.valkyrienskies.core.networking.VSNetworking
+import org.valkyrienskies.core.util.logger
 import org.valkyrienskies.core.util.names.NounListNameGenerator
 import org.valkyrienskies.physics_api.voxel_updates.DenseVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.EmptyVoxelShapeUpdate
@@ -32,6 +33,7 @@ class ShipObjectServerWorld(
 ) : ShipObjectWorld<ShipObjectServer>(queryableShipData) {
     companion object {
         internal lateinit var INSTANCE: ShipObjectServerWorld
+        private val logger by logger()
     }
 
     var lastTickPlayers: Set<IPlayer> = setOf()
@@ -152,7 +154,7 @@ class ShipObjectServerWorld(
         newLoadedChunksList.add(Pair(dimensionId, newLoadedChunks))
     }
 
-    public override fun tickShips() {
+    public override fun tickShips() = logger.action("tick-ships") {
         super.tickShips()
 
         val loadedShips = mutableListOf<ShipObjectServer>()
@@ -204,7 +206,9 @@ class ShipObjectServerWorld(
         chunkTracker.updateTracking(players, lastTickPlayers)
         networkManager.tick()
 
-        loadedShips.forEach { VSEvents.shipLoadEvent.emit(ShipLoadEvent(it)) }
+        child("events") {
+            loadedShips.forEach { VSEvents.shipLoadEvent.emit(ShipLoadEvent(it)) }
+        }
 
         // for now don't do anything with this
         chunkTracker.shipsToUnload.clear()

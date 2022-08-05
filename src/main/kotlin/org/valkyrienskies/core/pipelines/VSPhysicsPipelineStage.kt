@@ -44,7 +44,7 @@ class VSPhysicsPipelineStage {
     fun pushGameFrame(gameFrame: VSGameFrame) {
         if (gameFramesQueue.size >= 10) {
             // throw IllegalStateException("Too many game frames in the game frame queue. Is the physics stage broken?")
-            logger.warn("Too many game frames in the game frame queue. Is the physics stage broken?")
+            logger.debug("Too many game frames in the game frame queue!")
             Thread.sleep(1000L)
         }
         gameFramesQueue.add(gameFrame)
@@ -53,39 +53,44 @@ class VSPhysicsPipelineStage {
     /**
      * Process queued game frames, tick the physics, then create a new physics frame
      */
-    fun tickPhysics(gravity: Vector3dc, timeStep: Double, simulatePhysics: Boolean): VSPhysicsFrame {
-        // Apply game frames
-        while (gameFramesQueue.isNotEmpty()) {
-            val gameFrame = gameFramesQueue.remove()
-            applyGameFrame(gameFrame)
+    fun tickPhysics(gravity: Vector3dc, timeStep: Double, simulatePhysics: Boolean): VSPhysicsFrame =
+        logger.action("tick") {
+            // Apply game frames
+            while (gameFramesQueue.isNotEmpty()) {
+                val gameFrame = gameFramesQueue.remove()
+                applyGameFrame(gameFrame)
+            }
+
+            // Update the [poseVel] stored in [PhysShip]
+            shipIdToPhysShip.values.forEach {
+                it.poseVel = it.rigidBodyReference.poseVel
+                // TODO: In the future update the segment tracker too, probably do this after we've added portals to Krunch
+                // it.segments = it.rigidBodyReference.segments
+            }
+
+            // Compute and apply forces/torques for ships
+            child("forces") {
+                var count = 0
+                shipIdToPhysShip.values.forEach {
+                    val applier = APIForcesApplier(it.rigidBodyReference)
+                    it.forceInducers.forEach { i -> i.applyForces(applier, it); count++ }
+                }
+                hint("inducer-amount", count)
+            }
+
+            // Run the physics engine
+            physicsEngine.tick(gravity, timeStep, simulatePhysics)
+
+            // Return a new physics frame
+            createPhysicsFrame()
         }
-
-        // Update the [poseVel] stored in [PhysShip]
-        shipIdToPhysShip.values.forEach {
-            it.poseVel = it.rigidBodyReference.poseVel
-            // TODO: In the future update the segment tracker too, probably do this after we've added portals to Krunch
-            // it.segments = it.rigidBodyReference.segments
-        }
-
-        // Compute and apply forces/torques for ships
-        shipIdToPhysShip.values.forEach {
-            val applier = APIForcesApplier(it.rigidBodyReference)
-            it.forceInducers.forEach { i -> i.applyForces(applier, it) }
-        }
-
-        // Run the physics engine
-        physicsEngine.tick(gravity, timeStep, simulatePhysics)
-
-        // Return a new physics frame
-        return createPhysicsFrame()
-    }
 
     fun deleteResources() {
         if (physicsEngine.hasBeenDeleted()) throw IllegalStateException("Physics engine has already been deleted!")
         physicsEngine.deletePhysicsWorldResources()
     }
 
-    private fun applyGameFrame(gameFrame: VSGameFrame) {
+    private fun applyGameFrame(gameFrame: VSGameFrame) = logger.action("apply-game-frame") {
         // Delete deleted ships
         gameFrame.deletedShips.forEach { deletedShipId ->
             val shipRigidBodyReferenceAndId = shipIdToPhysShip[deletedShipId]

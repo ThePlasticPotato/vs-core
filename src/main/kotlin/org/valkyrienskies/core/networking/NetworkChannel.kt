@@ -98,6 +98,7 @@ class NetworkChannel {
     private fun bytesToPacket(data: ByteBuf): Packet {
         val id = data.readInt()
         val type = packetTypes[id]
+        logger.hint("packet-type", type)
         return Packet(type, data)
     }
 

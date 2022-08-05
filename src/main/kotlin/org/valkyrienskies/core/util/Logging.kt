@@ -25,7 +25,32 @@ object DelegateLogger {
 
 class VSLogger(val std: Logger) : AbstractLogger() {
 
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): Logger = this
+    fun visError(message: String, t: Throwable? = null) {
+        std.error(message, t)
+        traceData(message, t)
+    }
+
+    fun visWarn(message: String, t: Throwable? = null) {
+        std.warn(message, t)
+        traceData(message, t)
+    }
+
+    fun <T> action(name: String, lambda: Transaction.() -> T): T =
+        DataCollection.action(std.name, name, lambda)
+
+    fun hint(name: String, value: Any?) =
+        DataCollection.hint(std.name, name, value)
+
+    private fun traceData(message: String, t: Throwable? = null) {
+        DataCollection.log(
+            Level.TRACE,
+            null,
+            message,
+            t
+        )
+    }
+
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): VSLogger = this
 
     override fun getLevel(): Level = if (DataCollection.isCollecting) Level.ALL else std.level
 
@@ -95,7 +120,7 @@ class VSLogger(val std: Logger) : AbstractLogger() {
             DataCollection.log(
                 level,
                 marker,
-                message,
+                message.formattedMessage,
                 t
             )
         }

@@ -1,6 +1,7 @@
 package org.valkyrienskies.core.game.ships
 
 import org.valkyrienskies.core.game.ships.networking.ShipObjectNetworkManagerClient
+import org.valkyrienskies.core.util.logger
 
 class ShipObjectClientWorld(
     override val queryableShipData: MutableQueryableShipDataCommon
@@ -24,7 +25,7 @@ class ShipObjectClientWorld(
         shipObjectMap.remove(shipId)
     }
 
-    public override fun tickShips() {
+    public override fun tickShips() = logger.action("tick-ships") {
         super.tickShips()
 
         shipObjects.forEach { (_, shipObjectClient) ->
@@ -34,5 +35,9 @@ class ShipObjectClientWorld(
 
     override fun destroyWorld() {
         networkManager.onDestroy()
+    }
+
+    companion object {
+        private val logger by logger()
     }
 }

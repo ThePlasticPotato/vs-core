@@ -67,22 +67,26 @@ class UdpServerImpl(val socket: DatagramSocket, val channel: NetworkChannel) {
                 // TODO logger here
                 // println("Received UDP Packet from $sender, size: ${recvPacket.length}")
 
-                if (sender == null) {
-                    // If no player was found, try to identify the player
-                    if (buffer.capacity() != 8) continue
-                    // TODO make this spamfree, ppl can spam this packet to guess a player's id ??
-                    val newConnection = identification.remove(buffer.readLong()) ?: continue
+                logger.action("parse-packet") {
+                    if (sender == null) {
+                        // If no player was found, try to identify the player
+                        if (buffer.capacity() != 8) return@action
+                        // TODO make this spamfree, ppl can spam this packet to guess a player's id ??
+                        val newConnection = identification.remove(buffer.readLong()) ?: return@action
 
-                    connections[recvPacket.socketAddress] = newConnection
-                    failedConnectionsInRow = 0
+                        hint("new-connection", newConnection)
 
-                    sendToClient(
-                        Unpooled.buffer(16)
-                            .writeLong(newConnection.uuid.leastSignificantBits)
-                            .writeLong(newConnection.uuid.mostSignificantBits),
-                        newConnection
-                    )
-                } else channel.onReceiveServer(buffer, sender)
+                        connections[recvPacket.socketAddress] = newConnection
+                        failedConnectionsInRow = 0
+
+                        sendToClient(
+                            Unpooled.buffer(16)
+                                .writeLong(newConnection.uuid.leastSignificantBits)
+                                .writeLong(newConnection.uuid.mostSignificantBits),
+                            newConnection
+                        )
+                    } else channel.onReceiveServer(buffer, sender)
+                }
             } catch (e: Exception) {
                 logger.error("Error in server network thread", e)
             }

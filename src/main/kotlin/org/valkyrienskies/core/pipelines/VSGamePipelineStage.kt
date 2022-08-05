@@ -33,7 +33,7 @@ class VSGamePipelineStage(val shipWorld: ShipObjectServerWorld) {
     fun pushPhysicsFrame(physicsFrame: VSPhysicsFrame) {
         if (physicsFramesQueue.size >= 100) {
             // throw IllegalStateException("Too many physics frames in the physics frame queue. Is the game stage broken?")
-            logger.warn("Too many physics frames in the physics frame queue. Is the game stage broken?")
+            logger.debug("Too many physics frames in the physics frame queue!")
             Thread.sleep(1000L)
         }
         physicsFramesQueue.add(physicsFrame)
@@ -42,7 +42,7 @@ class VSGamePipelineStage(val shipWorld: ShipObjectServerWorld) {
     /**
      * Apply queued physics frames to the game
      */
-    fun preTickGame() {
+    fun preTickGame() = logger.action("pre-tick") {
         // Set the values of prevTickShipTransform
         shipWorld.shipObjects.forEach { (_, shipObject) ->
             shipObject.shipData.updatePrevTickShipTransform()
@@ -63,10 +63,7 @@ class VSGamePipelineStage(val shipWorld: ShipObjectServerWorld) {
     /**
      * Create a new game frame to be sent to the physics
      */
-    fun postTickGame(): VSGameFrame {
-        // Finally, return the game frame
-        return createGameFrame()
-    }
+    fun postTickGame(): VSGameFrame = logger.action("post-tick") { createGameFrame() }
 
     private fun applyPhysicsFrame(physicsFrame: VSPhysicsFrame) {
         physicsFrame.shipDataMap.forEach { (shipId, shipInPhysicsFrameData) ->
@@ -106,6 +103,8 @@ class VSGamePipelineStage(val shipWorld: ShipObjectServerWorld) {
         val updatedShipObjects = shipWorld.getUpdatedShipObjects()
         val deletedShipObjects = shipWorld.getDeletedShipObjectsIncludingGround()
         val shipVoxelUpdates = shipWorld.getShipToVoxelUpdates()
+
+        logger.hint("ship-amount", shipWorld.shipObjects.size)
 
         newGroundRigidBodyObjects.forEach { newGroundObjectData ->
             val dimensionId = newGroundObjectData.first

@@ -54,8 +54,8 @@ class UdpClientImpl(val socket: DatagramSocket, val channel: NetworkChannel, val
                 socket.receive(recvPacket)
                 packetCount++
                 if (!recvPacket.socketAddress.equals(server)) {
-                    logger.warn("Received packet from non server address: ${recvPacket.socketAddress}")
-                    logger.warn("This is VERY SUSPICIOUS!")
+                    logger.visWarn("Received packet from non server address: ${recvPacket.socketAddress}")
+                    logger.visWarn("This is VERY SUSPICIOUS!")
                     continue
                 }
 
@@ -66,8 +66,11 @@ class UdpClientImpl(val socket: DatagramSocket, val channel: NetworkChannel, val
                 }
 
                 logger.trace { StringFormattedMessage("Client received packet of size ${recvPacket.length}") }
-                val buffer = Unpooled.wrappedBuffer(recvBuffer, 0, recvPacket.length)
-                channel.onReceiveClient(buffer)
+
+                logger.action("parse-packet") {
+                    val buffer = Unpooled.wrappedBuffer(recvBuffer, 0, recvPacket.length)
+                    channel.onReceiveClient(buffer)
+                }
             } catch (e: Exception) {
                 logger.error("Error in client network thread", e)
             }
