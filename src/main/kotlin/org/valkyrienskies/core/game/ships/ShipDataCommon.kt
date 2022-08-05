@@ -91,13 +91,6 @@ open class ShipDataCommon(
     override val worldToShip: Matrix4dc
         get() = shipTransform.worldToShipMatrix
 
-    // Client side doesn't have any attachments, this is replaced in the server's [ShipData]
-    override fun <T> getAttachment(clazz: Class<T>): T? = TODO()
-
-    override fun <T> setAttachment(clazz: Class<T>, value: T?) {
-        TODO()
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

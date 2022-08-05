@@ -1,6 +1,7 @@
 package org.valkyrienskies.core.game
 
 import org.joml.Vector2i
+import org.joml.Vector3dc
 import org.joml.Vector3ic
 
 /**
@@ -76,6 +77,11 @@ data class ChunkAllocator(
         @JvmStatic
         fun isBlockInShipyard(blockPos: Vector3ic): Boolean {
             return isBlockInShipyard(blockPos.x(), blockPos.y(), blockPos.z())
+        }
+
+        @JvmStatic
+        fun isBlockInShipyard(pos: Vector3dc): Boolean {
+            return isBlockInShipyard(pos.x(), pos.y(), pos.z())
         }
     }
 

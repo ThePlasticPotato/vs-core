@@ -9,7 +9,7 @@ import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.ServerShip
-import org.valkyrienskies.core.api.ShipUser
+import org.valkyrienskies.core.api.ServerShipUser
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.chunk_tracking.ShipActiveChunksSet
 import org.valkyrienskies.core.datastructures.IBlockPosSetAABB
@@ -40,7 +40,8 @@ class ShipData(
 ) : ShipDataCommon(
     id, name, chunkClaim, chunkClaimDimension, physicsData, shipTransform, prevTickShipTransform,
     shipAABB, shipVoxelAABB, shipActiveChunksSet
-), ServerShip {
+),
+    ServerShip {
     /**
      * The set of chunks that must be loaded before this ship is fully loaded.
      *
@@ -73,8 +74,11 @@ class ShipData(
         }
 
         for (attachment in this.persistentAttachedData) {
-            if (ShipUser::class.java.isAssignableFrom(attachment.key) && (attachment.value as ShipUser).ship == null) {
-                (attachment.value as ShipUser).ship = this
+            if (
+                ServerShipUser::class.java.isAssignableFrom(attachment.key) &&
+                (attachment.value as ServerShipUser).ship == null
+            ) {
+                (attachment.value as ServerShipUser).ship = this
             }
         }
     }
@@ -134,8 +138,11 @@ class ShipData(
     }
 
     override fun <T> saveAttachment(clazz: Class<T>, value: T?) {
-        if (ShipUser::class.java.isAssignableFrom(clazz) && (value as ShipUser).ship == null) {
-            (value as ShipUser).ship = this
+        if (
+            ServerShipUser::class.java.isAssignableFrom(clazz) &&
+            (value as ServerShipUser).ship == null
+        ) {
+            (value as ServerShipUser).ship = this
         }
 
         if (value == null)
@@ -145,11 +152,6 @@ class ShipData(
     }
 
     override fun <T> getAttachment(clazz: Class<T>): T? = persistentAttachedData.getInstance(clazz)
-
-    // Does nothing is for tmp storage
-    override fun <T> setAttachment(clazz: Class<T>, value: T?) {
-        TODO()
-    }
 
     companion object {
         /**

@@ -15,7 +15,7 @@ class EventEmitterImpl<T> : EventEmitter<T> {
         val listener = EventListener(cb)
         listener.handler = RegisteredHandler { listeners.remove(listener) }
         listeners.add(listener)
-        
+
         return listener.handler
     }
 
@@ -27,4 +27,3 @@ class EventEmitterImpl<T> : EventEmitter<T> {
         }
     }
 }
-

@@ -1,12 +1,15 @@
 package org.valkyrienskies.core.api
 
 /**
- * Ship user: A interface that just specifies the existence of a ship field
+ * ServerShipProvider: A interface that just specifies the existence of a ship field
  */
-interface ShipProvider {
-    val ship: Ship?
+interface ServerShipProvider {
+    val ship: ServerShip?
 }
 
-interface ShipUser : ShipProvider {
-    override var ship: Ship?
+/**
+ * Modifiable version of ServerShipProvider, will be automatically set when used as an attachment
+ */
+interface ServerShipUser : ServerShipProvider {
+    override var ship: ServerShip?
 }

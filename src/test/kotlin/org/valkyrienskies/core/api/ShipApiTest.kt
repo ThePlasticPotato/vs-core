@@ -16,6 +16,7 @@ internal class ShipApiTest {
         val shipData = VSRandomUtils.randomShipData()
 
         abstractShipSaver(shipData)
+        // abstractShipSaver2(shipData) does not compile (wich is good)
         abstractShipUser(shipData, false)
     }
 
@@ -24,6 +25,7 @@ internal class ShipApiTest {
         val shipObject = ShipObjectServer(VSRandomUtils.randomShipData())
 
         abstractShipSaver(shipObject)
+        abstractShipSaver2(shipObject)
         abstractShipUser(shipObject, true)
     }
 
@@ -31,6 +33,8 @@ internal class ShipApiTest {
     fun testAttachmentInterfaces() {
         val shipData = VSRandomUtils.randomShipData()
         val user = TestShipUser()
+
+        shipData.saveAttachment(user)
 
         Assertions.assertEquals(user.ship, shipData)
         Assertions.assertEquals(user, shipData.getAttachment(TestShipUser::class.java))
@@ -42,17 +46,21 @@ internal class ShipApiTest {
         Assertions.assertEquals(shipData.getAttachment(TestShipUser::class.java)!!.ship, shipDataDeserialized)
     }
 
-    fun abstractShipSaver(ship: Ship) {
-        ship.setAttachment<Float>(3f)
+    fun abstractShipSaver(ship: ServerShip) {
+        ship.saveAttachment(3f)
     }
 
-    fun abstractShipUser(ship: Ship, checkFloat: Boolean) {
-        Assertions.assertEquals(ship.getAttachment<Int>(), 5)
-        if (checkFloat) Assertions.assertEquals(ship.getAttachment<Float>(), 3f)
+    fun abstractShipSaver2(ship: LoadedServerShip) {
+        ship.setAttachment(5)
+    }
+
+    fun abstractShipUser(ship: ServerShip, checkInt: Boolean) {
+        if (checkInt) Assertions.assertEquals(5, ship.getAttachment<Int>())
+        Assertions.assertEquals(3f, ship.getAttachment<Float>())
     }
 }
 
-internal class TestShipUser : ShipUser {
+internal class TestShipUser : ServerShipUser {
     @JsonIgnore
-    override var ship: Ship? = null
+    override var ship: ServerShip? = null
 }

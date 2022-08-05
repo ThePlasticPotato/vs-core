@@ -4,8 +4,8 @@ import com.google.common.collect.MutableClassToInstanceMap
 import org.joml.Vector3d
 import org.valkyrienskies.core.api.LoadedServerShip
 import org.valkyrienskies.core.api.ServerShip
+import org.valkyrienskies.core.api.ServerShipUser
 import org.valkyrienskies.core.api.ShipForcesInducer
-import org.valkyrienskies.core.api.ShipUser
 import org.valkyrienskies.core.api.Ticked
 import org.valkyrienskies.core.networking.delta.DeltaEncodedChannelServerTCP
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
@@ -55,8 +55,8 @@ class ShipObjectServer(
             forceInducers.add(value as ShipForcesInducer)
         }
 
-        if (ShipUser::class.java.isAssignableFrom(clazz)) {
-            (value as ShipUser).ship = this
+        if (ServerShipUser::class.java.isAssignableFrom(clazz)) {
+            (value as ServerShipUser).ship = this
         }
 
         if (Ticked::class.java.isAssignableFrom(clazz)) {
