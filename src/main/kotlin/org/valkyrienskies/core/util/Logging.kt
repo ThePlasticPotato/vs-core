@@ -36,13 +36,13 @@ class VSLogger(val std: Logger) : AbstractLogger() {
     }
 
     fun <T> action(name: String, lambda: Transaction.() -> T): T =
-        DataCollection.action(std.name, name, lambda)
+        DataCollection.action(name, lambda)
 
     fun hint(name: String, value: Any?) =
-        DataCollection.hint(std.name, name, value)
+        DataCollection.hint(name, value)
 
     private fun traceData(message: String, t: Throwable? = null) {
-        DataCollection.log(
+        if (DataCollection.isCollecting) DataCollection.log(
             Level.TRACE,
             null,
             message,

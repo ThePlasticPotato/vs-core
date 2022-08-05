@@ -15,32 +15,38 @@ import org.valkyrienskies.core.config.VSCoreConfig
 
 object DataCollection {
 
-    val isCollecting = true
+    var isCollecting = false
+        private set
 
     init {
-        Sentry.init {
-            var dsn = ""
+        var dsn = ""
 
-            if (dsn == "")
-                dsn = VSCoreConfig.SERVER.sentryUrl
+        if (dsn == "")
+            dsn = VSCoreConfig.SERVER.sentryUrl
 
-            if (dsn == "")
-                dsn = VSCoreConfig.CLIENT.sentryUrl
+        if (dsn == "")
+            dsn = VSCoreConfig.CLIENT.sentryUrl
 
+        if (dsn != "")
+            isCollecting = true
 
-            it.dsn = dsn
-            it.tracesSampleRate = 1.0
-            it.environment = "dev"// TODO get actual environment
-        }
+        if (isCollecting) {
+            Sentry.init {
 
-        Sentry.configureScope {
-            it.level = WARNING
-            it.contexts.setApp(App().apply {
-                appName = "Valkyrien Skies"
-                appVersion = "2.0" // TODO get actual number
-            })
-            it.user = User().apply {
-                username = "TODO" // TODO get actual username (or shouldn't we?)
+                it.dsn = dsn
+                it.tracesSampleRate = 1.0
+                it.environment = "dev"// TODO get actual environment
+            }
+
+            Sentry.configureScope {
+                it.level = WARNING
+                it.contexts.setApp(App().apply {
+                    appName = "Valkyrien Skies"
+                    appVersion = "2.0" // TODO get actual number
+                })
+                it.user = User().apply {
+                    username = "TODO" // TODO get actual username (or shouldn't we?)
+                }
             }
         }
     }
@@ -56,7 +62,7 @@ object DataCollection {
             if (Level.WARN.intLevel() >= level.intLevel())
                 Sentry.captureMessage(message, WARNING)
             else Sentry.addBreadcrumb(Breadcrumb(message).apply {
-                setData("thread", Thread.currentThread().name)
+                // setData("thread", Thread.currentThread().name)
                 if (marker != null) setData("marker", marker)
             })
         }
@@ -69,12 +75,21 @@ object DataCollection {
     private val _transaction = ThreadLocal<Transaction>()
     private val transaction: Transaction?
         get() = _transaction.get()
+    private val origin: String
+        get() {
+            val trace =
+                Thread.currentThread().stackTrace.filterIndexed { i, _ -> i > 3 }
+                    .first { !it.className.startsWith("org.valkyrienskies.core.util") }
+            return trace.className.substring(trace.className.lastIndexOf('.') + 1) + "#" + trace.methodName
+        }
 
-    fun <T> action(origin: String, name: String, lambda: Transaction.() -> T): T {
-        val fullName = "$origin:$name"
+    fun <T> action(name: String, lambda: Transaction.() -> T): T {
+        if (!isCollecting) return Transaction(null).lambda()
 
         if (transaction == null) {
-            val trans = Sentry.startTransaction("${Thread.currentThread().name}|$fullName", fullName)
+            val trans = Sentry.startTransaction(origin, name)
+            trans.setTag("thread", Thread.currentThread().name)
+
             val wrap = Transaction(trans)
             _transaction.set(wrap)
             try {
@@ -85,22 +100,27 @@ object DataCollection {
                 throw e
             } finally {
                 trans.finish()
+                _transaction.set(null)
             }
         } else {
-            return transaction!!.child(fullName, lambda)
+            return transaction!!.child(origin, lambda)
         }
     }
 
-    fun hint(origin: String, name: String, value: Any?) {
-        transaction?.hint("$origin:$name", value)
+    fun hint(name: String, value: Any?) {
+        if (!isCollecting) return
+
+        transaction?.hint(name, value)
     }
 }
 
 @JvmInline
-value class Transaction(internal val transaction: ISpan) {
+value class Transaction(internal val transaction: ISpan?) {
 
     fun <T> child(name: String, lambda: Transaction.() -> T): T {
-        val trans = transaction.startChild(name)
+        if (transaction == null) return lambda()
+
+        val trans = transaction!!.startChild(name)
         try {
             return Transaction(trans).lambda()
         } catch (e: Exception) {
@@ -112,5 +132,7 @@ value class Transaction(internal val transaction: ISpan) {
         }
     }
 
-    fun hint(name: String, data: Any?) = transaction.setData(name, data ?: "null")
+    fun hint(name: String, data: Any?) {
+        transaction?.setTag(name, data?.toString() ?: "null")
+    }
 }
