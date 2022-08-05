@@ -5,6 +5,6 @@ fun interface StagePredicate<S> {
 
     companion object {
         fun <S> single(stage: S): StagePredicate<S> = SingleStage(stage)
-        fun <S> oneOf(vararg stages: S): StagePredicate<S> = OneOfStages(*stages)
+        fun <S> anyOf(vararg stages: S): StagePredicate<S> = AnyOfStages(*stages)
     }
 }

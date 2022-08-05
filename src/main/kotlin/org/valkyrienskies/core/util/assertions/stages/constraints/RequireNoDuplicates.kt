@@ -1,10 +1,14 @@
 package org.valkyrienskies.core.util.assertions.stages.constraints
 
-internal class RequireNoDuplicates<S>(vararg stages: S) :
-    StageConstraint<S> {
+internal class RequireNoDuplicates<S>(vararg stages: S) : StageConstraint<S> {
+
     private val stages: List<S> = stages.asList()
 
     override fun check(stagesSinceReset: List<S>, isReset: Boolean): String? {
+        if (isReset) {
+            return null
+        }
+
         if (stages.isEmpty() && setOf(stagesSinceReset).size != stagesSinceReset.size) {
             return "Expected no duplicates"
         }

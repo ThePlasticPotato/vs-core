@@ -13,8 +13,8 @@ class StagePredicatesBuilder<S> {
         predicates.add(StagePredicate.single(stage))
     }
 
-    fun oneOf(vararg stages: S) {
-        predicates.add(StagePredicate.oneOf(*stages))
+    fun anyOf(vararg stages: S) {
+        predicates.add(StagePredicate.anyOf(*stages))
     }
 
     fun build(): List<StagePredicate<S>> {

@@ -3,8 +3,8 @@ package org.valkyrienskies.core.util.assertions
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import org.valkyrienskies.core.util.assertions.stages.ConstraintFailedException
 import org.valkyrienskies.core.util.assertions.stages.TickStageEnforcer
-import org.valkyrienskies.core.util.assertions.stages.constraints.ConstraintFailedException
 import org.valkyrienskies.core.util.assertions.stages.constraints.StageConstraint
 import org.valkyrienskies.core.util.assertions.stages.predicates.StagePredicate
 import java.util.concurrent.Executors
@@ -20,7 +20,9 @@ class TickStageEnforcerTest : StringSpec({
     }
 
     "enforces order" {
-        val enforcer = TickStageEnforcer("a", StageConstraint.requireOrder("a", "b", "c"))
+        val enforcer = TickStageEnforcer("a") {
+            requireOrder("a", "b", "c")
+        }
 
         enforcer.stage("a")
         enforcer.stage("d")
@@ -35,7 +37,7 @@ class TickStageEnforcerTest : StringSpec({
             "a",
             StageConstraint.requireOrder(
                 StagePredicate.single("a"),
-                StagePredicate.oneOf("b", "c", "d"),
+                StagePredicate.anyOf("b", "c", "d"),
                 StagePredicate.single("f")
             )
         )
@@ -58,7 +60,7 @@ class TickStageEnforcerTest : StringSpec({
         val enforcer = TickStageEnforcer("a") {
             requireOrder {
                 single("a")
-                oneOf("b", "c", "d")
+                anyOf("b", "c", "d")
                 single("f")
             }
         }
@@ -86,6 +88,40 @@ class TickStageEnforcerTest : StringSpec({
         enforcer.stage("c")
         enforcer.stage("c")
         enforcer.stage("a")
+    }
+
+    "enforces no duplicates" {
+        val enforcer = TickStageEnforcer("a") {
+            requireNoDuplicates("c", "d")
+        }
+
+        enforcer.stage("a")
+        enforcer.stage("b")
+        enforcer.stage("c")
+        enforcer.stage("b")
+        enforcer.stage("b")
+
+        shouldThrow<ConstraintFailedException> {
+            enforcer.stage("c")
+        }
+
+        enforcer.stage("a")
+    }
+
+    "enforces required final stage" {
+        val enforcer = TickStageEnforcer("a") {
+            requireFinal("z")
+        }
+
+        enforcer.stage("a")
+        enforcer.stage("b")
+        enforcer.stage("c")
+
+        shouldThrow<ConstraintFailedException> {
+            enforcer.stage("a")
+        }
+
+        enforcer.stage("z")
     }
 
     "enforces required stages" {

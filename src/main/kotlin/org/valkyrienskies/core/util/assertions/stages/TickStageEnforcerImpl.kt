@@ -1,6 +1,5 @@
 package org.valkyrienskies.core.util.assertions.stages
 
-import org.valkyrienskies.core.util.assertions.stages.constraints.ConstraintFailedException
 import org.valkyrienskies.core.util.assertions.stages.constraints.StageConstraint
 
 class TickStageEnforcerImpl<S>(
@@ -13,7 +12,7 @@ class TickStageEnforcerImpl<S>(
     override fun stage(stage: S) {
         val reset = stage == resetStage
         val isFirstStage = stagesSinceReset.isEmpty()
-        
+
         if (!reset && isFirstStage) {
             throw IllegalArgumentException("First executed stage must be a reset!")
         }
@@ -33,6 +32,14 @@ class TickStageEnforcerImpl<S>(
 
         if (reset && !isFirstStage) {
             constraints.mapNotNullTo(errors) { it.check(stagesSinceReset, true) }
+
+            if (errors.isNotEmpty()) {
+                throw ConstraintFailedException(
+                    "Constraints failed (last stage before reset). Stages since last reset: $stagesSinceReset" +
+                        "\n${errors.joinToString("\n")}"
+                )
+            }
+
             stagesSinceReset.clear()
         }
 

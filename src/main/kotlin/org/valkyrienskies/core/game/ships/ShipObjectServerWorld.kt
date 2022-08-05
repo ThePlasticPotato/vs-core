@@ -12,6 +12,11 @@ import org.valkyrienskies.core.game.ChunkAllocator
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.game.VSBlockType
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.POST_TICK
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.PRE_TICK
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_BLOCKS
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_CHUNKS
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_DIMENSIONS
 import org.valkyrienskies.core.game.ships.loading.ShipLoadManagerServer
 import org.valkyrienskies.core.game.ships.types.MutableShipVoxelUpdates
 import org.valkyrienskies.core.game.ships.types.ShipVoxelUpdates
@@ -19,6 +24,7 @@ import org.valkyrienskies.core.hooks.VSEvents
 import org.valkyrienskies.core.hooks.VSEvents.ShipLoadEvent
 import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.util.Internal
+import org.valkyrienskies.core.util.assertions.stages.TickStageEnforcer
 import org.valkyrienskies.core.util.names.NounListNameGenerator
 import org.valkyrienskies.physics_api.voxel_updates.DenseVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.EmptyVoxelShapeUpdate
@@ -35,6 +41,20 @@ class ShipObjectServerWorld @Inject constructor(
     @Internal private val chunkAllocator: ChunkAllocator,
     private val loadManager: ShipLoadManagerServer
 ) : ShipObjectWorld<ShipObjectServer>() {
+
+    private enum class Stages {
+        PRE_TICK, POST_TICK, UPDATE_DIMENSIONS, UPDATE_BLOCKS, UPDATE_CHUNKS
+    }
+
+    private val enforcer = TickStageEnforcer(PRE_TICK) {
+        requireOrder {
+            single(PRE_TICK)
+            anyOf(UPDATE_DIMENSIONS, UPDATE_BLOCKS, UPDATE_CHUNKS)
+            single(POST_TICK)
+        }
+
+        requireFinal(POST_TICK)
+    }
 
     var lastTickPlayers: Set<IPlayer> = setOf()
         private set
@@ -172,6 +192,7 @@ class ShipObjectServerWorld @Inject constructor(
     }
 
     fun addNewLoadedChunks(dimensionId: DimensionId, newLoadedChunks: List<IVoxelShapeUpdate>) {
+        enforcer.stage(UPDATE_CHUNKS)
         newLoadedChunksList.add(LevelVoxelUpdates(dimensionId, newLoadedChunks))
     }
 
@@ -180,12 +201,15 @@ class ShipObjectServerWorld @Inject constructor(
     }
 
     public override fun preTick() {
+        enforcer.stage(PRE_TICK)
         super.preTick()
 
         loadManager.preTick(players, lastTickPlayers, queryableShipData, deletedShipObjects)
     }
 
     fun postTick() {
+        enforcer.stage(POST_TICK)
+
         val loadedShips = mutableListOf<ShipObjectServer>()
         val it = shipObjects.iterator()
         while (it.hasNext()) {
@@ -342,13 +366,17 @@ class ShipObjectServerWorld @Inject constructor(
     }
 
     fun addDimension(dimensionId: DimensionId) {
+        enforcer.stage(UPDATE_DIMENSIONS)
         assert(!dimensionToGroundBodyId.contains(dimensionId))
+
         dimensionsAddedThisTick.add(dimensionId)
         dimensionToGroundBodyId[dimensionId] = chunkAllocator.allocateShipId()
     }
 
     fun removeDimension(dimensionId: DimensionId) {
+        enforcer.stage(UPDATE_DIMENSIONS)
         assert(dimensionToGroundBodyId.contains(dimensionId))
+
         dimensionsRemovedThisTick.add(dimensionId)
     }
 
