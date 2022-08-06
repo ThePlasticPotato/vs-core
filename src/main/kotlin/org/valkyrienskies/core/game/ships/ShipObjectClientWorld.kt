@@ -16,6 +16,7 @@ interface ShipObjectClientWorldComponent {
     }
 }
 
+@WorldScoped
 class ShipObjectClientWorld @Inject constructor(
     networkManagerFactory: ShipObjectNetworkManagerClient.Factory
 ) : ShipObjectWorld<ShipObjectClient>() {
