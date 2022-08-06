@@ -13,7 +13,8 @@ import org.valkyrienskies.core.util.writeVec3d
 import javax.inject.Inject
 
 class VSNetworkPipelineStage @Inject constructor(
-    private val shipWorld: ShipObjectServerWorld
+    private val shipWorld: ShipObjectServerWorld,
+    private val networking: VSNetworking
 ) {
 
     var noSkip = true
@@ -42,7 +43,7 @@ class VSNetworkPipelineStage @Inject constructor(
 
             // Each transform is 80 bytes big so 6 transforms per packet
             // If not using udp we just send 1 big packet with all transforms
-            if (VSNetworking.serverUsesUDP)
+            if (networking.serverUsesUDP)
                 trackedShips.chunked(504 / TRANSFORM_SIZE).forEach(::send)
             else
                 send(trackedShips.asList())

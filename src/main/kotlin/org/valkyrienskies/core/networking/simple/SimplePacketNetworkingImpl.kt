@@ -4,14 +4,14 @@ import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.networking.NetworkChannel
 import org.valkyrienskies.core.networking.PacketType
 import org.valkyrienskies.core.networking.RegisteredHandler
-import org.valkyrienskies.core.networking.VSNetworking
+import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule.TCP
 import org.valkyrienskies.core.util.logger
 import javax.inject.Inject
 import kotlin.reflect.KClass
 import kotlin.reflect.full.declaredMemberFunctions
 
-class SimplePacketNetworkingImpl @Inject constructor(
-    private val networking: VSNetworking
+open class SimplePacketNetworkingImpl @Inject constructor(
+    @TCP private val defaultChannel: NetworkChannel
 ) : SimplePacketNetworking {
     companion object {
         private val logger by logger("Simple Packet")
@@ -74,7 +74,7 @@ class SimplePacketNetworkingImpl @Inject constructor(
     ) {
         check(klass.isData) { "SimplePacket (${klass.java}) must be a data class!" }
 
-        val channel = channel ?: VSNetworking.TCP
+        val channel = channel ?: defaultChannel
 
         val packetType = channel.registerPacket(name)
         val packetInfo = SimplePacketInfo(packetType)

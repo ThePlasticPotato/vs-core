@@ -39,7 +39,8 @@ import javax.inject.Singleton
 class ShipObjectServerWorld @Inject constructor(
     @AllShips override val queryableShipData: MutableQueryableShipDataServer,
     @InternalInject private val chunkAllocator: ChunkAllocator,
-    private val loadManager: ShipLoadManagerServer
+    private val loadManager: ShipLoadManagerServer,
+    private val networking: VSNetworking
 ) : ShipObjectWorld<ShipObjectServer>() {
 
     private enum class Stages {
@@ -87,10 +88,9 @@ class ShipObjectServerWorld @Inject constructor(
     // These fields are used to generate [VSGameFrame]
     private val newShipObjects: MutableList<ShipObjectServer> = ArrayList()
     private val updatedShipObjects: MutableList<ShipObjectServer> = ArrayList()
-    private val _deletedShipObjects: MutableList<ShipData> = ArrayList()
+    private val deletedShipObjects: MutableList<ShipData> = ArrayList()
 
-    val deletedShipObjects: Collection<ShipData> = _deletedShipObjects
-    val udpServer = VSNetworking.tryUdpServer()
+    val udpServer = networking.tryUdpServer()
 
     /**
      * A map of voxel updates pending to be applied to ships.
@@ -218,7 +218,7 @@ class ShipObjectServerWorld @Inject constructor(
             val shipObjectServer = it.next()
             if (shipObjectServer.shipData.inertiaData.getShipMass() < 1e-8) {
                 // Delete this ship
-                _deletedShipObjects.add(shipObjectServer.shipData)
+                deletedShipObjects.add(shipObjectServer.shipData)
                 queryableShipData.removeShipData(shipObjectServer.shipData)
                 shipToVoxelUpdates.remove(shipObjectServer.shipData.id)
                 it.remove()
@@ -346,7 +346,7 @@ class ShipObjectServerWorld @Inject constructor(
         return LastTickChanges(
             newShipObjects,
             updatedShipObjects,
-            _deletedShipObjects,
+            deletedShipObjects,
             shipToVoxelUpdates,
             dimensionsAddedThisTick,
             dimensionsRemovedThisTick
@@ -356,7 +356,7 @@ class ShipObjectServerWorld @Inject constructor(
     fun clearNewUpdatedDeletedShipObjectsAndVoxelUpdates() {
         newShipObjects.clear()
         updatedShipObjects.clear()
-        _deletedShipObjects.clear()
+        deletedShipObjects.clear()
         shipToVoxelUpdates.clear()
         newLoadedChunksList.clear()
         dimensionsAddedThisTick.clear()

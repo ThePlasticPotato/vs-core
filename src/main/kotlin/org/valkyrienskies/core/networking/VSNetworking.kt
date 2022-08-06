@@ -1,5 +1,6 @@
 package org.valkyrienskies.core.networking
 
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer
@@ -7,6 +8,8 @@ import org.valkyrienskies.core.config.VSConfigClass
 import org.valkyrienskies.core.config.VSCoreConfig
 import org.valkyrienskies.core.networking.impl.PacketRequestUdp
 import org.valkyrienskies.core.networking.impl.PacketUdpState
+import org.valkyrienskies.core.networking.simple.SimplePacketNetworking
+import org.valkyrienskies.core.networking.simple.SimplePacketNetworkingImpl
 import org.valkyrienskies.core.networking.simple.registerClientHandler
 import org.valkyrienskies.core.networking.simple.registerServerHandler
 import org.valkyrienskies.core.networking.simple.sendToClient
@@ -17,19 +20,47 @@ import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.net.SocketException
 import javax.crypto.SecretKey
+import javax.inject.Qualifier
 import javax.inject.Singleton
+import kotlin.annotation.AnnotationRetention.BINARY
 
 object VSNetworking {
 
     @Module
-    class NetworkingModule {
-        @Provides
+    abstract class NetworkingModule {
+        @Binds
         @Singleton
-        fun vsNetworking(): VSNetworking = VSNetworking
+        abstract fun simplePacketNetworking(impl: SimplePacketNetworkingImpl): SimplePacketNetworking
 
-        @Provides
-        @Singleton
-        fun packets(networking: VSNetworking) = networking.packets
+        companion object {
+            @Provides
+            @Singleton
+            fun vsNetworking(): VSNetworking = VSNetworking
+
+            @Provides
+            @Singleton
+            fun packets(networking: VSNetworking) = networking.packets
+
+            @Provides
+            @Singleton
+            @TCP
+            fun tcp(networking: VSNetworking): NetworkChannel = networking.TCP
+
+            @Provides
+            @Singleton
+            @UDP
+            fun udp(networking: VSNetworking): NetworkChannel = networking.UDP
+        }
+
+        @Qualifier
+        @MustBeDocumented
+        @Retention(BINARY)
+        annotation class TCP
+
+        @Qualifier
+        @MustBeDocumented
+        @Retention(BINARY)
+        annotation class UDP
     }
 
     /**
@@ -45,6 +76,11 @@ object VSNetworking {
     val TCP = NetworkChannel()
 
     val packets: Packets = Packets
+
+    /**
+     * TCP Packet used as fallback when no UDP channel available
+     */
+    private val TCP_UDP_FALLBACK = TCP.registerPacket("UDP fallback")
 
     var clientUsesUDP = false
     var serverUsesUDP = false
@@ -65,7 +101,7 @@ object VSNetworking {
         try {
             val udpSocket = DatagramSocket(VSCoreConfig.SERVER.udpPort)
 
-            val udpServer = UdpServerImpl(udpSocket, UDP)
+            val udpServer = UdpServerImpl(udpSocket, UDP, TCP_UDP_FALLBACK)
             PacketRequestUdp::class.registerServerHandler { packet, player ->
                 udpServer.prepareIdentifier(player, packet)?.let {
                     PacketUdpState(udpSocket.localPort, serverUsesUDP, it)
@@ -135,20 +171,20 @@ object VSNetworking {
         }
 
         UDP.rawSendToClient = { data, player ->
-            Packets.TCP_UDP_FALLBACK.sendToClient(data, player)
+            TCP_UDP_FALLBACK.sendToClient(data, player)
         }
 
         UDP.rawSendToServer = { data ->
-            Packets.TCP_UDP_FALLBACK.sendToServer(data)
+            TCP_UDP_FALLBACK.sendToServer(data)
         }
     }
 
     private fun setupFallback() {
-        TCP.registerClientHandler(Packets.TCP_UDP_FALLBACK) { packet ->
+        TCP.registerClientHandler(TCP_UDP_FALLBACK) { packet ->
             UDP.onReceiveClient(packet.data)
         }
 
-        TCP.registerServerHandler(Packets.TCP_UDP_FALLBACK) { packet, player ->
+        TCP.registerServerHandler(TCP_UDP_FALLBACK) { packet, player ->
             UDP.onReceiveServer(packet.data, player)
         }
     }

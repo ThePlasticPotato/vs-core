@@ -14,7 +14,11 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import kotlin.random.Random
 
-class UdpServerImpl(val socket: DatagramSocket, val channel: NetworkChannel) {
+class UdpServerImpl(
+    val socket: DatagramSocket,
+    val channel: NetworkChannel,
+    val fallback: PacketType
+) {
     private val thread = Thread(::run)
 
     private val recvBuffer = ByteArray(PACKET_SIZE)
@@ -40,7 +44,7 @@ class UdpServerImpl(val socket: DatagramSocket, val channel: NetworkChannel) {
 
     private fun sendToClient(buf: ByteBuf, player: IPlayer) {
         if (connections.inverse()[player] == null) {
-            Packets.TCP_UDP_FALLBACK.sendToClient(buf, player)
+            fallback.sendToClient(buf, player)
         } else {
             packetCount++
             if (lastPacketPrint + 1000 < System.currentTimeMillis()) {
