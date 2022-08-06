@@ -3,6 +3,7 @@ package org.valkyrienskies.core.program
 import org.valkyrienskies.core.hooks.AbstractCoreHooks
 import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.networking.VSNetworkingConfigurator
+import org.valkyrienskies.core.pipelines.VSPipelineComponent
 
 /**
  * An object that lives the entirety of the program. The entrypoint for VS Core
@@ -17,4 +18,5 @@ interface VSCore {
     val networking: VSNetworking
     val hooks: AbstractCoreHooks
     val configurator: VSNetworkingConfigurator
+    val pipelineComponentFactory: VSPipelineComponent.Factory
 }

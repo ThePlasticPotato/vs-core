@@ -17,7 +17,7 @@ import kotlin.random.Random
 class UdpServerImpl(
     val socket: DatagramSocket,
     val channel: NetworkChannel,
-    val fallback: PacketType
+    val fallback: PacketType,
 ) {
     private val thread = Thread(::run)
 
@@ -61,7 +61,6 @@ class UdpServerImpl(
     }
 
     private fun run() {
-        VSNetworking.serverUsesUDP = true
         while (!socket.isClosed) {
             try {
                 socket.receive(recvPacket)

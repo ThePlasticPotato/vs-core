@@ -1,15 +1,24 @@
 package org.valkyrienskies.core.pipelines
 
-import dagger.Component
+import dagger.Subcomponent
 import org.joml.Vector3d
 import org.joml.Vector3dc
-import org.valkyrienskies.core.config.VSCoreConfig.ServerConfigModule
 import org.valkyrienskies.core.game.ships.SerializedShipDataModule
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
-import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule
+import org.valkyrienskies.core.util.WorldScoped
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.concurrent.thread
+
+@WorldScoped
+@Subcomponent(modules = [SerializedShipDataModule::class])
+interface VSPipelineComponent {
+    fun newPipeline(): VSPipeline
+
+    @Subcomponent.Factory
+    interface Factory {
+        fun newPipelineComponent(module: SerializedShipDataModule): VSPipelineComponent
+    }
+}
 
 /**
  * A pipeline that moves data between the game, the physics, and the network stages.
@@ -20,19 +29,13 @@ import kotlin.concurrent.thread
  *
  * Game <--> Physics --> Network
  */
-@Singleton
+@WorldScoped
 class VSPipeline @Inject constructor(
     val shipWorld: ShipObjectServerWorld,
     private val gameStage: VSGamePipelineStage,
     private val physicsStage: VSPhysicsPipelineStage,
     private val networkStage: VSNetworkPipelineStage
 ) {
-    @Singleton
-    @Component(modules = [SerializedShipDataModule::class, NetworkingModule::class, ServerConfigModule::class])
-    interface Factory {
-        fun make(): VSPipeline
-    }
-
     private val physicsPipelineBackgroundTask: VSPhysicsPipelineBackgroundTask = VSPhysicsPipelineBackgroundTask(this)
 
     @Volatile

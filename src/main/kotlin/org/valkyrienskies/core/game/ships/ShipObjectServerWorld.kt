@@ -24,6 +24,7 @@ import org.valkyrienskies.core.hooks.VSEvents
 import org.valkyrienskies.core.hooks.VSEvents.ShipLoadEvent
 import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.util.InternalInject
+import org.valkyrienskies.core.util.WorldScoped
 import org.valkyrienskies.core.util.assertions.stages.TickStageEnforcer
 import org.valkyrienskies.core.util.names.NounListNameGenerator
 import org.valkyrienskies.physics_api.voxel_updates.DenseVoxelShapeUpdate
@@ -33,14 +34,13 @@ import org.valkyrienskies.physics_api.voxel_updates.KrunchVoxelStates
 import org.valkyrienskies.physics_api.voxel_updates.SparseVoxelShapeUpdate
 import java.util.concurrent.CompletableFuture
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@WorldScoped
 class ShipObjectServerWorld @Inject constructor(
     @AllShips override val queryableShipData: MutableQueryableShipDataServer,
     @InternalInject private val chunkAllocator: ChunkAllocator,
     private val loadManager: ShipLoadManagerServer,
-    private val networking: VSNetworking
+    networking: VSNetworking
 ) : ShipObjectWorld<ShipObjectServer>() {
 
     private enum class Stages {

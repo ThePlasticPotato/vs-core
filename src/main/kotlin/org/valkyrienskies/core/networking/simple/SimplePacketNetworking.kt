@@ -3,7 +3,6 @@ package org.valkyrienskies.core.networking.simple
 import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.networking.NetworkChannel
 import org.valkyrienskies.core.networking.RegisteredHandler
-import org.valkyrienskies.core.networking.VSNetworking
 import kotlin.reflect.KClass
 
 @Suppress("INAPPLICABLE_JVM_NAME")
@@ -52,7 +51,7 @@ interface SimplePacketNetworking {
     @JvmSynthetic
     @JvmName("register1")
     fun KClass<out SimplePacket>.register(
-        channel: NetworkChannel = VSNetworking.TCP,
+        channel: NetworkChannel? = null,
         name: String = "SimplePacket - ${this.java}"
     ) = register(this, channel, name)
 

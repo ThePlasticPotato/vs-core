@@ -1,21 +1,24 @@
 package org.valkyrienskies.core.game.ships
 
-import dagger.Component
+import dagger.Subcomponent
 import org.valkyrienskies.core.game.ships.networking.ShipObjectNetworkManagerClient
-import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule
+import org.valkyrienskies.core.util.WorldScoped
 import javax.inject.Inject
-import javax.inject.Singleton
+
+@WorldScoped
+@Subcomponent
+interface ShipObjectClientWorldComponent {
+    fun newWorld(): ShipObjectClientWorld
+
+    @Subcomponent.Factory
+    interface Factory {
+        fun newShipObjectClientWorldComponent(): ShipObjectClientWorldComponent
+    }
+}
 
 class ShipObjectClientWorld @Inject constructor(
     networkManagerFactory: ShipObjectNetworkManagerClient.Factory
 ) : ShipObjectWorld<ShipObjectClient>() {
-
-    @Singleton
-    @Component(modules = [NetworkingModule::class])
-    interface Factory {
-        fun make(): ShipObjectClientWorld
-    }
-
     override val queryableShipData: QueryableShipData<ShipObjectClient> get() = loadedShips
 
     private val _loadedShips: MutableQueryableShipData<ShipObjectClient> = QueryableShipDataImpl()

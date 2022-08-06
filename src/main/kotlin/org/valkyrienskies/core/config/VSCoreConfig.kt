@@ -3,12 +3,14 @@ package org.valkyrienskies.core.config
 import com.github.imifou.jsonschema.module.addon.annotation.JsonSchema
 import dagger.Module
 import dagger.Provides
+import javax.inject.Singleton
 
 object VSCoreConfig {
 
     @Module
     class ServerConfigModule {
         @Provides
+        @Singleton
         fun server(): Server = SERVER
     }
 

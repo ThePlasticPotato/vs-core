@@ -1,5 +1,6 @@
 package org.valkyrienskies.core.networking.simple
 
+import dagger.Lazy
 import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.networking.NetworkChannel
 import org.valkyrienskies.core.networking.PacketType
@@ -11,7 +12,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.declaredMemberFunctions
 
 open class SimplePacketNetworkingImpl @Inject constructor(
-    @TCP private val defaultChannel: NetworkChannel
+    @TCP private val defaultChannel: Lazy<NetworkChannel>
 ) : SimplePacketNetworking {
     companion object {
         private val logger by logger("Simple Packet")
@@ -74,7 +75,7 @@ open class SimplePacketNetworkingImpl @Inject constructor(
     ) {
         check(klass.isData) { "SimplePacket (${klass.java}) must be a data class!" }
 
-        val channel = channel ?: defaultChannel
+        val channel = channel ?: defaultChannel.get()
 
         val packetType = channel.registerPacket(name)
         val packetInfo = SimplePacketInfo(packetType)

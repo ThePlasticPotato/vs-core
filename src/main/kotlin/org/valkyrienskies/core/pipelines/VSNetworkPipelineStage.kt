@@ -14,7 +14,8 @@ import javax.inject.Inject
 
 class VSNetworkPipelineStage @Inject constructor(
     private val shipWorld: ShipObjectServerWorld,
-    private val networking: VSNetworking
+    private val networking: VSNetworking,
+    private val packets: Packets
 ) {
 
     var noSkip = true
@@ -38,7 +39,7 @@ class VSNetworkPipelineStage @Inject constructor(
                 writePacket(buf, shipDatas, physicsFrame)
 
                 // Send it to the player
-                Packets.UDP_SHIP_TRANSFORM.sendToClient(buf, player)
+                packets.UDP_SHIP_TRANSFORM.sendToClient(buf, player)
             }
 
             // Each transform is 80 bytes big so 6 transforms per packet

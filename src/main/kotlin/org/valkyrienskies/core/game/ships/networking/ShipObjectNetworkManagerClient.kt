@@ -15,7 +15,6 @@ import org.valkyrienskies.core.networking.Packets
 import org.valkyrienskies.core.networking.RegisteredHandler
 import org.valkyrienskies.core.networking.VSCryptUtils
 import org.valkyrienskies.core.networking.VSNetworking
-import org.valkyrienskies.core.networking.VSNetworking.tryUdpClient
 import org.valkyrienskies.core.networking.impl.PacketShipDataCreate
 import org.valkyrienskies.core.networking.impl.PacketShipRemove
 import org.valkyrienskies.core.networking.simple.registerClientHandler
@@ -31,7 +30,8 @@ import javax.crypto.SecretKey
 
 class ShipObjectNetworkManagerClient @AssistedInject constructor(
     @Assisted private val parent: ShipObjectClientWorld,
-    private val networking: VSNetworking
+    private val networking: VSNetworking,
+    private val packets: Packets
 ) {
 
     @AssistedFactory
@@ -47,8 +47,8 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
 
     fun registerPacketListeners() {
         handlers = listOf(
-            Packets.UDP_SHIP_TRANSFORM.registerClientHandler(this::onShipTransform),
-            Packets.TCP_SHIP_DATA_DELTA.registerClientHandler(this::onShipDataDelta),
+            packets.UDP_SHIP_TRANSFORM.registerClientHandler(this::onShipTransform),
+            packets.TCP_SHIP_DATA_DELTA.registerClientHandler(this::onShipDataDelta),
             PacketShipDataCreate::class.registerClientHandler(this::onShipDataCreate),
             PacketShipRemove::class.registerClientHandler(this::onShipDataRemove)
         )
@@ -116,7 +116,7 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
             tryConnectIn--
             if (tryConnectIn <= 0) {
                 secretKey = VSCryptUtils.generateAES128Key()
-                tryUdpClient(server, secretKey!!) { supports: Boolean ->
+                networking.tryUdpClient(server, secretKey!!) { supports: Boolean ->
                     if (!supports) {
                         serverNoUdp = true
                     }

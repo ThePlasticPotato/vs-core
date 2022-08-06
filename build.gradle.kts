@@ -119,7 +119,7 @@ ktlint {
 tasks {
     compileKotlin {
         kotlinOptions {
-            freeCompilerArgs += "-Xopt-in=org.valkyrienskies.core.util.PrivateApi"
+            freeCompilerArgs += "-opt-in=org.valkyrienskies.core.util.PrivateApi"
         }
 
         kotlinOptions.jvmTarget = "1.8"

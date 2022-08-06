@@ -13,7 +13,6 @@ import java.util.function.IntFunction
  * are called appropriately when packets are received.
  */
 class NetworkChannel {
-
     private val packetTypes = ArrayList<PacketType>()
     private val serverHandlers = Int2ObjectOpenHashMap<MutableSet<ServerHandler>>()
     private val clientHandlers = Int2ObjectOpenHashMap<MutableSet<ClientHandler>>()

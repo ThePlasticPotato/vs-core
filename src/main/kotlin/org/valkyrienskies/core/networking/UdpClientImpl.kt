@@ -9,7 +9,12 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.SocketAddress
 
-class UdpClientImpl(val socket: DatagramSocket, val channel: NetworkChannel, val server: SocketAddress, id: Long) {
+class UdpClientImpl(
+    val socket: DatagramSocket,
+    val channel: NetworkChannel,
+    val server: SocketAddress, id: Long,
+    private val onConfirm: () -> Unit
+) {
     private val thread = Thread(::run)
 
     private val recvBuffer = ByteArray(PACKET_SIZE)
@@ -45,7 +50,7 @@ class UdpClientImpl(val socket: DatagramSocket, val channel: NetworkChannel, val
         // TODO check player uuid is the same
 
         socket.soTimeout = 0
-        VSNetworking.clientUsesUDP = true
+        onConfirm()
         var packetCount = 0
         var lastPacketPrint = System.currentTimeMillis()
 

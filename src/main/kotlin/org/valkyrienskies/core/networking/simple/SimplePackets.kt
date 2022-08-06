@@ -6,13 +6,13 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.networking.NetworkChannel
+import org.valkyrienskies.core.networking.Packets
 import org.valkyrienskies.core.networking.RegisteredHandler
-import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
 import org.valkyrienskies.core.util.serialization.readValue
 import kotlin.reflect.KClass
 
-private val global = SimplePacketNetworkingImpl(VSNetworking)
+private val global = Packets.INSTANCE.simplePackets
 
 fun SimplePacket.serialize(): ByteBuf {
     return Unpooled.wrappedBuffer(VSJacksonUtil.packetMapper.writeValueAsBytes(this))
@@ -48,7 +48,7 @@ fun SimplePacket.sendToAllClients() =
 
 @Deprecated(message = "This is global state; please inject a SimplePacketNetworking and use that instead")
 fun KClass<out SimplePacket>.register(
-    channel: NetworkChannel = VSNetworking.TCP,
+    channel: NetworkChannel? = null,
     name: String = "SimplePacket - ${this.java}"
 ) = with(global) { register(channel, name) }
 
