@@ -6,30 +6,13 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.networking.NetworkChannel
-import org.valkyrienskies.core.networking.PacketType
 import org.valkyrienskies.core.networking.RegisteredHandler
 import org.valkyrienskies.core.networking.VSNetworking
-import org.valkyrienskies.core.util.logger
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
 import org.valkyrienskies.core.util.serialization.readValue
 import kotlin.reflect.KClass
-import kotlin.reflect.full.declaredMemberFunctions
 
-private val classToPacket = HashMap<Class<out SimplePacket>, SimplePacketInfo>()
-
-private data class SimplePacketInfo(
-    val type: PacketType,
-    val serverHandlers: MutableList<(SimplePacket, IPlayer) -> Unit> = mutableListOf(),
-    val clientHandlers: MutableList<(SimplePacket) -> Unit> = mutableListOf()
-)
-
-private fun Class<out SimplePacket>.getPacketType(): PacketType {
-    return getSimplePacketInfo().type
-}
-
-private fun Class<out SimplePacket>.getSimplePacketInfo(): SimplePacketInfo {
-    return requireNotNull(classToPacket[this]) { "SimplePacket ($this) not registered" }
-}
+private val global = SimplePacketNetworkingImpl(VSNetworking)
 
 fun SimplePacket.serialize(): ByteBuf {
     return Unpooled.wrappedBuffer(VSJacksonUtil.packetMapper.writeValueAsBytes(this))
@@ -39,66 +22,33 @@ fun <T : SimplePacket> KClass<T>.deserialize(buf: ByteBuf): T {
     return VSJacksonUtil.packetMapper.readValue(buf.duplicate(), this.java)
 }
 
-fun <T : SimplePacket> KClass<T>.registerServerHandler(handler: (T, IPlayer) -> Unit): RegisteredHandler {
-    @Suppress("UNCHECKED_CAST")
-    this.java.getSimplePacketInfo().serverHandlers.add(handler as (SimplePacket, IPlayer) -> Unit)
+@Deprecated(message = "This is global state; please inject a SimplePacketNetworking and use that instead")
+fun <T : SimplePacket> KClass<T>.registerServerHandler(handler: (T, IPlayer) -> Unit): RegisteredHandler =
+    with(global) { registerServerHandler(handler) }
 
-    return RegisteredHandler { this.java.getSimplePacketInfo().serverHandlers.remove(handler) }
-}
+@Deprecated(message = "This is global state; please inject a SimplePacketNetworking and use that instead")
+fun <T : SimplePacket> KClass<T>.registerClientHandler(handler: (T) -> Unit): RegisteredHandler =
+    with(global) { registerClientHandler(handler) }
 
-fun <T : SimplePacket> KClass<T>.registerClientHandler(handler: (T) -> Unit): RegisteredHandler {
-    @Suppress("UNCHECKED_CAST")
-    this.java.getSimplePacketInfo().clientHandlers.add(handler as (SimplePacket) -> Unit)
+@Deprecated(message = "This is global state; please inject a SimplePacketNetworking and use that instead")
+fun SimplePacket.sendToServer() =
+    with(global) { sendToServer() }
 
-    return RegisteredHandler { this.java.getSimplePacketInfo().clientHandlers.remove(handler) }
-}
+@Deprecated(message = "This is global state; please inject a SimplePacketNetworking and use that instead")
+fun SimplePacket.sendToClient(player: IPlayer) =
+    with(global) { sendToClient(player) }
 
-fun SimplePacket.sendToServer() {
-    this::class.java.getPacketType().sendToServer(this.serialize())
-}
+@Deprecated(message = "This is global state; please inject a SimplePacketNetworking and use that instead")
+fun SimplePacket.sendToClients(vararg players: IPlayer) =
+    with(global) { sendToClients(*players) }
 
-fun SimplePacket.sendToClient(player: IPlayer) {
-    this::class.java.getPacketType().sendToClient(this.serialize(), player)
-}
+@Deprecated(message = "This is global state; please inject a SimplePacketNetworking and use that instead")
+fun SimplePacket.sendToAllClients() =
+    with(global) { sendToAllClients() }
 
-fun SimplePacket.sendToClients(vararg players: IPlayer) {
-    require(players.isNotEmpty())
-
-    this::class.java.getPacketType().sendToClients(this.serialize(), *players)
-}
-
-fun SimplePacket.sendToAllClients() {
-    this::class.java.getPacketType().sendToAllClients(this.serialize())
-}
-
+@Deprecated(message = "This is global state; please inject a SimplePacketNetworking and use that instead")
 fun KClass<out SimplePacket>.register(
     channel: NetworkChannel = VSNetworking.TCP,
     name: String = "SimplePacket - ${this.java}"
-) {
-    check(this.isData) { "SimplePacket (${this.java}) must be a data class!" }
+) = with(global) { register(channel, name) }
 
-    val packetType = channel.registerPacket(name)
-    val packetInfo = SimplePacketInfo(packetType)
-    classToPacket[this.java] = packetInfo
-
-    packetType.registerClientHandler { packet ->
-        val data = this.deserialize(packet.data)
-        packetInfo.clientHandlers.forEach { it(data) }
-        if (packetInfo.clientHandlers.isEmpty())
-            logger.warn("No client handlers registered for the received SimplePacket ($packetType)")
-    }
-
-    packetType.registerServerHandler { packet, player ->
-        val data = this.deserialize(packet.data)
-        packetInfo.serverHandlers.forEach { it(data, player) }
-        if (packetInfo.serverHandlers.isEmpty())
-            logger.warn("No server handlers registered for the received SimplePacket ($packetType)")
-    }
-
-    if (this.declaredMemberFunctions.any { it.name == "receivedByClient" })
-        registerClientHandler(SimplePacket::receivedByClient)
-    if (this.declaredMemberFunctions.any { it.name == "receivedByServer" })
-        registerServerHandler(SimplePacket::receivedByServer)
-}
-
-private val logger by logger("Simple Packet")

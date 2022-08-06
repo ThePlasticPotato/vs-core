@@ -4,11 +4,13 @@ import dagger.Component
 import org.valkyrienskies.core.game.ships.networking.ShipObjectNetworkManagerClient
 import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule
 import javax.inject.Inject
+import javax.inject.Singleton
 
 class ShipObjectClientWorld @Inject constructor(
     networkManagerFactory: ShipObjectNetworkManagerClient.Factory
 ) : ShipObjectWorld<ShipObjectClient>() {
 
+    @Singleton
     @Component(modules = [NetworkingModule::class])
     interface Factory {
         fun make(): ShipObjectClientWorld

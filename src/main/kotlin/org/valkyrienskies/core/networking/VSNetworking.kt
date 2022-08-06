@@ -17,15 +17,18 @@ import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.net.SocketException
 import javax.crypto.SecretKey
+import javax.inject.Singleton
 
 object VSNetworking {
 
     @Module
     class NetworkingModule {
         @Provides
+        @Singleton
         fun vsNetworking(): VSNetworking = VSNetworking
 
         @Provides
+        @Singleton
         fun packets(networking: VSNetworking) = networking.packets
     }
 

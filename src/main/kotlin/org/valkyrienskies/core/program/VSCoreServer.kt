@@ -1,7 +1,11 @@
 package org.valkyrienskies.core.program
 
+import javax.inject.Inject
+
 /**
  * An object that lives the entirety of the program.
  * Intended to be bound to DedicatedServer
  */
-class VSCoreServer : VSCore()
+class VSCoreServer @Inject constructor(
+    private val base: VSCoreImpl
+) : VSCore by base
