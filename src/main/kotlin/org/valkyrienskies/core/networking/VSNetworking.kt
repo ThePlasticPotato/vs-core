@@ -3,8 +3,8 @@ package org.valkyrienskies.core.networking
 import dagger.Module
 import dagger.Provides
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer
-import org.valkyrienskies.core.config.VSConfigClass
-import org.valkyrienskies.core.config.VSCoreConfig
+import org.valkyrienskies.core.config.VSCoreConfig.Server
+import org.valkyrienskies.core.config.framework.scopes.single.SingleConfig
 import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule.TCP
 import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule.UDP
 import org.valkyrienskies.core.networking.impl.PacketRequestUdp
@@ -39,8 +39,12 @@ class VSNetworking @Inject constructor(
      */
     @TCP val TCP: NetworkChannel,
 
-    packets: Packets // don't actually need this, but for now force it to init for VSConfigClass
+    packets: Packets, // don't actually need this, but for now force it to init for VSConfigClass
+
+    config: SingleConfig<Server>
 ) {
+
+    val config by config
 
     @Module
     abstract class NetworkingModule {
@@ -81,7 +85,6 @@ class VSNetworking @Inject constructor(
     var serverUsesUDP = false
 
     fun init() {
-        VSConfigClass.registerNetworkHandlers() //yea this is a mess
         setupFallback()
     }
 
@@ -93,7 +96,7 @@ class VSNetworking @Inject constructor(
     fun tryUdpServer(): UdpServerImpl? {
 
         try {
-            val udpSocket = DatagramSocket(VSCoreConfig.SERVER.udpPort)
+            val udpSocket = DatagramSocket(config.udpPort)
 
             val udpServer = UdpServerImpl(udpSocket, UDP, TCP_UDP_FALLBACK)
             serverUsesUDP = true
@@ -106,9 +109,9 @@ class VSNetworking @Inject constructor(
             }
             return udpServer
         } catch (e: SocketException) {
-            logger.error("Tried to bind to ${VSCoreConfig.SERVER.udpPort} but failed!", e)
+            logger.error("Tried to bind to ${config.udpPort} but failed!", e)
         } catch (e: Exception) {
-            logger.error("Tried to setup udp with port: ${VSCoreConfig.SERVER.udpPort} but failed!", e)
+            logger.error("Tried to setup udp with port: ${config.udpPort} but failed!", e)
         }
 
         tcp4udpFallback()

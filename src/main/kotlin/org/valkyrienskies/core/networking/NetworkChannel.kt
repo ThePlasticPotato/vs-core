@@ -150,6 +150,6 @@ class NetworkChannel {
     }
 
     companion object {
-        val logger by logger()
+        private val logger by logger()
     }
 }

@@ -1,6 +1,5 @@
 package org.valkyrienskies.core.hooks
 
-import org.valkyrienskies.core.config.VSConfigClass
 import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.game.ships.ShipObjectClientWorld
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
@@ -18,14 +17,12 @@ abstract class AbstractCoreHooks {
      * Called when client disconnects from a world
      */
     fun afterDisconnect() {
-        VSConfigClass.afterDisconnect()
     }
 
     /**
      * Called when a client joins a server
      */
     fun afterClientJoinServer(player: IPlayer) {
-        VSConfigClass.afterClientJoinServer(player)
     }
 }
 
