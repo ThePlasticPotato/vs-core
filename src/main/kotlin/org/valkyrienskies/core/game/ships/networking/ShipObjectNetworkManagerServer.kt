@@ -3,7 +3,9 @@ package org.valkyrienskies.core.game.ships.networking
 import com.fasterxml.jackson.databind.JsonNode
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
+import dagger.Lazy
 import io.netty.buffer.Unpooled
+import org.valkyrienskies.core.chunk_tracking.ChunkTrackingInfo
 import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.game.ships.ShipData
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
@@ -12,23 +14,29 @@ import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.networking.impl.PacketShipDataCreate
 import org.valkyrienskies.core.networking.impl.PacketShipRemove
 import org.valkyrienskies.core.networking.simple.sendToClient
+import org.valkyrienskies.core.util.getValue
 import org.valkyrienskies.core.util.logger
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
 import org.valkyrienskies.core.util.toImmutableSet
+import javax.inject.Inject
 
-class ShipObjectNetworkManagerServer(
-    private val parent: ShipObjectServerWorld
+internal class ShipObjectNetworkManagerServer @Inject constructor(
+    _parent: Lazy<ShipObjectServerWorld>,
+    private val network: VSNetworking,
+    private val packets: Packets
 ) {
 
-    private val tracker = parent.chunkTracker
+    private val parent by _parent
 
     private lateinit var players: Iterable<IPlayer>
+    private lateinit var tracker: ChunkTrackingInfo
 
-    fun tick() {
-        this.players = parent.players
+    fun tick(players: Iterable<IPlayer>, trackingInfo: ChunkTrackingInfo) {
+        this.players = players
+        this.tracker = trackingInfo
+
         updateShipData()
         updateTracking()
-
         updateTrackedShips()
         // Transforms are sent in [VSNetworkPipelineStage]
     }
@@ -61,9 +69,6 @@ class ShipObjectNetworkManagerServer(
             val shipsNoLongerWatching = tracker.playersToShipsNoLongerWatchingMap[player] ?: emptySet()
             endTracking(player, tracker.shipsToUnload + shipsNoLongerWatching)
         }
-
-        tracker.playersToShipsNewlyWatchingMap.clear()
-        tracker.playersToShipsNoLongerWatchingMap.clear()
     }
 
     private fun endTracking(player: IPlayer, shipsToNotTrack: Iterable<ShipData>) {
@@ -88,9 +93,8 @@ class ShipObjectNetworkManagerServer(
             val buf = Unpooled.buffer()
             val newlyWatching = tracker.playersToShipsNewlyWatchingMap[player] ?: emptySet()
             val trackedShips = player.getTrackedShips()
-                // bad time complexity; sue me
-                .filter { tracked -> newlyWatching.none { tracked.id == it.id } }
-                .map { parent.shipObjects[it.id]!! }
+                .filter { tracked -> !newlyWatching.contains(tracked) }
+                .map { parent.getShipObject(it)!! }
 
             if (trackedShips.isEmpty())
                 continue
@@ -101,13 +105,13 @@ class ShipObjectNetworkManagerServer(
                 ship.shipDataChannel.encode(json, buf)
             }
 
-            Packets.TCP_SHIP_DATA_DELTA.sendToClient(buf, player)
+            packets.TCP_SHIP_DATA_DELTA.sendToClient(buf, player)
         }
     }
 
     init {
-        VSNetworking.TCP.serverIsReady()
-        VSNetworking.UDP.serverIsReady()
+        network.TCP.serverIsReady()
+        network.UDP.serverIsReady()
     }
 
     companion object {

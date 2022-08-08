@@ -4,43 +4,63 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.Vector3i
 import org.joml.Vector3ic
+import org.valkyrienskies.core.api.ServerShip
 import org.valkyrienskies.core.chunk_tracking.ChunkUnwatchTask
 import org.valkyrienskies.core.chunk_tracking.ChunkWatchTask
-import org.valkyrienskies.core.chunk_tracking.ShipObjectServerWorldChunkTracker
-import org.valkyrienskies.core.config.VSCoreConfig
+import org.valkyrienskies.core.chunk_tracking.ChunkWatchTasks
 import org.valkyrienskies.core.game.ChunkAllocator
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.game.VSBlockType
-import org.valkyrienskies.core.game.ships.networking.ShipObjectNetworkManagerServer
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.POST_TICK
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.PRE_TICK
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_BLOCKS
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_CHUNKS
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_DIMENSIONS
+import org.valkyrienskies.core.game.ships.loading.ShipLoadManagerServer
+import org.valkyrienskies.core.game.ships.types.MutableShipVoxelUpdates
+import org.valkyrienskies.core.game.ships.types.ShipVoxelUpdates
 import org.valkyrienskies.core.hooks.VSEvents
 import org.valkyrienskies.core.hooks.VSEvents.ShipLoadEvent
 import org.valkyrienskies.core.networking.VSNetworking
+import org.valkyrienskies.core.util.InternalInject
+import org.valkyrienskies.core.util.WorldScoped
+import org.valkyrienskies.core.util.assertions.stages.TickStageEnforcer
 import org.valkyrienskies.core.util.names.NounListNameGenerator
 import org.valkyrienskies.physics_api.voxel_updates.DenseVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.EmptyVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.KrunchVoxelStates
 import org.valkyrienskies.physics_api.voxel_updates.SparseVoxelShapeUpdate
-import java.util.Collections
-import java.util.Spliterator
 import java.util.concurrent.CompletableFuture
+import javax.inject.Inject
 
-class ShipObjectServerWorld(
-    override val queryableShipData: MutableQueryableShipDataServer,
-    val chunkAllocator: ChunkAllocator,
-) : ShipObjectWorld<ShipObjectServer>(queryableShipData) {
-    companion object {
-        internal lateinit var INSTANCE: ShipObjectServerWorld
+@WorldScoped
+class ShipObjectServerWorld @Inject constructor(
+    @AllShips override val queryableShipData: MutableQueryableShipDataServer,
+    @InternalInject private val chunkAllocator: ChunkAllocator,
+    private val loadManager: ShipLoadManagerServer,
+    networking: VSNetworking
+) : ShipObjectWorld<ShipObjectServer>() {
+
+    private enum class Stages {
+        PRE_TICK, POST_TICK, UPDATE_DIMENSIONS, UPDATE_BLOCKS, UPDATE_CHUNKS
+    }
+
+    private val enforcer = TickStageEnforcer(PRE_TICK) {
+        ignoreUntilFirstReset()
+
+        requireOrder {
+            single(PRE_TICK)
+            anyOf(UPDATE_DIMENSIONS, UPDATE_BLOCKS, UPDATE_CHUNKS)
+            single(POST_TICK)
+        }
+
+        requireFinal(POST_TICK)
     }
 
     var lastTickPlayers: Set<IPlayer> = setOf()
         private set
-
-    init {
-        // todo: this is messy
-        INSTANCE = this
-    }
 
     var players: Set<IPlayer> = setOf()
         set(value) {
@@ -48,10 +68,12 @@ class ShipObjectServerWorld(
             field = value
         }
 
-    private val shipObjectMap = HashMap<ShipId, ShipObjectServer>()
+    val playersToTrackedShips by loadManager::playersToTrackedShips
 
-    // Explicitly make [shipObjects] a MutableMap so that we can use Iterator::remove()
-    override val shipObjects: MutableMap<ShipId, ShipObjectServer> = shipObjectMap
+    private val _loadedShips = QueryableShipDataImpl<ShipObjectServer>()
+
+    override val loadedShips: QueryableShipData<ShipObjectServer>
+        get() = _loadedShips
 
     private val dimensionToGroundBodyId: MutableMap<DimensionId, ShipId> = HashMap()
 
@@ -61,16 +83,14 @@ class ShipObjectServerWorld(
 
     private val dimensionsAddedThisTick = ArrayList<DimensionId>()
     private val dimensionsRemovedThisTick = ArrayList<DimensionId>()
-
-    private val newLoadedChunksList = ArrayList<Pair<DimensionId, List<IVoxelShapeUpdate>>>()
+    private val newLoadedChunksList = ArrayList<LevelVoxelUpdates>()
 
     // These fields are used to generate [VSGameFrame]
     private val newShipObjects: MutableList<ShipObjectServer> = ArrayList()
     private val updatedShipObjects: MutableList<ShipObjectServer> = ArrayList()
-    private val _deletedShipObjects: MutableList<ShipData> = ArrayList()
+    private val deletedShipObjects: MutableList<ShipData> = ArrayList()
 
-    val deletedShipObjects: Collection<ShipData> = _deletedShipObjects
-    val udpServer = VSNetworking.tryUdpServer()
+    val udpServer = networking.tryUdpServer()
 
     /**
      * A map of voxel updates pending to be applied to ships.
@@ -78,19 +98,44 @@ class ShipObjectServerWorld(
      * These updates will be sent to the physics engine, however they are not applied immediately. The physics engine
      * has full control of when the updates are applied.
      */
-    private val shipToVoxelUpdates: MutableMap<ShipId, MutableMap<Vector3ic, IVoxelShapeUpdate>> = HashMap()
-
-    val chunkTracker = ShipObjectServerWorldChunkTracker(
-        this, VSCoreConfig.SERVER.shipLoadDistance, VSCoreConfig.SERVER.shipUnloadDistance
-    )
-
-    internal val networkManager = ShipObjectNetworkManagerServer(this)
+    private val shipToVoxelUpdates: MutableShipVoxelUpdates = HashMap()
 
     @Deprecated(
         message = "All events moved to VSEvents",
         replaceWith = ReplaceWith("ShipLoadEvent", "org.valkyrienskies.core.hooks.VSEvents.ShipLoadEvent")
     )
     val shipLoadEvent by VSEvents::shipLoadEvent
+
+    internal data class LevelVoxelUpdates(
+        val dimensionId: DimensionId,
+        val updates: List<IVoxelShapeUpdate>
+    )
+
+    /**
+     * A class containing the result of the last tick. **This object is only valid for the tick it was produced in!**
+     * Many of the maps/sets will be reused for efficiency's sake.
+     */
+    internal inner class LastTickChanges(
+        val newShipObjects: Collection<ShipObjectServer>,
+        val updatedShipObjects: Collection<ShipObjectServer>,
+        val deletedShipObjects: Collection<ShipData>,
+        val shipToVoxelUpdates: ShipVoxelUpdates,
+        val dimensionsAddedThisTick: Collection<DimensionId>,
+        val dimensionsRemovedThisTick: Collection<DimensionId>
+    ) {
+        fun getNewGroundRigidBodyObjects(): List<Pair<DimensionId, ShipId>> {
+            return dimensionsAddedThisTick.map { dimensionId: DimensionId ->
+                Pair(dimensionId, dimensionToGroundBodyId[dimensionId]!!)
+            }
+        }
+
+        fun getDeletedShipObjectsIncludingGround(): List<ShipId> {
+            val deletedGroundShips = dimensionsRemovedThisTick.map { dim: DimensionId ->
+                dimensionToGroundBodyId[dim]!!
+            }
+            return deletedGroundShips + deletedShipObjects.map { it.id }
+        }
+    }
 
     /**
      * Add the update to [shipToVoxelUpdates].
@@ -149,19 +194,31 @@ class ShipObjectServerWorld(
     }
 
     fun addNewLoadedChunks(dimensionId: DimensionId, newLoadedChunks: List<IVoxelShapeUpdate>) {
-        newLoadedChunksList.add(Pair(dimensionId, newLoadedChunks))
+        enforcer.stage(UPDATE_CHUNKS)
+        newLoadedChunksList.add(LevelVoxelUpdates(dimensionId, newLoadedChunks))
     }
 
-    public override fun tickShips() {
-        super.tickShips()
+    fun getShipObject(ship: ServerShip): ShipObjectServer? {
+        return shipObjects[ship.id]
+    }
 
-        val loadedShips = mutableListOf<ShipObjectServer>()
-        val it = shipObjects.iterator()
+    public override fun preTick() {
+        enforcer.stage(PRE_TICK)
+        super.preTick()
+
+        loadManager.preTick(players, lastTickPlayers, queryableShipData, deletedShipObjects)
+    }
+
+    fun postTick() {
+        enforcer.stage(POST_TICK)
+
+        val shipsLoadedThisTick = mutableListOf<ShipObjectServer>()
+        val it = _loadedShips.iterator()
         while (it.hasNext()) {
-            val shipObjectServer = it.next().value
+            val shipObjectServer = it.next()
             if (shipObjectServer.shipData.inertiaData.getShipMass() < 1e-8) {
                 // Delete this ship
-                _deletedShipObjects.add(shipObjectServer.shipData)
+                deletedShipObjects.add(shipObjectServer.shipData)
                 queryableShipData.removeShipData(shipObjectServer.shipData)
                 shipToVoxelUpdates.remove(shipObjectServer.shipData.id)
                 it.remove()
@@ -176,11 +233,11 @@ class ShipObjectServerWorld(
         // For now, just make a [ShipObject] for every [ShipData]
         for (shipData in queryableShipData) {
             val shipID = shipData.id
-            if (!shipObjectMap.containsKey(shipID)) {
+            if (!_loadedShips.contains(shipID)) {
                 val newShipObject = ShipObjectServer(shipData)
                 newShipObjects.add(newShipObject)
-                shipObjectMap[shipID] = newShipObject
-                loadedShips.add(newShipObject)
+                _loadedShips.addShipData(newShipObject)
+                shipsLoadedThisTick.add(newShipObject)
             }
         }
 
@@ -201,14 +258,9 @@ class ShipObjectServerWorld(
         }
         // endregion
 
-        chunkTracker.updateTracking(players, lastTickPlayers)
-        networkManager.tick()
+        shipsLoadedThisTick.forEach { VSEvents.shipLoadEvent.emit(ShipLoadEvent(it)) }
 
-        loadedShips.forEach { VSEvents.shipLoadEvent.emit(ShipLoadEvent(it)) }
-
-        // for now don't do anything with this
-        chunkTracker.shipsToUnload.clear()
-        chunkTracker.shipsToLoad.clear()
+        loadManager.postTick(players)
     }
 
     /**
@@ -217,11 +269,7 @@ class ShipObjectServerWorld(
      * If the chunk at [chunkX], [chunkZ] is not a ship chunk, then this returns nothing.
      */
     fun getIPlayersWatchingShipChunk(chunkX: Int, chunkZ: Int, dimensionId: DimensionId): Iterator<IPlayer> {
-        // Check if this chunk potentially belongs to a ship
-        if (ChunkAllocator.isChunkInShipyard(chunkX, chunkZ)) {
-            return chunkTracker.getPlayersWatchingChunk(chunkX, chunkZ, dimensionId).iterator()
-        }
-        return Collections.emptyIterator()
+        return loadManager.getIPlayersWatchingShipChunk(chunkX, chunkZ, dimensionId)
     }
 
     /**
@@ -230,8 +278,12 @@ class ShipObjectServerWorld(
      * It only returns the tasks, it is up to the caller to execute the tasks; however they do not have to execute all of them.
      * It is up to the caller to decide which tasks to execute, and which ones to skip.
      */
-    fun getChunkWatchUnwatchTasks(): Pair<Spliterator<ChunkWatchTask>, Spliterator<ChunkUnwatchTask>> {
-        return Pair(chunkTracker.chunkWatchTasks.spliterator(), chunkTracker.chunkUnwatchTasks.spliterator())
+    fun getChunkWatchTasks(): ChunkWatchTasks {
+        return loadManager.chunkWatchTasks
+    }
+
+    fun setExecutedChunkWatchTasks(watchTasks: Iterable<ChunkWatchTask>, unwatchTasks: Iterable<ChunkUnwatchTask>) {
+        loadManager.setExecutedChunkWatchTasks(watchTasks, unwatchTasks)
     }
 
     /**
@@ -290,38 +342,21 @@ class ShipObjectServerWorld(
     override fun destroyWorld() {
     }
 
-    fun getNewGroundRigidBodyObjects(): List<Pair<DimensionId, ShipId>> {
-        val newDimensionsObjects = ArrayList<Pair<DimensionId, ShipId>>(dimensionsAddedThisTick.size)
-        dimensionsAddedThisTick.forEach { dimensionId: DimensionId ->
-            newDimensionsObjects.add(Pair(dimensionId, dimensionToGroundBodyId[dimensionId]!!))
-        }
-        return newDimensionsObjects
-    }
-
-    fun getNewShipObjects(): List<ShipObjectServer> {
-        return newShipObjects
-    }
-
-    fun getUpdatedShipObjects(): List<ShipObjectServer> {
-        return updatedShipObjects
-    }
-
-    fun getDeletedShipObjectsIncludingGround(): List<ShipId> {
-        val deletedGroundShips = ArrayList<ShipId>()
-        dimensionsRemovedThisTick.forEach { dimensionRemovedThisTick: DimensionId ->
-            deletedGroundShips.add(dimensionToGroundBodyId[dimensionRemovedThisTick]!!)
-        }
-        return deletedGroundShips + _deletedShipObjects.map { it.id }
-    }
-
-    fun getShipToVoxelUpdates(): Map<ShipId, Map<Vector3ic, IVoxelShapeUpdate>> {
-        return shipToVoxelUpdates
+    internal fun getLastTickChanges(): LastTickChanges {
+        return LastTickChanges(
+            newShipObjects,
+            updatedShipObjects,
+            deletedShipObjects,
+            shipToVoxelUpdates,
+            dimensionsAddedThisTick,
+            dimensionsRemovedThisTick
+        )
     }
 
     fun clearNewUpdatedDeletedShipObjectsAndVoxelUpdates() {
         newShipObjects.clear()
         updatedShipObjects.clear()
-        _deletedShipObjects.clear()
+        deletedShipObjects.clear()
         shipToVoxelUpdates.clear()
         newLoadedChunksList.clear()
         dimensionsAddedThisTick.clear()
@@ -333,13 +368,17 @@ class ShipObjectServerWorld(
     }
 
     fun addDimension(dimensionId: DimensionId) {
+        enforcer.stage(UPDATE_DIMENSIONS)
         assert(!dimensionToGroundBodyId.contains(dimensionId))
+
         dimensionsAddedThisTick.add(dimensionId)
         dimensionToGroundBodyId[dimensionId] = chunkAllocator.allocateShipId()
     }
 
     fun removeDimension(dimensionId: DimensionId) {
+        enforcer.stage(UPDATE_DIMENSIONS)
         assert(dimensionToGroundBodyId.contains(dimensionId))
+
         dimensionsRemovedThisTick.add(dimensionId)
     }
 

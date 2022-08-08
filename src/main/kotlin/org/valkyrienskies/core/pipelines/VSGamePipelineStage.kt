@@ -22,8 +22,10 @@ import org.valkyrienskies.physics_api.PhysicsWorldReference
 import org.valkyrienskies.physics_api.PoseVel
 import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
 import java.util.concurrent.ConcurrentLinkedQueue
+import javax.inject.Inject
 
-class VSGamePipelineStage(val shipWorld: ShipObjectServerWorld) {
+class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectServerWorld) {
+
     private val physicsFramesQueue: ConcurrentLinkedQueue<VSPhysicsFrame> = ConcurrentLinkedQueue()
     private val dimensionIntIdToString = Int2ObjectOpenHashMap<String>()
 
@@ -58,12 +60,15 @@ class VSGamePipelineStage(val shipWorld: ShipObjectServerWorld) {
         shipWorld.shipObjects.forEach {
             it.value.toBeTicked.forEach(Ticked::tick)
         }
+
+        shipWorld.preTick()
     }
 
     /**
      * Create a new game frame to be sent to the physics
      */
     fun postTickGame(): VSGameFrame {
+        shipWorld.postTick()
         // Finally, return the game frame
         return createGameFrame()
     }
@@ -101,11 +106,13 @@ class VSGamePipelineStage(val shipWorld: ShipObjectServerWorld) {
         val updatedShips = HashMap<ShipId, UpdateShipInGameFrameData>() // Map of ship updates
         val gameFrameVoxelUpdatesMap = HashMap<ShipId, List<IVoxelShapeUpdate>>() // Voxel updates applied by this frame
 
-        val newGroundRigidBodyObjects = shipWorld.getNewGroundRigidBodyObjects()
-        val newShipObjects = shipWorld.getNewShipObjects()
-        val updatedShipObjects = shipWorld.getUpdatedShipObjects()
-        val deletedShipObjects = shipWorld.getDeletedShipObjectsIncludingGround()
-        val shipVoxelUpdates = shipWorld.getShipToVoxelUpdates()
+        val lastTickChanges = shipWorld.getLastTickChanges()
+
+        val newGroundRigidBodyObjects = lastTickChanges.getNewGroundRigidBodyObjects()
+        val newShipObjects = lastTickChanges.newShipObjects
+        val updatedShipObjects = lastTickChanges.updatedShipObjects
+        val deletedShipObjects = lastTickChanges.getDeletedShipObjectsIncludingGround()
+        val shipVoxelUpdates = lastTickChanges.shipToVoxelUpdates
 
         newGroundRigidBodyObjects.forEach { newGroundObjectData ->
             val dimensionId = newGroundObjectData.first
@@ -176,7 +183,7 @@ class VSGamePipelineStage(val shipWorld: ShipObjectServerWorld) {
                 maxDefined,
                 totalVoxelRegion,
                 it.shipData.inertiaData.copyToPhyInertia(),
-                it.shipData.physicsData,
+                it.shipData.physicsData.copy(),
                 poseVel,
                 segments,
                 voxelOffset,
@@ -197,7 +204,7 @@ class VSGamePipelineStage(val shipWorld: ShipObjectServerWorld) {
                 uuid,
                 newVoxelOffset,
                 it.shipData.inertiaData.copyToPhyInertia(),
-                it.shipData.physicsData,
+                it.shipData.physicsData.copy(),
                 isStatic,
                 isVoxelsFullyLoaded
             )
@@ -210,7 +217,7 @@ class VSGamePipelineStage(val shipWorld: ShipObjectServerWorld) {
             gameFrameVoxelUpdatesMap[shipId] = voxelUpdatesMap.values.toList()
         }
 
-        shipWorld.clearNewUpdatedDeletedShipObjectsAndVoxelUpdates()
+        shipWorld.clearNewUpdatedDeletedShipObjectsAndVoxelUpdates() // can we move this into [ShipObjectServerWorld]?
         return VSGameFrame(newShips, deletedShips, updatedShips, gameFrameVoxelUpdatesMap)
     }
 

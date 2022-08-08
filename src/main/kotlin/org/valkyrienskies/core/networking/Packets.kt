@@ -1,35 +1,48 @@
 package org.valkyrienskies.core.networking
 
+import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule.TCP
+import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule.UDP
 import org.valkyrienskies.core.networking.impl.PacketCommonConfigUpdate
 import org.valkyrienskies.core.networking.impl.PacketRequestUdp
 import org.valkyrienskies.core.networking.impl.PacketServerConfigUpdate
 import org.valkyrienskies.core.networking.impl.PacketShipDataCreate
 import org.valkyrienskies.core.networking.impl.PacketShipRemove
 import org.valkyrienskies.core.networking.impl.PacketUdpState
-import org.valkyrienskies.core.networking.simple.register
+import org.valkyrienskies.core.networking.simple.SimplePacketNetworking
+import org.valkyrienskies.core.networking.simple.SimplePacketNetworkingImpl
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Contains packets used by vs-core.
  */
-object Packets {
-    /**
-     * TCP Packet used as fallback when no UDP channel available
-     */
-    val TCP_UDP_FALLBACK = VSNetworking.TCP.registerPacket("UDP fallback")
+@Singleton
+class Packets @Inject constructor(
+    @TCP tcp: NetworkChannel,
+    @UDP udp: NetworkChannel,
+) {
 
-    val TCP_SHIP_DATA_DELTA = VSNetworking.TCP.registerPacket("Ship data delta update")
+    internal val simplePackets: SimplePacketNetworking = SimplePacketNetworkingImpl { tcp }
 
-    val UDP_SHIP_TRANSFORM = VSNetworking.UDP.registerPacket("Ship transform update")
+    val TCP_SHIP_DATA_DELTA = tcp.registerPacket("Ship data delta update")
 
-    init {
-        PacketRequestUdp::class.register()
-        PacketUdpState::class.register()
-        PacketShipDataCreate::class.register()
-        PacketShipRemove::class.register()
-        PacketCommonConfigUpdate::class.register()
-        PacketServerConfigUpdate::class.register()
+    val UDP_SHIP_TRANSFORM = udp.registerPacket("Ship transform update")
+
+    companion object {
+        @Deprecated(message = "global state")
+        lateinit var INSTANCE: Packets
     }
 
-    // no-op to force the class to load
-    internal fun init() {}
+    init {
+        INSTANCE = this
+
+        with(simplePackets) {
+            PacketRequestUdp::class.register()
+            PacketUdpState::class.register()
+            PacketShipDataCreate::class.register()
+            PacketShipRemove::class.register()
+            PacketCommonConfigUpdate::class.register()
+            PacketServerConfigUpdate::class.register()
+        }
+    }
 }

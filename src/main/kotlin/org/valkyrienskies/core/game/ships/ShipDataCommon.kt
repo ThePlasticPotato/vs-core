@@ -1,6 +1,7 @@
 package org.valkyrienskies.core.game.ships
 
 import org.joml.Matrix4dc
+import org.joml.Vector3dc
 import org.joml.primitives.AABBd
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
@@ -15,10 +16,10 @@ import org.valkyrienskies.core.util.serialization.PacketIgnore
 import org.valkyrienskies.core.util.toAABBd
 
 open class ShipDataCommon(
-    val id: ShipId,
+    override val id: ShipId,
     var name: String,
-    val chunkClaim: ChunkClaim,
-    val chunkClaimDimension: DimensionId,
+    override val chunkClaim: ChunkClaim,
+    override val chunkClaimDimension: DimensionId,
     @DeltaIgnore
     val physicsData: ShipPhysicsData,
     shipTransform: ShipTransform,
@@ -27,6 +28,13 @@ open class ShipDataCommon(
     var shipVoxelAABB: AABBic?,
     val shipActiveChunksSet: IShipActiveChunksSet
 ) : Ship {
+
+    override val velocity: Vector3dc
+        get() = physicsData.linearVelocity
+
+    override val omega: Vector3dc
+        get() = physicsData.angularVelocity
+
     @DeltaIgnore
     override var shipTransform: ShipTransform = shipTransform
         set(shipTransform) {
@@ -37,11 +45,11 @@ open class ShipDataCommon(
         }
 
     @PacketIgnore
-    var prevTickShipTransform: ShipTransform = prevTickShipTransform
+    final override var prevTickShipTransform: ShipTransform = prevTickShipTransform
         private set
 
     @DeltaIgnore
-    var shipAABB: AABBdc = shipAABB
+    final override var shipAABB: AABBdc = shipAABB
         private set
 
     fun updatePrevTickShipTransform() {
@@ -51,7 +59,7 @@ open class ShipDataCommon(
     /**
      * Updates the [IBlockPosSet] and [ShipInertiaData] for this [ShipData]
      */
-    internal open fun onSetBlock(
+    override fun onSetBlock(
         posX: Int,
         posY: Int,
         posZ: Int,

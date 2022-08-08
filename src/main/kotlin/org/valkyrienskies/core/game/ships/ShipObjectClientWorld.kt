@@ -1,31 +1,48 @@
 package org.valkyrienskies.core.game.ships
 
+import dagger.Subcomponent
 import org.valkyrienskies.core.game.ships.networking.ShipObjectNetworkManagerClient
+import org.valkyrienskies.core.util.WorldScoped
+import javax.inject.Inject
 
-class ShipObjectClientWorld(
-    override val queryableShipData: MutableQueryableShipDataCommon
-) : ShipObjectWorld<ShipObjectClient>(queryableShipData) {
+@WorldScoped
+@Subcomponent
+interface ShipObjectClientWorldComponent {
+    fun newWorld(): ShipObjectClientWorld
 
-    private val shipObjectMap = HashMap<ShipId, ShipObjectClient>()
-    override val shipObjects: Map<ShipId, ShipObjectClient> = shipObjectMap
-    val networkManager = ShipObjectNetworkManagerClient(this)
+    @Subcomponent.Factory
+    interface Factory {
+        fun newShipObjectClientWorldComponent(): ShipObjectClientWorldComponent
+    }
+}
+
+@WorldScoped
+class ShipObjectClientWorld @Inject constructor(
+    networkManagerFactory: ShipObjectNetworkManagerClient.Factory
+) : ShipObjectWorld<ShipObjectClient>() {
+    override val queryableShipData: QueryableShipData<ShipObjectClient> get() = loadedShips
+
+    private val _loadedShips: MutableQueryableShipData<ShipObjectClient> = QueryableShipDataImpl()
+
+    override val loadedShips: QueryableShipData<ShipObjectClient>
+        get() = _loadedShips
+
+    val networkManager: ShipObjectNetworkManagerClient = networkManagerFactory.make(this)
 
     init {
         networkManager.registerPacketListeners()
     }
 
     fun addShip(ship: ShipDataCommon) {
-        queryableShipData.addShipData(ship)
-        shipObjectMap[ship.id] = ShipObjectClient(ship)
+        _loadedShips.addShipData(ShipObjectClient(ship))
     }
 
     fun removeShip(shipId: ShipId) {
-        queryableShipData.removeShipData(shipId)
-        shipObjectMap.remove(shipId)
+        _loadedShips.removeShipData(shipId)
     }
 
-    public override fun tickShips() {
-        super.tickShips()
+    public override fun preTick() {
+        super.preTick()
 
         shipObjects.forEach { (_, shipObjectClient) ->
             shipObjectClient.tickUpdateShipTransform()

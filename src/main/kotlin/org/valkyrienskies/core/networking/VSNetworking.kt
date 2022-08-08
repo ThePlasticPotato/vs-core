@@ -1,10 +1,15 @@
 package org.valkyrienskies.core.networking
 
+import dagger.Module
+import dagger.Provides
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer
 import org.valkyrienskies.core.config.VSConfigClass
 import org.valkyrienskies.core.config.VSCoreConfig
+import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule.TCP
+import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule.UDP
 import org.valkyrienskies.core.networking.impl.PacketRequestUdp
 import org.valkyrienskies.core.networking.impl.PacketUdpState
+import org.valkyrienskies.core.networking.simple.SimplePacketNetworking
 import org.valkyrienskies.core.networking.simple.registerClientHandler
 import org.valkyrienskies.core.networking.simple.registerServerHandler
 import org.valkyrienskies.core.networking.simple.sendToClient
@@ -15,26 +20,68 @@ import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.net.SocketException
 import javax.crypto.SecretKey
+import javax.inject.Inject
+import javax.inject.Qualifier
+import javax.inject.Singleton
+import kotlin.annotation.AnnotationRetention.BINARY
 
-object VSNetworking {
+@Singleton
+class VSNetworking @Inject constructor(
     /**
      * Valkyrien Skies UDP channel
      */
-    val UDP = NetworkChannel()
+    @UDP val UDP: NetworkChannel,
 
     /**
      * Valkyrien Skies TCP channel
      *
      * Should be initialized by Forge or Fabric (see [NetworkChannel])
      */
-    val TCP = NetworkChannel()
+    @TCP val TCP: NetworkChannel,
+
+    packets: Packets // don't actually need this, but for now force it to init for VSConfigClass
+) {
+
+    @Module
+    abstract class NetworkingModule {
+        companion object {
+
+            @Provides
+            @Singleton
+            fun simplePacketNetworking(packets: Packets): SimplePacketNetworking = packets.simplePackets
+
+            @Provides
+            @Singleton
+            @TCP
+            fun tcp(): NetworkChannel = NetworkChannel()
+
+            @Provides
+            @Singleton
+            @UDP
+            fun udp(): NetworkChannel = NetworkChannel()
+        }
+
+        @Qualifier
+        @MustBeDocumented
+        @Retention(BINARY)
+        annotation class TCP
+
+        @Qualifier
+        @MustBeDocumented
+        @Retention(BINARY)
+        annotation class UDP
+    }
+
+    /**
+     * TCP Packet used as fallback when no UDP channel available
+     */
+    private val TCP_UDP_FALLBACK = TCP.registerPacket("UDP fallback")
 
     var clientUsesUDP = false
     var serverUsesUDP = false
 
     fun init() {
-        Packets.init()
-        VSConfigClass.registerNetworkHandlers()
+        VSConfigClass.registerNetworkHandlers() //yea this is a mess
         setupFallback()
     }
 
@@ -48,14 +95,15 @@ object VSNetworking {
         try {
             val udpSocket = DatagramSocket(VSCoreConfig.SERVER.udpPort)
 
-            val udpServer = UdpServerImpl(udpSocket, UDP)
+            val udpServer = UdpServerImpl(udpSocket, UDP, TCP_UDP_FALLBACK)
+            serverUsesUDP = true
+
             PacketRequestUdp::class.registerServerHandler { packet, player ->
                 udpServer.prepareIdentifier(player, packet)?.let {
                     PacketUdpState(udpSocket.localPort, serverUsesUDP, it)
                         .sendToClient(player)
                 }
             }
-
             return udpServer
         } catch (e: SocketException) {
             logger.error("Tried to bind to ${VSCoreConfig.SERVER.udpPort} but failed!", e)
@@ -67,7 +115,7 @@ object VSNetworking {
         return null
     }
 
-    var prevStateHandler: RegisteredHandler? = null
+    private var prevStateHandler: RegisteredHandler? = null
 
     /**
      * Try to setup udp client
@@ -100,7 +148,7 @@ object VSNetworking {
     private fun setupUdpClient(socketAddress: SocketAddress, id: Long): Boolean {
         try {
             val udpSocket = DatagramSocket()
-            UdpClientImpl(udpSocket, UDP, socketAddress, id)
+            UdpClientImpl(udpSocket, UDP, socketAddress, id, onConfirm = { this.clientUsesUDP = true })
             return true
         } catch (e: Exception) {
             logger.error("Tried to setup udp client with socket address: $socketAddress but failed!", e)
@@ -118,20 +166,20 @@ object VSNetworking {
         }
 
         UDP.rawSendToClient = { data, player ->
-            Packets.TCP_UDP_FALLBACK.sendToClient(data, player)
+            TCP_UDP_FALLBACK.sendToClient(data, player)
         }
 
         UDP.rawSendToServer = { data ->
-            Packets.TCP_UDP_FALLBACK.sendToServer(data)
+            TCP_UDP_FALLBACK.sendToServer(data)
         }
     }
 
     private fun setupFallback() {
-        TCP.registerClientHandler(Packets.TCP_UDP_FALLBACK) { packet ->
+        TCP.registerClientHandler(TCP_UDP_FALLBACK) { packet ->
             UDP.onReceiveClient(packet.data)
         }
 
-        TCP.registerServerHandler(Packets.TCP_UDP_FALLBACK) { packet, player ->
+        TCP.registerServerHandler(TCP_UDP_FALLBACK) { packet, player ->
             UDP.onReceiveServer(packet.data, player)
         }
     }

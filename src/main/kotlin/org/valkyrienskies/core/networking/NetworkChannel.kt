@@ -13,7 +13,6 @@ import java.util.function.IntFunction
  * are called appropriately when packets are received.
  */
 class NetworkChannel {
-
     private val packetTypes = ArrayList<PacketType>()
     private val serverHandlers = Int2ObjectOpenHashMap<MutableSet<ServerHandler>>()
     private val clientHandlers = Int2ObjectOpenHashMap<MutableSet<ClientHandler>>()
@@ -27,7 +26,7 @@ class NetworkChannel {
 
     /**
      * Allocate a new packet type. This should be always be called in the same order, on startup, on both server and
-     * client. Otherwise packet IDs will not be correct.
+     * client. Otherwise, packet IDs will not be correct.
      */
     fun registerPacket(name: String): PacketType {
         return PacketType(channel = this, id = packetTypes.size, name)

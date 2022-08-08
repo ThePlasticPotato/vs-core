@@ -10,8 +10,13 @@ import org.valkyrienskies.core.util.logger
 import org.valkyrienskies.core.util.writeNormQuatdAs3F
 import org.valkyrienskies.core.util.writeVec3AsFloat
 import org.valkyrienskies.core.util.writeVec3d
+import javax.inject.Inject
 
-class VSNetworkPipelineStage(private val shipWorld: ShipObjectServerWorld) {
+class VSNetworkPipelineStage @Inject constructor(
+    private val shipWorld: ShipObjectServerWorld,
+    private val networking: VSNetworking,
+    private val packets: Packets
+) {
 
     var noSkip = true
 
@@ -24,7 +29,8 @@ class VSNetworkPipelineStage(private val shipWorld: ShipObjectServerWorld) {
         noSkip = !noSkip
         if (noSkip) return
 
-        shipWorld.networkManager.playersToTrackedShips.forEach { (player, trackedShips) ->
+
+        shipWorld.playersToTrackedShips.forEach { (player, trackedShips) ->
             val buf = Unpooled.buffer()
 
             fun send(shipDatas: List<ShipData>) {
@@ -33,12 +39,12 @@ class VSNetworkPipelineStage(private val shipWorld: ShipObjectServerWorld) {
                 writePacket(buf, shipDatas, physicsFrame)
 
                 // Send it to the player
-                Packets.UDP_SHIP_TRANSFORM.sendToClient(buf, player)
+                packets.UDP_SHIP_TRANSFORM.sendToClient(buf, player)
             }
 
             // Each transform is 80 bytes big so 6 transforms per packet
             // If not using udp we just send 1 big packet with all transforms
-            if (VSNetworking.serverUsesUDP)
+            if (networking.serverUsesUDP)
                 trackedShips.chunked(504 / TRANSFORM_SIZE).forEach(::send)
             else
                 send(trackedShips.asList())

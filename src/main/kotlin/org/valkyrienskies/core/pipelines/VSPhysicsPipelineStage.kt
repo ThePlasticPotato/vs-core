@@ -18,8 +18,9 @@ import org.valkyrienskies.physics_api.voxel_updates.VoxelRigidBodyShapeUpdates
 import org.valkyrienskies.physics_api_krunch.KrunchBootstrap
 import org.valkyrienskies.physics_api_krunch.KrunchPhysicsWorldSettings
 import java.util.concurrent.ConcurrentLinkedQueue
+import javax.inject.Inject
 
-class VSPhysicsPipelineStage {
+class VSPhysicsPipelineStage @Inject constructor() {
     private val gameFramesQueue: ConcurrentLinkedQueue<VSGameFrame> = ConcurrentLinkedQueue()
     private val physicsEngine: PhysicsWorldReference = KrunchBootstrap.createKrunchPhysicsWorld()
 
