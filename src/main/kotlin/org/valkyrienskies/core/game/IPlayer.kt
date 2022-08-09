@@ -18,5 +18,5 @@ interface IPlayer {
 
     val isAdmin: Boolean
 
-    val canModifyServerConfig: Boolean
+    val canModifyServerConfig: Boolean get() = isAdmin
 }

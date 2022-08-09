@@ -11,7 +11,7 @@ class ChunkWatchTask(
     val chunkPos: Long,
     val dimensionId: DimensionId,
     val playersNeedWatching: Iterable<IPlayer>,
-    val distanceSqToClosestPlayer: Double,
+    private val distanceToClosestPlayer: Double,
     val ship: ShipData
 ) : Comparable<ChunkWatchTask> {
 
@@ -19,6 +19,6 @@ class ChunkWatchTask(
     fun getChunkZ(): Int = IShipActiveChunksSet.longToChunkZ(chunkPos)
 
     override fun compareTo(other: ChunkWatchTask): Int {
-        return distanceSqToClosestPlayer.compareTo(other.distanceSqToClosestPlayer)
+        return distanceToClosestPlayer.compareTo(other.distanceToClosestPlayer)
     }
 }

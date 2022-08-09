@@ -6,12 +6,14 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import org.joml.Vector3d
 import org.joml.Vector3dc
+import org.joml.primitives.AABBd
 import org.valkyrienskies.core.config.VSCoreConfig
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.game.ships.ShipData
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
-import org.valkyrienskies.core.util.squared
+import org.valkyrienskies.core.util.set
+import org.valkyrienskies.core.util.signedDistanceTo
 import java.util.TreeSet
 import java.util.function.LongFunction
 import javax.inject.Inject
@@ -63,6 +65,8 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
     }
 
     private fun resetForNewTick() {
+        shipsToLoad.clear()
+        shipsToUnload.clear()
         playersToShipsNewlyWatchingMap.clear()
         playersToShipsNoLongerWatchingMap.clear()
     }
@@ -89,30 +93,36 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
         // Reuse these vector objects across iterations
         val tempVector0 = Vector3d()
         val tempVector1 = Vector3d()
+
+        val tempAABB = AABBd()
+
         ships.forEach { shipData ->
             val shipTransform = shipData.shipTransform
 
             shipData.shipActiveChunksSet.iterateChunkPos { chunkX, chunkZ ->
-                val chunkPosInWorldCoordinates: Vector3dc = shipTransform.shipToWorldMatrix.transformPosition(
-                    tempVector0.set(
-                        ((chunkX shl 4) + 8).toDouble(),
-                        127.0,
-                        ((chunkZ shl 4) + 8).toDouble()
+                val chunkAABBInWorld = tempAABB
+                    .set(
+                        (chunkX shl 4).toDouble(),
+                        0.0,
+                        (chunkZ shl 4).toDouble(),
+                        (chunkX shl 4).toDouble() + 16.0,
+                        256.0,
+                        (chunkZ shl 4).toDouble() + 16.0
                     )
-                )
+                    .transform(shipTransform.shipToWorldMatrix)
 
                 val newPlayersWatching: MutableList<IPlayer> = ArrayList()
                 val newPlayersUnwatching: MutableList<IPlayer> = ArrayList()
 
-                var minWatchingDistanceSq = Double.MAX_VALUE
-                var minUnwatchingDistanceSq = Double.MAX_VALUE
+                var minWatchingDistance = Double.MAX_VALUE
+                var minUnwatchingDistance = Double.MAX_VALUE
 
                 val playersWatchingChunk = getPlayersWatchingChunk(chunkX, chunkZ, shipData.chunkClaimDimension)
 
                 for (player in players) {
                     val playerPositionInWorldCoordinates: Vector3dc = player.getPosition(tempVector1)
-                    val displacementDistanceSq =
-                        chunkPosInWorldCoordinates.distanceSquared(playerPositionInWorldCoordinates)
+                    val displacementDistance =
+                        chunkAABBInWorld.signedDistanceTo(playerPositionInWorldCoordinates)
 
                     val isPlayerWatchingThisChunk = playersWatchingChunk.contains(player)
 
@@ -123,19 +133,19 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
                         continue
                     }
 
-                    if (displacementDistanceSq < chunkWatchDistance.squared()) {
+                    if (displacementDistance < chunkWatchDistance) {
                         if (!isPlayerWatchingThisChunk) {
                             // Watch this chunk
                             newPlayersWatching.add(player)
                             // Update [minWatchingDistanceSq]
-                            minWatchingDistanceSq = min(minWatchingDistanceSq, displacementDistanceSq)
+                            minWatchingDistance = min(minWatchingDistance, displacementDistance)
                         }
-                    } else if (displacementDistanceSq > chunkUnwatchDistance.squared()) {
+                    } else if (displacementDistance > chunkUnwatchDistance) {
                         if (isPlayerWatchingThisChunk) {
                             // Unwatch this chunk
                             newPlayersUnwatching.add(player)
                             // Update [minUnwatchingDistanceSq]
-                            minUnwatchingDistanceSq = min(minUnwatchingDistanceSq, displacementDistanceSq)
+                            minUnwatchingDistance = min(minUnwatchingDistance, displacementDistance)
                         }
                     }
                 }
@@ -145,7 +155,7 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
                 // ( doesn't matter as long as we still do all of the watching in one tick though )
                 if (newPlayersWatching.isNotEmpty()) {
                     val newChunkWatchTask = ChunkWatchTask(
-                        chunkPosAsLong, shipData.chunkClaimDimension, newPlayersWatching, minWatchingDistanceSq,
+                        chunkPosAsLong, shipData.chunkClaimDimension, newPlayersWatching, minWatchingDistance,
                         shipData
                     )
                     newChunkWatchTasks.add(newChunkWatchTask)
@@ -155,7 +165,7 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
                     val shouldUnloadChunk = playersWatchingChunk.size == newPlayersUnwatching.size
                     val newChunkUnwatchTask = ChunkUnwatchTask(
                         chunkPosAsLong, shipData.chunkClaimDimension,
-                        newPlayersUnwatching, shouldUnloadChunk, minUnwatchingDistanceSq, shipData
+                        newPlayersUnwatching, shouldUnloadChunk, minUnwatchingDistance, shipData
                     )
                     newChunkUnwatchTasks.add(newChunkUnwatchTask)
                 }
@@ -245,26 +255,31 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
         }
 
         removedWatchingPlayers.forEach { player ->
-            playersToShipsWatchingMap[player]?.computeIfPresent(shipData) { _, count ->
-                if (count == 1) {
-                    // This was the last chunk on the ship that [player] was tracking
-                    playersToShipsNoLongerWatchingMap
-                        .computeIfAbsent(player) { HashSet() }
-                        .add(shipData)
+            playersToShipsWatchingMap.computeIfPresent(player) { _, shipsWatchingMap ->
+                shipsWatchingMap.computeIfPresent(shipData) { _, count ->
+                    if (count == 1) {
+                        // This was the last chunk on the ship that [player] was tracking
+                        playersToShipsNoLongerWatchingMap
+                            .computeIfAbsent(player) { HashSet() }
+                            .add(shipData)
 
-                    val playersWatchingShip = shipsToPlayersWatchingMap.get(shipData.id)!!
-                    playersWatchingShip.remove(player)
+                        val playersWatchingShip = shipsToPlayersWatchingMap.get(shipData.id)!!
+                        playersWatchingShip.remove(player)
 
-                    // If no players are watching this ship anymore, unload it
-                    if (playersWatchingShip.isEmpty()) {
-                        shipsToUnload.add(shipData)
+                        // If no players are watching this ship anymore, unload it
+                        if (playersWatchingShip.isEmpty()) {
+                            shipsToUnload.add(shipData)
+                        }
+
+                        null // return null to remove the hashmap entry for this [shipId]
+                    } else {
+                        // There are remaining chunks on the ship that [player] is tracking
+                        count - 1
                     }
-
-                    null // return null to remove the hashmap entry for this [shipId]
-                } else {
-                    // There are remaining chunks on the ship that [player] is tracking
-                    count - 1
                 }
+
+                // if the player is no longer watching any ships, remove the hashmap entry for this [player]
+                if (shipsWatchingMap.isEmpty()) null else shipsWatchingMap
             }
         }
     }
