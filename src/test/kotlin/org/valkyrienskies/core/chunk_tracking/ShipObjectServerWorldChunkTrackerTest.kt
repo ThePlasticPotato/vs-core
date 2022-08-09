@@ -4,24 +4,15 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.maps.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import org.joml.Vector3d
 import org.valkyrienskies.core.config.VSCoreConfig
-import org.valkyrienskies.core.game.ChunkClaim
-import org.valkyrienskies.core.game.ships.ShipData
+import org.valkyrienskies.test_utils.VSBlankUtils
 import org.valkyrienskies.test_utils.fakes.FakePlayer
 
 class ShipObjectServerWorldChunkTrackerTest : StringSpec({
 
     "track" {
-        val dimension = ""
-        val ship = ShipData.createEmpty(
-            name = "",
-            shipId = 0,
-            chunkClaim = ChunkClaim(0, 0),
-            chunkClaimDimension = dimension,
-            shipCenterInWorldCoordinates = Vector3d(0.0, 0.0, 0.0),
-            shipCenterInShipCoordinates = Vector3d(0.0, 0.0, 0.0)
-        )
+        val dimension = "fake_dimension"
+        val ship = VSBlankUtils.blankShipData(chunkClaimDimension = dimension)
         ship.shipActiveChunksSet.addChunkPos(0, 0)
         val ships = listOf(ship)
 

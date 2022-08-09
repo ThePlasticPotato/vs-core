@@ -106,8 +106,7 @@ internal object VSRandomUtils {
     fun randomString(random: Random = defaultRandom, length: Int): String {
         val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
         return (1..length)
-            .map { random.nextInt(0, charPool.size) }
-            .map(charPool::get)
+            .map { charPool.random(random) }
             .joinToString("")
     }
 
