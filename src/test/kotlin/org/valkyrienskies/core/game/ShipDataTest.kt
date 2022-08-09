@@ -1,27 +1,29 @@
 package org.valkyrienskies.core.game
 
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.RepeatedTest
-import org.valkyrienskies.core.VSRandomUtils
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.checkAll
 import org.valkyrienskies.core.game.ships.ShipData
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
+import org.valkyrienskies.test_utils.generators.shipData
 
-internal class ShipDataTest {
+class ShipDataTest : StringSpec({
 
     /**
      * Tests the correctness of ShipData serialization and deserialization.
      */
-    @RepeatedTest(25)
-    fun testSerializationAndDeSerialization() {
-        val shipData = VSRandomUtils.randomShipData()
-        // Now serialize and deserialize and verify that they are the same
-        val blockPosSetSerialized = VSJacksonUtil.defaultMapper.writeValueAsBytes(shipData)
-        val blockPosSetDeserialized = VSJacksonUtil.defaultMapper.readValue(
-            blockPosSetSerialized,
-            ShipData::class.java
-        )
+    "test serialization and deserialization" {
+        checkAll(Arb.shipData()) { shipData ->
+            // Now serialize and deserialize and verify that they are the same
+            val blockPosSetSerialized = VSJacksonUtil.defaultMapper.writeValueAsBytes(shipData)
+            val blockPosSetDeserialized = VSJacksonUtil.defaultMapper.readValue(
+                blockPosSetSerialized,
+                ShipData::class.java
+            )
 
-        // Verify that both are equal
-        Assertions.assertEquals(shipData, blockPosSetDeserialized)
+            // Verify that both are equal
+            shipData shouldBe blockPosSetDeserialized
+        }
     }
-}
+})

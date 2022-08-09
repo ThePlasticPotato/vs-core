@@ -1,20 +1,24 @@
 package org.valkyrienskies.core.game
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.RepeatedTest
-import org.junit.jupiter.api.Test
 import org.valkyrienskies.core.VSRandomUtils
 import org.valkyrienskies.core.game.ships.QueryableShipDataImpl
 import org.valkyrienskies.core.game.ships.QueryableShipDataServer
 import org.valkyrienskies.core.game.ships.ShipData
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
+import org.valkyrienskies.test_utils.generators.queryableShipData
+import org.valkyrienskies.test_utils.generators.shipData
 import kotlin.random.Random
 
-internal class QueryableShipDataServerTest {
+class QueryableShipDataServerTest : AnnotationSpec() {
 
     /**
      * Tests getting [ShipData] from [java.util.UUID].
@@ -30,7 +34,7 @@ internal class QueryableShipDataServerTest {
     /**
      * Tests getting [ShipData] from [ChunkClaim].
      */
-    @RepeatedTest(25)
+    @Test
     fun testGetShipFromChunkClaim() {
         val queryableShipData = QueryableShipDataImpl<ShipData>()
         val shipData = VSRandomUtils.randomShipData()
@@ -114,13 +118,13 @@ internal class QueryableShipDataServerTest {
      * Test removing [ShipData] in [QueryableShipDataServer].
      */
     @Test
-    fun testRemovingShipNotInQueryableShipData() {
-        val queryableShipData = QueryableShipDataImpl<ShipData>()
-        val shipData = VSRandomUtils.randomShipData()
-        val otherShipData = VSRandomUtils.randomShipData()
-        queryableShipData.addShipData(shipData)
-        assertThrows(IllegalArgumentException::class.java) {
-            queryableShipData.removeShipData(otherShipData)
+    suspend fun testRemovingShipNotInQueryableShipData() {
+        checkAll(Arb.shipData(), Arb.shipData()) { shipData, otherShipData ->
+            val queryableShipData = QueryableShipDataImpl<ShipData>()
+            queryableShipData.addShipData(shipData)
+            assertThrows(IllegalArgumentException::class.java) {
+                queryableShipData.removeShipData(otherShipData)
+            }
         }
     }
 
@@ -128,27 +132,29 @@ internal class QueryableShipDataServerTest {
      * Test getting a [ShipData] by its [org.joml.primitives.AABBdc]
      */
     @Test
-    fun testGettingShipByBoundingBox() {
-        val queryableShipData = QueryableShipDataImpl<ShipData>()
-        val shipData = VSRandomUtils.randomShipData()
-        queryableShipData.addShipData(shipData)
-        val shipsIntersectingBB = queryableShipData.getShipDataIntersecting(shipData.shipAABB).iterator()
-        assertTrue(shipsIntersectingBB.hasNext())
-        assertEquals(shipsIntersectingBB.next(), shipData)
-        assertFalse(shipsIntersectingBB.hasNext())
+    suspend fun testGettingShipByBoundingBox() {
+        checkAll(Arb.shipData()) { shipData ->
+            val queryableShipData = QueryableShipDataImpl<ShipData>()
+            queryableShipData.addShipData(shipData)
+            val shipsIntersectingBB = queryableShipData.getShipDataIntersecting(shipData.shipAABB).iterator()
+            assertTrue(shipsIntersectingBB.hasNext())
+            assertEquals(shipsIntersectingBB.next(), shipData)
+            assertFalse(shipsIntersectingBB.hasNext())
+        }
     }
 
     /**
      * Tests the correctness of [QueryableShipDataServer] serialization and deserialization.
      */
-    @RepeatedTest(25)
-    fun testSerializationAndDeSerialization() {
-        val queryableShipData = VSRandomUtils.randomQueryableShipData(size = Random.nextInt(20))
-        // Now serialize and deserialize and verify that they are the same
-        val queryableShipDataSerialized = VSJacksonUtil.defaultMapper.writeValueAsBytes(queryableShipData.toList())
-        val queryableShipDataDeserialized =
-            QueryableShipDataImpl<ShipData>(VSJacksonUtil.defaultMapper.readValue(queryableShipDataSerialized))
-        // Verify that both are equal
-        assertEquals(queryableShipData, queryableShipDataDeserialized)
+    @Test
+    suspend fun testSerializationAndDeSerialization() {
+        checkAll(Arb.queryableShipData(Arb.int(0, 20))) { queryableShipData ->
+            // Now serialize and deserialize and verify that they are the same
+            val queryableShipDataSerialized = VSJacksonUtil.defaultMapper.writeValueAsBytes(queryableShipData.toList())
+            val queryableShipDataDeserialized =
+                QueryableShipDataImpl<ShipData>(VSJacksonUtil.defaultMapper.readValue(queryableShipDataSerialized))
+            // Verify that both are equal
+            assertEquals(queryableShipData, queryableShipDataDeserialized)
+        }
     }
 }
