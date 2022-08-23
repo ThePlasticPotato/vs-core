@@ -10,11 +10,13 @@ import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.game.ships.ShipData
 import org.valkyrienskies.core.game.ships.ShipObjectServer
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
+import org.valkyrienskies.core.networking.NetworkChannel
 import org.valkyrienskies.core.networking.Packets
-import org.valkyrienskies.core.networking.VSNetworking
+import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule.TCP
+import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule.UDP
 import org.valkyrienskies.core.networking.impl.PacketShipDataCreate
 import org.valkyrienskies.core.networking.impl.PacketShipRemove
-import org.valkyrienskies.core.networking.simple.sendToClient
+import org.valkyrienskies.core.networking.simple.SimplePacketNetworking
 import org.valkyrienskies.core.util.getValue
 import org.valkyrienskies.core.util.logger
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
@@ -23,7 +25,9 @@ import javax.inject.Inject
 
 internal class ShipObjectNetworkManagerServer @Inject constructor(
     _parent: Lazy<ShipObjectServerWorld>,
-    private val network: VSNetworking,
+    @TCP private val tcp: NetworkChannel,
+    @UDP private val udp: NetworkChannel,
+    private val spNetwork: SimplePacketNetworking,
     private val packets: Packets
 ) {
 
@@ -76,14 +80,14 @@ internal class ShipObjectNetworkManagerServer @Inject constructor(
         val shipIds = shipsToNotTrack.map { it.id }
         if (shipIds.isEmpty()) return
         logger.debug("${player.uuid} unwatched ships $shipIds")
-        PacketShipRemove(shipIds).sendToClient(player)
+        spNetwork.sendToClient(PacketShipRemove(shipIds), player)
     }
 
     private fun startTracking(player: IPlayer, shipsToTrack: Iterable<ShipData>) {
         val ships = shipsToTrack.toList()
         if (ships.isEmpty()) return
         logger.debug("${player.uuid} watched ships: ${ships.map { it.id }}")
-        PacketShipDataCreate(ships).sendToClient(player)
+        spNetwork.sendToClient(PacketShipDataCreate(ships), player)
     }
 
     /**
@@ -111,8 +115,8 @@ internal class ShipObjectNetworkManagerServer @Inject constructor(
     }
 
     init {
-        network.TCP.serverIsReady()
-        network.UDP.serverIsReady()
+        tcp.serverIsReady()
+        udp.serverIsReady()
     }
 
     companion object {

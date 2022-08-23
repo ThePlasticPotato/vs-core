@@ -1,5 +1,6 @@
 package org.valkyrienskies.core.networking
 
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer
@@ -10,6 +11,7 @@ import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule.UDP
 import org.valkyrienskies.core.networking.impl.PacketRequestUdp
 import org.valkyrienskies.core.networking.impl.PacketUdpState
 import org.valkyrienskies.core.networking.simple.SimplePacketNetworking
+import org.valkyrienskies.core.networking.simple.SimplePacketNetworkingImpl
 import org.valkyrienskies.core.networking.simple.registerClientHandler
 import org.valkyrienskies.core.networking.simple.registerServerHandler
 import org.valkyrienskies.core.networking.simple.sendToClient
@@ -44,11 +46,11 @@ class VSNetworking @Inject constructor(
 
     @Module
     abstract class NetworkingModule {
-        companion object {
+        @Binds
+        @Singleton
+        abstract fun simplePacketNetworking(impl: SimplePacketNetworkingImpl): SimplePacketNetworking
 
-            @Provides
-            @Singleton
-            fun simplePacketNetworking(packets: Packets): SimplePacketNetworking = packets.simplePackets
+        companion object {
 
             @Provides
             @Singleton

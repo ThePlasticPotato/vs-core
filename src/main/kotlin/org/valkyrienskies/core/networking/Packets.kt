@@ -9,7 +9,6 @@ import org.valkyrienskies.core.networking.impl.PacketShipDataCreate
 import org.valkyrienskies.core.networking.impl.PacketShipRemove
 import org.valkyrienskies.core.networking.impl.PacketUdpState
 import org.valkyrienskies.core.networking.simple.SimplePacketNetworking
-import org.valkyrienskies.core.networking.simple.SimplePacketNetworkingImpl
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,9 +19,8 @@ import javax.inject.Singleton
 class Packets @Inject constructor(
     @TCP tcp: NetworkChannel,
     @UDP udp: NetworkChannel,
+    val simplePackets: SimplePacketNetworking
 ) {
-
-    internal val simplePackets: SimplePacketNetworking = SimplePacketNetworkingImpl { tcp }
 
     val TCP_SHIP_DATA_DELTA = tcp.registerPacket("Ship data delta update")
 

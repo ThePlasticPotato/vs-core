@@ -88,6 +88,7 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
     testImplementation("io.kotest:kotest-property:$kotestVersion")
     testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
+    testImplementation("io.mockk:mockk:1.12.5")
 
     // Log4j2 for Logging
     implementation("org.apache.logging.log4j:log4j-api:${properties["mc_log4j2_version"]}")

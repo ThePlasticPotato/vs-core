@@ -17,7 +17,7 @@ import org.valkyrienskies.core.networking.VSCryptUtils
 import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.networking.impl.PacketShipDataCreate
 import org.valkyrienskies.core.networking.impl.PacketShipRemove
-import org.valkyrienskies.core.networking.simple.registerClientHandler
+import org.valkyrienskies.core.networking.simple.SimplePacketNetworking
 import org.valkyrienskies.core.networking.unregisterAll
 import org.valkyrienskies.core.pipelines.VSNetworkPipelineStage
 import org.valkyrienskies.core.util.logger
@@ -31,6 +31,7 @@ import javax.crypto.SecretKey
 class ShipObjectNetworkManagerClient @AssistedInject constructor(
     @Assisted private val parent: ShipObjectClientWorld,
     private val networking: VSNetworking,
+    private val spNetwork: SimplePacketNetworking,
     private val packets: Packets
 ) {
 
@@ -49,8 +50,8 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
         handlers = listOf(
             packets.UDP_SHIP_TRANSFORM.registerClientHandler(this::onShipTransform),
             packets.TCP_SHIP_DATA_DELTA.registerClientHandler(this::onShipDataDelta),
-            PacketShipDataCreate::class.registerClientHandler(this::onShipDataCreate),
-            PacketShipRemove::class.registerClientHandler(this::onShipDataRemove)
+            spNetwork.registerClientHandler(PacketShipDataCreate::class, this::onShipDataCreate),
+            spNetwork.registerClientHandler(PacketShipRemove::class, this::onShipDataRemove)
         )
 
         networking.TCP.clientIsReady()
