@@ -166,9 +166,8 @@ class ShipObjectServerWorld @Inject constructor(
             val voxelType: Byte = when (newBlockType) {
                 VSBlockType.AIR -> KrunchVoxelStates.AIR_STATE
                 VSBlockType.SOLID -> KrunchVoxelStates.SOLID_STATE
-                // TODO: send correct states to Krunch
-                VSBlockType.WATER -> KrunchVoxelStates.AIR_STATE
-                VSBlockType.LAVA -> KrunchVoxelStates.AIR_STATE
+                VSBlockType.WATER -> KrunchVoxelStates.WATER_STATE
+                VSBlockType.LAVA -> KrunchVoxelStates.LAVA_STATE
                 else -> throw IllegalArgumentException("Unknown blockType $newBlockType")
             }
 
