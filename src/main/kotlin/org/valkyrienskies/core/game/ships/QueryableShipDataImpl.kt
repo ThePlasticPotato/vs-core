@@ -50,12 +50,19 @@ open class QueryableShipDataImpl<ShipType : Ship>(
         val iter = _idToShipData.values.iterator()
 
         return object : MutableIterator<ShipType> {
-            lateinit var last: ShipType
+            var last: ShipType? = null
             override fun hasNext(): Boolean = iter.hasNext()
-            override fun next(): ShipType = iter.next()
+            override fun next(): ShipType {
+                val next = iter.next()
+                last = next
+                return next
+            }
+
             override fun remove() {
+                val lastCopy: ShipType = last ?: throw IllegalStateException("remove() failed because last was null!")
                 iter.remove()
-                chunkClaimToShipData.remove(last.chunkClaim)
+                chunkClaimToShipData.remove(lastCopy.chunkClaim)
+                last = null
             }
         }
     }

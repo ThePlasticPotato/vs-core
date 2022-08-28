@@ -56,7 +56,7 @@ class VSNetworkPipelineStage @Inject constructor(
             val ships = frame.shipDataMap
             buf.writeInt(frame.physTickNumber)
             shipDatas.forEach { shipData ->
-                val physicsFrameData = ships.getValue(shipData.id)
+                val physicsFrameData = ships[shipData.id] ?: return@forEach
                 val transform =
                     VSGamePipelineStage.generateTransformFromPhysicsFrameData(physicsFrameData, shipData)
 

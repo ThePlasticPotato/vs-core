@@ -8,6 +8,7 @@ import io.netty.buffer.Unpooled
 import org.valkyrienskies.core.chunk_tracking.ChunkTrackingInfo
 import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.game.ships.ShipData
+import org.valkyrienskies.core.game.ships.ShipObjectServer
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
 import org.valkyrienskies.core.networking.Packets
 import org.valkyrienskies.core.networking.VSNetworking
@@ -92,9 +93,9 @@ internal class ShipObjectNetworkManagerServer @Inject constructor(
         for (player in players) {
             val buf = Unpooled.buffer()
             val newlyWatching = tracker.playersToShipsNewlyWatchingMap[player] ?: emptySet()
-            val trackedShips = player.getTrackedShips()
+            val trackedShips: List<ShipObjectServer> = player.getTrackedShips()
                 .filter { tracked -> !newlyWatching.contains(tracked) }
-                .map { parent.getShipObject(it)!! }
+                .mapNotNull { parent.getShipObject(it) }
 
             if (trackedShips.isEmpty())
                 continue
