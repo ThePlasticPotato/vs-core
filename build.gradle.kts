@@ -81,7 +81,9 @@ dependencies {
     val daggerVersion = "2.43.2"
     implementation("com.google.dagger", "dagger", daggerVersion)
     annotationProcessor("com.google.dagger", "dagger-compiler", daggerVersion)
+    testAnnotationProcessor("com.google.dagger", "dagger-compiler", daggerVersion)
     kapt("com.google.dagger", "dagger-compiler", daggerVersion)
+    kaptTest("com.google.dagger", "dagger-compiler", daggerVersion)
 
     // Junit 5 for Unit Testing
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
