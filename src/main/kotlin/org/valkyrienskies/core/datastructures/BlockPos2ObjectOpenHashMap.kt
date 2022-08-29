@@ -116,11 +116,7 @@ class BlockPos2ObjectOpenHashMap<T>(expected: Int = 10, loadFactor: Float = 0.75
 
                 slot = hash(curX, curY, curZ) and mask
 
-                if (last <= pos) {
-                    if (last >= slot || slot > pos) break
-                } else {
-                    if (slot in (pos + 1)..last) break
-                }
+                if (if (last <= pos) last >= slot || slot > pos else last >= slot && slot > pos) break
 
                 pos = pos + 1 and mask
             }
@@ -166,7 +162,7 @@ class BlockPos2ObjectOpenHashMap<T>(expected: Int = 10, loadFactor: Float = 0.75
         val keys = keys
         val values = values
 
-        val newMask = newN - 1 // Note that this is used by the hashing macro
+        val newMask = newN - 1
         val newKey = IntArray((newN + 1) * NUM_KEYS)
 
         @Suppress("UNCHECKED_CAST")

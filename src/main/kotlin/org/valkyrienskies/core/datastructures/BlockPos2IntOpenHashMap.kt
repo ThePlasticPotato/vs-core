@@ -3,23 +3,10 @@ package org.valkyrienskies.core.datastructures
 import it.unimi.dsi.fastutil.Hash
 import it.unimi.dsi.fastutil.HashCommon.arraySize
 import it.unimi.dsi.fastutil.HashCommon.maxFill
-import it.unimi.dsi.fastutil.ints.Int2ByteOpenHashMap
 import org.valkyrienskies.core.datastructures.MurmurHash3.fmix32
 import org.valkyrienskies.core.datastructures.MurmurHash3.mix32
 
-fun main() {
-    val map = Int2ByteOpenHashMap()
-    for (i in 1..100) {
-        map.put(i, i.toByte())
-        map.remove(i)
-    }
-
-    map.put(101, 0)
-
-    map.remove(101)
-}
-
-class BlockPos2IntOpenHashMap {
+class BlockPos2IntOpenHashMap(expected: Int = 10, loadFactor: Float = 0.75f) {
 
     companion object {
         private const val NUM_KEYS = 3
@@ -34,19 +21,17 @@ class BlockPos2IntOpenHashMap {
     private var containsNullKey = false
     private var maxFill: Int
 
-    private var defRetValue = 0
+    var defRetValue: Int = 0
 
     private val minN: Int
-    private val f: Float // load factor
+    private val f: Float = loadFactor // load factor
     private val mask get() = n - 1
     private val realSize get() = if (containsNullKey) size - 1 else size
 
-    constructor(expected: Int = 10, loadFactor: Float = 0.75f) {
-        f = loadFactor
+    init {
         n = arraySize(expected, f)
         minN = n
         maxFill = maxFill(n, loadFactor)
-
         keys = IntArray((n + 1) * NUM_KEYS)
         values = IntArray(n + 1)
     }
@@ -106,6 +91,7 @@ class BlockPos2IntOpenHashMap {
         var pos = pos
         var last: Int
         var slot: Int
+
         var curX: Int
         var curY: Int
         var curZ: Int
@@ -130,13 +116,9 @@ class BlockPos2IntOpenHashMap {
 
                 slot = hash(curX, curY, curZ) and mask
 
-                if (last <= pos) {
-                    if (last >= slot || slot > pos) break
-                } else {
-                    if (slot in (pos + 1)..last) break
-                }
+                if (if (last <= pos) last >= slot || slot > pos else last >= slot && slot > pos) break
 
-                pos = pos + 1 and mask
+                pos = (pos + 1) and mask
             }
             key[last * NUM_KEYS] = curX
             key[last * NUM_KEYS + 1] = curY
@@ -180,7 +162,7 @@ class BlockPos2IntOpenHashMap {
         val keys = keys
         val values = values
 
-        val newMask = newN - 1 // Note that this is used by the hashing macro
+        val newMask = newN - 1
         val newKey = IntArray((newN + 1) * NUM_KEYS)
         val newValue = IntArray(newN + 1)
         var pos: Int
