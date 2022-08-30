@@ -10,7 +10,7 @@ import org.valkyrienskies.core.game.DimensionId
 
 // TODO DAGGER
 class VentityChunkTracker(
-    val world: VSWorld
+    private val world: VSWorld
 ) : Iterable<Ventity> {
     /**
      * Chunk claims are shared over all dimensions, this is so that we don't have to change the chunk claim when we move
@@ -19,11 +19,11 @@ class VentityChunkTracker(
     private val chunkClaimToShipData: ChunkClaimMap2<Ventity> = ChunkClaimMap2()
 
     init {
-        ChunkClaimComponent::class.listenOnAdd { ve, it ->
+        ChunkClaimComponent::class.listenOnAdd(world) { ve, it ->
             chunkClaimToShipData[it] = ve
         }
 
-        ChunkClaimComponent::class.listenOnRemove { ve, it ->
+        ChunkClaimComponent::class.listenOnRemove(world) { ve, it ->
             chunkClaimToShipData.remove(it)
         }
     }

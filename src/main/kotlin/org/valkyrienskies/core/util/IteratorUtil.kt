@@ -29,3 +29,11 @@ fun <F, T> Iterator<F>.map(transform: (F) -> T): Iterator<T> = object : Iterator
 
     override fun next(): T = transform(this@map.next())
 }
+
+fun <F, T> MutableIterator<F>.mutMap(transform: (F) -> T): MutableIterator<T> = object : MutableIterator<T> {
+    override fun hasNext(): Boolean = this@mutMap.hasNext()
+
+    override fun next(): T = transform(this@mutMap.next())
+
+    override fun remove() = this@mutMap.remove()
+}
