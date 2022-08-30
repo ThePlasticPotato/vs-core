@@ -20,6 +20,7 @@ version = if (project.hasProperty("CustomReleaseVersion")) {
 
 repositories {
     mavenCentral()
+    maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots") // For dependency dominion
     maven {
         name = "VS Maven"
         url = uri(project.findProperty("vs_maven_url") ?: "https://maven.valkyrienskies.org/")
@@ -94,6 +95,9 @@ dependencies {
 
     // Log4j2 for Logging
     implementation("org.apache.logging.log4j:log4j-api:${properties["mc_log4j2_version"]}")
+
+    // Dominion for ECS
+    implementation("dev.dominion.ecs:dominion-ecs-engine:0.7.0-SNAPSHOT")
 }
 
 tasks.withType<Checkstyle> {
