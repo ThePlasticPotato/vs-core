@@ -5,6 +5,7 @@ import dev.dominion.ecs.engine.CompositionRepository.Node
 import dev.dominion.ecs.engine.DataComposition
 import dev.dominion.ecs.engine.DataComposition.StateIterator
 import dev.dominion.ecs.engine.IntEntity
+import dev.dominion.ecs.engine.ResultSet
 import dev.dominion.ecs.engine.system.IndexKey
 import org.valkyrienskies.core.util.ConcatMutableIterator
 import java.util.Spliterator
@@ -38,6 +39,10 @@ private value class IResults<T>(val results: dev.dominion.ecs.api.Results<T>) : 
     override fun without(vararg componentTypes: Class<*>): Results<T> = IResults(results.without(*componentTypes))
 
     override fun withAlso(vararg componentTypes: Class<*>): Results<T> = IResults(results.withAlso(*componentTypes))
+
+    companion object {
+        private val nodeMap = ResultSet::class.java.getDeclaredField("nodeMap")
+    }
 }
 
 class ResultsMany(val indices: Map<Class<*>, Int>, val owner: IntEntity) {

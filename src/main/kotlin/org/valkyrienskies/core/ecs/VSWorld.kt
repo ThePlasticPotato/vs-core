@@ -4,6 +4,7 @@ import dev.dominion.ecs.engine.CompositionRepository
 import dev.dominion.ecs.engine.DataComposition
 import dev.dominion.ecs.engine.ResultSet
 import dev.dominion.ecs.engine.system.LoggingSystem.Context
+import org.valkyrienskies.core.util.ConcatMutableIterator
 import kotlin.reflect.KClass
 
 class VSWorld {
@@ -44,6 +45,13 @@ class VSWorld {
     fun spawn(name: String? = null, prepared: BuiltComposition) =
         prepared.owner.createEntity(name, true, prepared.values)
 
-    internal fun compose(components: List<KClass<Component>>): DataComposition =
+    internal fun compose(components: List<KClass<out Component>>): DataComposition =
         compositions.getOrCreate(components.toTypedArray())
+
+    fun findOwnersOf(vararg classes: KClass<out Component>): MutableIterator<Ventity> =
+        ConcatMutableIterator(
+            compositions.findWith(*classes.map { it.java }.toTypedArray())
+                .map { (_, it) -> { it.composition.tenant.iterator() as MutableIterator<Ventity> } as MutableIterable<Ventity> }
+                .iterator()
+        )
 }
