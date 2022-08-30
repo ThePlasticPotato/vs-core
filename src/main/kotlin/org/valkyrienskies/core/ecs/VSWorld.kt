@@ -1,6 +1,5 @@
 package org.valkyrienskies.core.ecs
 
-import dev.dominion.ecs.api.Composition
 import dev.dominion.ecs.engine.CompositionRepository
 import dev.dominion.ecs.engine.DataComposition
 import dev.dominion.ecs.engine.ResultSet
@@ -42,9 +41,9 @@ class VSWorld {
         compositions.getOrCreate(components)
             .createEntity(name, false, (if (components.isEmpty()) null else components) as Array<Any>?)
 
-    fun spawn(name: String? = null, prepared: Composition.OfTypes) =
-        (prepared.context as DataComposition).createEntity(name, true, prepared.components)
+    fun spawn(name: String? = null, prepared: BuiltComposition) =
+        prepared.owner.createEntity(name, true, prepared.values)
 
-    // TODO kotlinfy this
-    fun compose(): Composition = compositions.preparedComposition
+    internal fun compose(components: List<KClass<Component>>): DataComposition =
+        compositions.getOrCreate(components.toTypedArray())
 }
