@@ -133,27 +133,30 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
         // Reads all ship transforms in a buffer and places them in the latestReceived map.
         internal fun readShipTransform(buf: ByteBuf, shipObjects: Map<ShipId, ShipObjectClient>) {
             val tickNum = buf.readInt()
-            while (buf.isReadable) {
-                val shipId = buf.readLong()
-                val ship = shipObjects[shipId]
-                if (ship == null) {
-                    logger.warn("Received ship transform for ship with unknown ID!")
-                    buf.skipBytes(VSNetworkPipelineStage.TRANSFORM_SIZE - 8)
-                } else if (ship.latestNetworkTTick >= tickNum) {
-                    // Skip the transform if we already have it
-                    buf.skipBytes(VSNetworkPipelineStage.TRANSFORM_SIZE - 8)
-                } else {
-                    ship.latestNetworkTTick = tickNum
+            try {
+                while (buf.isReadable) {
+                    val shipId = buf.readLong()
+                    val ship = shipObjects[shipId]
+                    if (ship == null) {
+                        logger.warn("Received ship transform for ship with unknown ID!")
+                        buf.skipBytes(VSNetworkPipelineStage.TRANSFORM_SIZE - 8)
+                    } else if (ship.latestNetworkTTick >= tickNum) {
+                        // Skip the transform if we already have it
+                        buf.skipBytes(VSNetworkPipelineStage.TRANSFORM_SIZE - 8)
+                    } else {
+                        val centerOfMass = buf.readVec3d()
+                        val scaling = buf.readVec3fAsDouble()
+                        val rotation = buf.read3FAsNormQuatd()
+                        val position = buf.readVec3d()
 
-                    val centerOfMass = buf.readVec3d()
-                    val scaling = buf.readVec3fAsDouble()
-                    val rotation = buf.read3FAsNormQuatd()
-                    val position = buf.readVec3d()
-
-                    ship.latestNetworkTransform = ShipTransform.createFromCoordinatesAndRotationAndScaling(
-                        position, centerOfMass, rotation, scaling
-                    )
+                        ship.latestNetworkTransform = ShipTransform.createFromCoordinatesAndRotationAndScaling(
+                            position, centerOfMass, rotation, scaling
+                        )
+                        ship.latestNetworkTTick = tickNum
+                    }
                 }
+            } catch (e: Exception) {
+                logger.error("Something went wrong when reading ship transform packets", e)
             }
         }
     }
