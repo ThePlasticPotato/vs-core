@@ -5,6 +5,7 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.valkyrienskies.core.game.ships.SerializedShipDataModule
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
+import org.valkyrienskies.core.hooks.AbstractCoreHooks
 import org.valkyrienskies.core.util.WorldScoped
 import javax.inject.Inject
 import kotlin.concurrent.thread
@@ -34,12 +35,14 @@ class VSPipeline @Inject constructor(
     val shipWorld: ShipObjectServerWorld,
     private val gameStage: VSGamePipelineStage,
     private val physicsStage: VSPhysicsPipelineStage,
-    private val networkStage: VSNetworkPipelineStage
+    private val networkStage: VSNetworkPipelineStage,
+    hooks: AbstractCoreHooks,
 ) {
     private val physicsPipelineBackgroundTask: VSPhysicsPipelineBackgroundTask = VSPhysicsPipelineBackgroundTask(this)
 
+    // start paused on client, start unpaused on server
     @Volatile
-    var arePhysicsRunning = false
+    var arePhysicsRunning = !hooks.isPhysicalClient
 
     // The thread the physics engine runs on
     private val physicsThread: Thread = thread(start = true, priority = 8, name = "Physics thread") {
@@ -57,13 +60,14 @@ class VSPipeline @Inject constructor(
         physicsStage.pushGameFrame(gameFrame)
     }
 
-    fun tickPhysics(gravity: Vector3dc, timeStep: Double, simulatePhysics: Boolean) {
+    fun tickPhysics(gravity: Vector3dc, timeStep: Double) {
         if (deleteResources) {
             physicsStage.deleteResources()
             physicsPipelineBackgroundTask.tellTaskToKillItself()
             return
         }
-        val physicsFrame = physicsStage.tickPhysics(gravity, timeStep, simulatePhysics)
+
+        val physicsFrame = physicsStage.tickPhysics(gravity, timeStep, arePhysicsRunning)
         gameStage.pushPhysicsFrame(physicsFrame)
         networkStage.pushPhysicsFrame(physicsFrame)
     }

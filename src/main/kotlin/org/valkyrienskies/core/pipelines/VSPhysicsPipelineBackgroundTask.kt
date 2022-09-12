@@ -33,7 +33,7 @@ class VSPhysicsPipelineBackgroundTask(private val vsPipeline: VSPipeline, privat
                 val timeStep = timeToSimulateNs / 1e9
 
                 // Run the physics tick
-                vsPipeline.tickPhysics(vsPipeline.getPhysicsGravity(), timeStep, vsPipeline.arePhysicsRunning)
+                vsPipeline.tickPhysics(vsPipeline.getPhysicsGravity(), timeStep)
 
                 val timeToRunPhysTick = System.nanoTime() - timeBeforePhysicsTick
 
