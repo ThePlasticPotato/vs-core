@@ -61,6 +61,7 @@ internal class ShipObjectNetworkManagerServer @Inject constructor(
     /**
      * Used by VSNetworkPipeline as a threadsafe way to access the transforms to send
      */
+    @Volatile
     var playersToTrackedShips: ImmutableMap<IPlayer, ImmutableSet<ShipData>> = ImmutableMap.of()
 
     /**
