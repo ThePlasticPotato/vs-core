@@ -3,6 +3,7 @@ package org.valkyrienskies.core.api
 import org.joml.Matrix4dc
 import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
+import org.joml.primitives.AABBic
 import org.valkyrienskies.core.game.ChunkClaim
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.game.VSBlockType
@@ -24,6 +25,7 @@ interface Ship {
     val chunkClaim: ChunkClaim
     val chunkClaimDimension: DimensionId
     val shipAABB: AABBdc
+    val shipVoxelAABB: AABBic?
     val velocity: Vector3dc
     val omega: Vector3dc
 
@@ -41,5 +43,4 @@ interface Ship {
         oldBlockMass: Double,
         newBlockMass: Double
     )
-
 }

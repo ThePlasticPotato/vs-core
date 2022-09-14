@@ -25,7 +25,7 @@ open class ShipDataCommon(
     shipTransform: ShipTransform,
     prevTickShipTransform: ShipTransform = shipTransform,
     shipAABB: AABBdc = shipTransform.createEmptyAABB(),
-    var shipVoxelAABB: AABBic?,
+    override var shipVoxelAABB: AABBic?,
     val shipActiveChunksSet: IShipActiveChunksSet
 ) : Ship {
 
