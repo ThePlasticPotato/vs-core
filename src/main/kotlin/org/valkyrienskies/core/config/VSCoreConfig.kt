@@ -18,6 +18,21 @@ object VSCoreConfig {
     val SERVER = Server()
 
     class Server {
+
+        @JsonSchema(
+            title = "Physics Thread Settings"
+        )
+        val pt = PhysicsThreadSettings()
+
+        class PhysicsThreadSettings {
+            @JsonSchema(
+                description = "Synchronize the physics thread and the game thread"
+            )
+            var synchronizePhysics = false
+
+            var physicsTicksPerGameTick = 3
+        }
+
         @JsonSchema(
             description = "Port to attempt to establish UDP connections on"
         )

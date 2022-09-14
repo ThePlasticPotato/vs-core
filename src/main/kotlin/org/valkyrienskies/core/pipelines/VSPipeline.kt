@@ -3,6 +3,7 @@ package org.valkyrienskies.core.pipelines
 import dagger.Subcomponent
 import org.joml.Vector3d
 import org.joml.Vector3dc
+import org.valkyrienskies.core.config.VSCoreConfig
 import org.valkyrienskies.core.game.ships.SerializedShipDataModule
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
 import org.valkyrienskies.core.hooks.AbstractCoreHooks
@@ -38,6 +39,9 @@ class VSPipeline @Inject constructor(
     private val networkStage: VSNetworkPipelineStage,
     hooks: AbstractCoreHooks,
 ) {
+    var synchronizePhysics = VSCoreConfig.SERVER.pt.synchronizePhysics
+        private set
+
     private val physicsPipelineBackgroundTask: VSPhysicsPipelineBackgroundTask = VSPhysicsPipelineBackgroundTask(this)
 
     // start paused on client, start unpaused on server
@@ -52,12 +56,30 @@ class VSPipeline @Inject constructor(
     var deleteResources = false
 
     fun preTickGame() {
+        synchronizePhysics = VSCoreConfig.SERVER.pt.synchronizePhysics
+        if (synchronizePhysics) {
+            physicsPipelineBackgroundTask.lock.lock()
+
+            val physicsTicksPerGameTick = VSCoreConfig.SERVER.pt.physicsTicksPerGameTick
+
+            // in the event the physics thread hasn't produced all the required ticks yet,
+            // wait until it does
+            while (physicsPipelineBackgroundTask.physicsTicksSinceLastGameTick <= physicsTicksPerGameTick)
+                physicsPipelineBackgroundTask.shouldRunGameTick.await()
+        }
+
         gameStage.preTickGame()
     }
 
     fun postTickGame() {
         val gameFrame = gameStage.postTickGame()
         physicsStage.pushGameFrame(gameFrame)
+
+        if (synchronizePhysics) {
+            // indicate the game tick has completed and signal the physics thread
+            physicsPipelineBackgroundTask.physicsTicksSinceLastGameTick = 0
+            physicsPipelineBackgroundTask.shouldRunPhysicsTick.signal()
+        }
     }
 
     fun tickPhysics(gravity: Vector3dc, timeStep: Double) {

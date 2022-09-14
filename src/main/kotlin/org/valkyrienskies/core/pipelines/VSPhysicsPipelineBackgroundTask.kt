@@ -1,9 +1,12 @@
 package org.valkyrienskies.core.pipelines
 
+import org.valkyrienskies.core.config.VSCoreConfig
+import org.valkyrienskies.core.pipelines.VSGamePipelineStage.Companion.GAME_TPS
 import org.valkyrienskies.core.util.logger
 import java.util.LinkedList
 import java.util.Queue
-import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import kotlin.math.min
 
 class VSPhysicsPipelineBackgroundTask(private val vsPipeline: VSPipeline, private var idealPhysicsTps: Int = 60) :
@@ -11,56 +14,75 @@ class VSPhysicsPipelineBackgroundTask(private val vsPipeline: VSPipeline, privat
     // When this is set to true, this task will kill itself at the next opportunity
     private var killTask = false
 
-    // A non-blocking thread-safe queue
-    private val queuedTasksQueue = ConcurrentLinkedQueue<() -> Unit>()
-
     private var lostTime: Long = 0
-
     private val prevPhysTicksTimeMillis: Queue<Long> = LinkedList()
+
+    @Volatile
+    var physicsTicksSinceLastGameTick = 0
+
+    val lock = ReentrantLock()
+    val shouldRunGameTick = lock.newCondition()
+    val shouldRunPhysicsTick = lock.newCondition()
 
     override fun run() {
         try {
             while (true) {
                 if (killTask) break // Stop looping
 
-                val timeToSimulateNs = 1e9 / idealPhysicsTps.toDouble()
+                if (vsPipeline.synchronizePhysics) {
+                    val physicsTicksPerGameTick = VSCoreConfig.SERVER.pt.physicsTicksPerGameTick
+                    val timeStep = 1.0 / (GAME_TPS * physicsTicksPerGameTick)
+                    lock.withLock {
+                        // in the event we've done all 3 physics ticks for this tick, wait for game tick to run,
+                        // set the physicsTicksSinceLastGameTick to 0, and signal
+                        while (physicsTicksSinceLastGameTick >= physicsTicksPerGameTick)
+                            shouldRunPhysicsTick.await()
 
-                val timeBeforePhysicsTick = System.nanoTime()
+                        vsPipeline.tickPhysics(vsPipeline.getPhysicsGravity(), timeStep)
+                        physicsTicksSinceLastGameTick++
 
-                // Execute queued tasks
-                while (!queuedTasksQueue.isEmpty()) queuedTasksQueue.remove()()
-
-                val timeStep = timeToSimulateNs / 1e9
-
-                // Run the physics tick
-                vsPipeline.tickPhysics(vsPipeline.getPhysicsGravity(), timeStep)
-
-                val timeToRunPhysTick = System.nanoTime() - timeBeforePhysicsTick
-
-                // Keep track of when physics tick finished
-                val currentTimeMillis = System.currentTimeMillis()
-                prevPhysTicksTimeMillis.add(currentTimeMillis)
-                // Remove physics ticks that were over [PHYS_TICK_AVERAGE_WINDOW_MS] ms ago
-                while (prevPhysTicksTimeMillis.isNotEmpty() &&
-                    prevPhysTicksTimeMillis.peek() + PHYS_TICK_AVERAGE_WINDOW_MS < currentTimeMillis
-                ) {
-                    prevPhysTicksTimeMillis.remove()
-                }
-
-                // Ideal time minus actual time to run physics tick
-                val timeDif = timeToSimulateNs - timeToRunPhysTick
-
-                if (timeDif < 0) {
-                    // Physics tick took too long, store some lost time to catch up
-                    lostTime = min(lostTime - timeDif.toLong(), MAX_LOST_TIME)
+                        // if this is our final physics tick for this game tick,
+                        // signal the game thread
+                        if (physicsTicksSinceLastGameTick >= physicsTicksPerGameTick) {
+                            shouldRunGameTick.signal()
+                        }
+                    }
                 } else {
-                    if (lostTime > timeDif) {
-                        // Catch up
-                        lostTime -= timeDif.toLong()
+                    val timeToSimulateNs = 1e9 / idealPhysicsTps.toDouble()
+                    val timeBeforePhysicsTick = System.nanoTime()
+
+                    val timeStep = timeToSimulateNs / 1e9
+
+                    // Run the physics tick
+                    vsPipeline.tickPhysics(vsPipeline.getPhysicsGravity(), timeStep)
+
+                    val timeToRunPhysTick = System.nanoTime() - timeBeforePhysicsTick
+
+                    // Keep track of when physics tick finished
+                    val currentTimeMillis = System.currentTimeMillis()
+                    prevPhysTicksTimeMillis.add(currentTimeMillis)
+                    // Remove physics ticks that were over [PHYS_TICK_AVERAGE_WINDOW_MS] ms ago
+                    while (prevPhysTicksTimeMillis.isNotEmpty() &&
+                        prevPhysTicksTimeMillis.peek() + PHYS_TICK_AVERAGE_WINDOW_MS < currentTimeMillis
+                    ) {
+                        prevPhysTicksTimeMillis.remove()
+                    }
+
+                    // Ideal time minus actual time to run physics tick
+                    val timeDif = timeToSimulateNs - timeToRunPhysTick
+
+                    if (timeDif < 0) {
+                        // Physics tick took too long, store some lost time to catch up
+                        lostTime = min(lostTime - timeDif.toLong(), MAX_LOST_TIME)
                     } else {
-                        val timeToWait = timeDif - lostTime
-                        lostTime = 0
-                        Thread.sleep((timeToWait / 1e6).toLong())
+                        if (lostTime > timeDif) {
+                            // Catch up
+                            lostTime -= timeDif.toLong()
+                        } else {
+                            val timeToWait = timeDif - lostTime
+                            lostTime = 0
+                            Thread.sleep((timeToWait / 1e6).toLong())
+                        }
                     }
                 }
             }
@@ -73,10 +95,6 @@ class VSPhysicsPipelineBackgroundTask(private val vsPipeline: VSPipeline, privat
 
     fun tellTaskToKillItself() {
         killTask = true
-    }
-
-    fun queueTask(task: () -> Unit) {
-        queuedTasksQueue.add(task)
     }
 
     fun computePhysicsTPS(): Double {

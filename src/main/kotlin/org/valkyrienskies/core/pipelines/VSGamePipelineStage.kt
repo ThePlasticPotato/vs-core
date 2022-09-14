@@ -222,6 +222,8 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
     }
 
     companion object {
+        const val GAME_TPS = 20
+
         private fun getShipVoxelOffset(inertiaData: ShipInertiaData): Vector3dc {
             val cm = inertiaData.getCenterOfMassInShipSpace()
             return Vector3d(-cm.x(), -cm.y(), -cm.z())
