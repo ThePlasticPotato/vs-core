@@ -36,12 +36,12 @@ class TransformedCuboidPolygon private constructor(
         _normals[2].set(0.0, 0.0, 1.0)
 
         if (transform != null) {
-            var minX = Double.MAX_VALUE
-            var minY = Double.MAX_VALUE
-            var minZ = Double.MAX_VALUE
-            var maxX = Double.MIN_VALUE
-            var maxY = Double.MIN_VALUE
-            var maxZ = Double.MIN_VALUE
+            var minX = _points[0].x()
+            var minY = _points[0].y()
+            var minZ = _points[0].z()
+            var maxX = _points[0].x()
+            var maxY = _points[0].y()
+            var maxZ = _points[0].z()
             for (point in _points) {
                 transform.transformPosition(point)
                 minX = min(minX, point.x())
