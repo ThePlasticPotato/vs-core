@@ -208,7 +208,7 @@ class ShipObjectServerWorld @Inject constructor(
         loadManager.preTick(players, lastTickPlayers, queryableShipData, deletedShipObjects)
     }
 
-    fun postTick() {
+    public override fun postTick() {
         enforcer.stage(POST_TICK)
 
         val shipsLoadedThisTick = mutableListOf<ShipObjectServer>()

@@ -45,17 +45,6 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
      * Apply queued physics frames to the game
      */
     fun preTickGame() {
-        // Set the values of prevTickShipTransform
-        shipWorld.shipObjects.forEach { (_, shipObject) ->
-            shipObject.shipData.updatePrevTickShipTransform()
-        }
-
-        // Apply the physics frames
-        while (physicsFramesQueue.isNotEmpty()) {
-            val physicsFrame = physicsFramesQueue.remove()
-            applyPhysicsFrame(physicsFrame)
-        }
-
         // Tick every attachment that wants to get ticked
         shipWorld.shipObjects.forEach {
             it.value.toBeTicked.forEach(Ticked::tick)
@@ -68,6 +57,17 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
      * Create a new game frame to be sent to the physics
      */
     fun postTickGame(): VSGameFrame {
+        // Set the values of prevTickShipTransform
+        shipWorld.shipObjects.forEach { (_, shipObject) ->
+            shipObject.shipData.updatePrevTickShipTransform()
+        }
+
+        // Apply the physics frames
+        while (physicsFramesQueue.isNotEmpty()) {
+            val physicsFrame = physicsFramesQueue.remove()
+            applyPhysicsFrame(physicsFrame)
+        }
+
         shipWorld.postTick()
         // Finally, return the game frame
         return createGameFrame()

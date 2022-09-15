@@ -40,6 +40,8 @@ abstract class ShipObjectWorld<ShipObjectType : ShipObject> {
         tickNumber++
     }
 
+    protected abstract fun postTick()
+
     open fun onSetBlock(
         posX: Int,
         posY: Int,

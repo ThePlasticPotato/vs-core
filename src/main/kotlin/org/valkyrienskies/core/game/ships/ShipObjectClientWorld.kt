@@ -41,7 +41,7 @@ class ShipObjectClientWorld @Inject constructor(
         _loadedShips.removeShipData(shipId)
     }
 
-    public override fun preTick() {
+    public override fun postTick() {
         super.preTick()
 
         shipObjects.forEach { (_, shipObjectClient) ->
