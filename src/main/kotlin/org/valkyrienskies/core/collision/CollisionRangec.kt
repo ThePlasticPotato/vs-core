@@ -23,12 +23,46 @@ interface CollisionRangec {
             return if (pushRight <= 0 || pushLeft >= 0) {
                 // Not overlapping
                 0.0
-            } else if (abs(pushLeft) > abs(pushRight)) {
-                // Its more efficient to push [collisionRange1] left
+            } else if (abs(pushRight) < abs(pushLeft)) {
+                // Its more efficient to push [collisionRange1] right
                 pushRight
             } else {
-                // Its more efficient to push [collisionRange1] right
+                // Its more efficient to push [collisionRange1] left
                 pushLeft
+            }
+        }
+
+        /**
+         * @return The offset we must move [collisionRange1] such that it is no longer overlapping with [collisionRange2]. If [collisionRange1] and [collisionRange2] are not overlapping then this returns 0.
+         */
+        fun computeCollisionResponseGivenVelocity(
+            collisionRange1: CollisionRangec,
+            collisionRange2: CollisionRangec,
+            collisionRange1Velocity: Double
+        ): Double {
+            // Assume that [collisionRange1] is moving with vel [collisionRange1Velocity]
+            //
+            // Return the collision response to apply to [collisionRange1] after it has moved by [collisionRange1Velocity],
+            // being careful not to push [collisionRange1] to the opposite side of [collisionRange2] where it was initially
+            val pushLeftOriginal = -collisionRange1.max + collisionRange2.min
+            val pushRightOriginal = -collisionRange1.min + collisionRange2.max
+
+            if (abs(pushRightOriginal) < abs(pushLeftOriginal)) {
+                // [collisionRange1] is initially to the right of [collisionRange2], so only push to the right
+                val collisionResponse = pushRightOriginal - collisionRange1Velocity
+                return if (collisionResponse > 0.0)
+                    collisionResponse
+                else
+                // [collisionRange1] is not colliding after it moved by [collisionRange1Velocity]
+                    0.0
+            } else {
+                // [collisionRange1] is initially to the left of [collisionRange2], so only push to the left
+                val collisionResponse = pushLeftOriginal - collisionRange1Velocity
+                return if (collisionResponse < 0.0)
+                    collisionResponse
+                else
+                // [collisionRange1] is not colliding after it moved by [collisionRange1Velocity]
+                    0.0
             }
         }
 

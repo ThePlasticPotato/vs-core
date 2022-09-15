@@ -2,15 +2,19 @@ package org.valkyrienskies.core.collision
 
 import org.joml.Matrix4dc
 import org.joml.Vector3d
+import org.joml.primitives.AABBd
 import org.joml.primitives.AABBdc
 import org.valkyrienskies.core.game.ships.ShipId
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * A [TransformedCuboidPolygon] is a polygon whose shape is a cuboid that been transformed by a 4x4 transform matrix. It is guaranteed to have 8 [points] and 3 [normals].
  */
 class TransformedCuboidPolygon private constructor(
-    private val _points: List<Vector3d>, private val _normals: List<Vector3d>, _shipFrom: ShipId? = null
-) : ConvexPolygon(_points, _normals, _shipFrom) {
+    private val _points: List<Vector3d>, private val _normals: List<Vector3d>, _shipFrom: ShipId? = null,
+    private val _aabb: AABBd
+) : ConvexPolygon(_points, _normals, _shipFrom, _aabb) {
 
     /**
      * Sets this [TransformedCuboidPolygon] to be the shape of [aabb] transformed by [transform].
@@ -32,8 +36,26 @@ class TransformedCuboidPolygon private constructor(
         _normals[2].set(0.0, 0.0, 1.0)
 
         if (transform != null) {
-            for (point in _points) transform.transformPosition(point)
+            var minX = Double.MAX_VALUE
+            var minY = Double.MAX_VALUE
+            var minZ = Double.MAX_VALUE
+            var maxX = Double.MIN_VALUE
+            var maxY = Double.MIN_VALUE
+            var maxZ = Double.MIN_VALUE
+            for (point in _points) {
+                transform.transformPosition(point)
+                minX = min(minX, point.x())
+                minY = min(minY, point.y())
+                minZ = min(minZ, point.z())
+                maxX = max(maxX, point.x())
+                maxY = max(maxY, point.y())
+                maxZ = max(maxZ, point.z())
+            }
+            _aabb.setMin(minX, minY, minZ)
+            _aabb.setMax(maxX, maxY, maxZ)
             for (normal in _normals) transform.transformDirection(normal).normalize()
+        } else {
+            _aabb.set(aabb)
         }
         return this
     }
@@ -49,7 +71,7 @@ class TransformedCuboidPolygon private constructor(
             val points: List<Vector3d> = List(NUMBER_OF_POINTS) { Vector3d() }
             val normals: List<Vector3d> = List(NUMBER_OF_NORMALS) { Vector3d() }
 
-            return TransformedCuboidPolygon(points, normals, shipFrom)
+            return TransformedCuboidPolygon(points, normals, shipFrom, AABBd())
         }
 
         fun createFromAABB(

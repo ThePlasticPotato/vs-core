@@ -23,6 +23,29 @@ interface ConvexPolygonCollider {
         forcedResponseNormal: Vector3dc? = null
     )
 
+    /**
+     * Adjust [firstPolygonVel] such that [firstPolygon] won't overlap with [secondPolygon]
+     */
+    fun computeResponseMinimizingChangesToVel(
+        firstPolygon: ConvexPolygonc,
+        firstPolygonVel: Vector3dc,
+        secondPolygon: ConvexPolygonc,
+        normals: Iterator<Vector3dc>,
+        temp1: CollisionRange,
+        temp2: CollisionRange,
+        maxSlopeClimbAngle: Double,
+        forcedResponseNormalFromCaller: Vector3dc? = null
+    ): Vector3dc
+
+    fun computeResponseMinimizingChangesToVelHorOnly(
+        firstPolygon: ConvexPolygonc,
+        firstPolygonVel: Vector3dc,
+        secondPolygon: ConvexPolygonc,
+        normals: Iterator<Vector3dc>,
+        temp1: CollisionRange,
+        temp2: CollisionRange
+    ): Vector3dc
+
     fun timeToCollision(
         firstPolygon: ConvexPolygonc,
         secondPolygon: ConvexPolygonc,

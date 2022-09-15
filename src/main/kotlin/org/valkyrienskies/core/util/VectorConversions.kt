@@ -30,6 +30,12 @@ fun Vector3dc.multiplyTerms() = x * y * z
 fun Vector3dc.addTerms() = x + y + z
 fun Vector3dc.horizontalLengthSq() = x * x + z * z
 
+fun Vector3dc.differenceHorLengthSq(other: Vector3dc): Double {
+    val xDif = x() - other.x()
+    val zDif = z() - other.z()
+    return xDif * xDif + zDif * zDif
+}
+
 fun Vector3dc.horizontalLength() = kotlin.math.sqrt(horizontalLengthSq())
 
 // Matrix4dc

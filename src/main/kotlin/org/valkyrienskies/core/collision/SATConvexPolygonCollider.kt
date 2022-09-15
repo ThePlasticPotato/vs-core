@@ -1,7 +1,11 @@
 package org.valkyrienskies.core.collision
 
+import org.joml.Vector3d
 import org.joml.Vector3dc
+import org.valkyrienskies.core.util.horizontalLength
 import kotlin.math.abs
+import kotlin.math.sin
+import kotlin.math.tan
 
 /**
  * A basic implementation of [ConvexPolygonCollider] using the Separating Axis Theorem algorithm.
@@ -58,6 +62,147 @@ object SATConvexPolygonCollider : ConvexPolygonCollider {
         if (minCollisionDepth == Double.MAX_VALUE) collisionResult._colliding = false
     }
 
+    override fun computeResponseMinimizingChangesToVel(
+        firstPolygon: ConvexPolygonc,
+        firstPolygonVel: Vector3dc,
+        secondPolygon: ConvexPolygonc,
+        normals: Iterator<Vector3dc>,
+        temp1: CollisionRange,
+        temp2: CollisionRange,
+        maxSlopeClimbAngle: Double,
+        forcedResponseNormalFromCaller: Vector3dc?
+    ): Vector3dc {
+        var newFirstPolygonVel: Vector3dc? = null
+
+        for (normal in normals) {
+            // Calculate the overlapping range of the projection of both polygons along the [normal] axis
+            val collisionResponseAlongNormal =
+                computeCollisionResponseAlongNormalWithVel(
+                    firstPolygon, firstPolygonVel, secondPolygon, normal, temp1, temp2
+                )
+
+            // Not colliding, even with the velocity
+            if (collisionResponseAlongNormal == 0.0)
+                return firstPolygonVel
+
+            var potentialNewVel: Vector3dc? = null
+            if (forcedResponseNormalFromCaller != null) {
+                // Player is trying to climb a very steep slope, in this case don't change the y, only change horizontal components
+                // Adjust the collision vector such that the y-component is 0
+                val dotProduct = normal.dot(forcedResponseNormalFromCaller)
+                // Avoid divide by zero errors
+                if (abs(dotProduct) < 1e-6) continue
+                val newCollisionResponse = Vector3d(
+                    collisionResponseAlongNormal * forcedResponseNormalFromCaller.x() / dotProduct,
+                    collisionResponseAlongNormal * forcedResponseNormalFromCaller.y() / dotProduct,
+                    collisionResponseAlongNormal * forcedResponseNormalFromCaller.z() / dotProduct
+                )
+                potentialNewVel = firstPolygonVel.add(newCollisionResponse, Vector3d())
+            } else {
+                // Polygons are colliding along this axis, doesn't guarantee if the polygons are colliding or not
+                if (abs(normal.y()) >= sin(Math.toRadians(maxSlopeClimbAngle))) {
+                    // Adjust the collision vector such that the player can climb up slopes
+                    // So adjust the y value such that the horizontal components are not changed.
+                    val newCollisionResponse = Vector3d(0.0, collisionResponseAlongNormal / normal.y(), 0.0)
+                    potentialNewVel = firstPolygonVel.add(newCollisionResponse, Vector3d())
+                    val potentialNewVelHorizontalComponent = potentialNewVel.horizontalLength()
+                    if (potentialNewVelHorizontalComponent > 1e-6) {
+                        // TODO: This logic is only valid if we aren't initially colliding with the block!
+                        // Check if the climb slope is less steep than [maxSlopeClimbAngle]
+                        val climbSlope = abs(potentialNewVel.y()) / potentialNewVelHorizontalComponent
+                        if (climbSlope >= tan(Math.toRadians(maxSlopeClimbAngle)))
+                            potentialNewVel = null // The climb is too steep
+                    }
+                }
+                if (potentialNewVel == null) {
+                    // Player is trying to climb a very steep slope, in this case don't change the y, only change horizontal components
+                    // Adjust the collision vector such that the y-component is 0
+                    val forcedResponseNormal = Vector3d(normal.x(), 0.0, normal.z()).normalize()
+                    if (forcedResponseNormal.isFinite) {
+                        val dotProduct = normal.dot(forcedResponseNormal)
+                        val newCollisionResponse = Vector3d(
+                            collisionResponseAlongNormal * forcedResponseNormal.x() / dotProduct, 0.0,
+                            collisionResponseAlongNormal * forcedResponseNormal.z() / dotProduct
+                        )
+                        potentialNewVel = firstPolygonVel.add(newCollisionResponse, Vector3d())
+                    } else {
+                        // Skip
+                        continue
+                    }
+                }
+            }
+            if (newFirstPolygonVel == null) {
+                newFirstPolygonVel = potentialNewVel
+            } else {
+                val potentialNewVelDif = Vector3d(potentialNewVel!!).sub(firstPolygonVel)
+                val newFirstPolygonVelDif = Vector3d(newFirstPolygonVel).sub(firstPolygonVel)
+
+                // Add the response
+                if (potentialNewVelDif.lengthSquared() < newFirstPolygonVelDif.lengthSquared())
+                    newFirstPolygonVel = potentialNewVel
+            }
+        }
+
+        return newFirstPolygonVel!!
+    }
+
+    override fun computeResponseMinimizingChangesToVelHorOnly(
+        firstPolygon: ConvexPolygonc,
+        firstPolygonVel: Vector3dc,
+        secondPolygon: ConvexPolygonc,
+        normals: Iterator<Vector3dc>,
+        temp1: CollisionRange,
+        temp2: CollisionRange
+    ): Vector3dc {
+        var newFirstPolygonVel: Vector3dc? = null
+
+        for (normal in normals) {
+            // Calculate the overlapping range of the projection of both polygons along the [normal] axis
+            val collisionResponseAlongNormal =
+                computeCollisionResponseAlongNormalWithVel(
+                    firstPolygon, firstPolygonVel, secondPolygon, normal, temp1, temp2
+                )
+
+            // Not colliding, even with the velocity
+            if (collisionResponseAlongNormal == 0.0)
+                return firstPolygonVel
+
+            val potentialNewVel: Vector3dc
+
+            // Player is trying to climb a very steep slope, in this case don't change the y, only change horizontal components
+            // Adjust the collision vector such that the y-component is 0
+            val forcedResponseNormal = Vector3d(normal.x(), 0.0, normal.z()).normalize()
+            if (forcedResponseNormal.isFinite) {
+                val dotProduct = normal.dot(forcedResponseNormal)
+                val newCollisionResponse = Vector3d(
+                    collisionResponseAlongNormal * forcedResponseNormal.x() / dotProduct, 0.0,
+                    collisionResponseAlongNormal * forcedResponseNormal.z() / dotProduct
+                )
+                potentialNewVel = firstPolygonVel.add(newCollisionResponse, Vector3d())
+            } else {
+                // Skip
+                continue
+            }
+
+            if (newFirstPolygonVel == null) {
+                newFirstPolygonVel = potentialNewVel
+            } else {
+                val potentialNewVelDif = Vector3d(potentialNewVel).sub(firstPolygonVel)
+                val newFirstPolygonVelDif = Vector3d(newFirstPolygonVel).sub(firstPolygonVel)
+
+                // Add the response
+                if (potentialNewVelDif.lengthSquared() < newFirstPolygonVelDif.lengthSquared())
+                    newFirstPolygonVel = potentialNewVel
+            }
+        }
+
+        return newFirstPolygonVel!!
+    }
+
+    private fun angleCosHorizontalComponents(a: Vector3dc, b: Vector3dc): Double {
+        return Vector3d(a.x(), 0.0, a.z()).angleCos(Vector3d(b.x(), 0.0, b.z()))
+    }
+
     override fun timeToCollision(
         firstPolygon: ConvexPolygonc, secondPolygon: ConvexPolygonc, firstPolygonVelocity: Vector3dc,
         normals: Iterator<Vector3dc>
@@ -92,7 +237,7 @@ object SATConvexPolygonCollider : ConvexPolygonCollider {
         return result
     }
 
-    fun computeCollisionResponseAlongNormal(
+    internal fun computeCollisionResponseAlongNormal(
         firstPolygon: ConvexPolygonc,
         secondPolygon: ConvexPolygonc,
         normal: Vector3dc,
@@ -106,6 +251,26 @@ object SATConvexPolygonCollider : ConvexPolygonCollider {
         return CollisionRangec.computeCollisionResponse(
             firstCollisionRange,
             secondCollisionRange
+        )
+    }
+
+    private fun computeCollisionResponseAlongNormalWithVel(
+        firstPolygon: ConvexPolygonc,
+        firstPolygonVel: Vector3dc,
+        secondPolygon: ConvexPolygonc,
+        normal: Vector3dc,
+        temp1: CollisionRange,
+        temp2: CollisionRange
+    ): Double {
+        // Check if the polygons are separated along the [normal] axis
+        val firstCollisionRange: CollisionRangec = firstPolygon.getProjectionAlongAxis(normal, temp1)
+        val secondCollisionRange: CollisionRangec = secondPolygon.getProjectionAlongAxis(normal, temp2)
+        val firstVelAlongNormal = normal.dot(firstPolygonVel)
+
+        return CollisionRangec.computeCollisionResponseGivenVelocity(
+            firstCollisionRange,
+            secondCollisionRange,
+            firstVelAlongNormal
         )
     }
 

@@ -3,6 +3,7 @@ package org.valkyrienskies.core.collision
 import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBd
+import org.joml.primitives.AABBdc
 import org.valkyrienskies.core.game.ships.ShipId
 import kotlin.math.max
 import kotlin.math.min
@@ -14,6 +15,7 @@ interface ConvexPolygonc {
     val points: Iterable<Vector3dc>
     val normals: Iterable<Vector3dc>
     val shipFrom: ShipId?
+    val aabb: AABBdc
 
     fun getProjectionAlongAxis(normalAxis: Vector3dc, output: CollisionRange): CollisionRange {
         var minProjection = Double.POSITIVE_INFINITY
