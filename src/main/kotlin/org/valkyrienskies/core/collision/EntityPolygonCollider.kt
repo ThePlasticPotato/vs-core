@@ -11,8 +11,6 @@ import org.valkyrienskies.core.util.horizontalLengthSq
 import org.valkyrienskies.core.util.intersectsAABB
 import org.valkyrienskies.core.util.signedDistanceTo
 import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.tan
 
 object EntityPolygonCollider {
@@ -57,7 +55,7 @@ object EntityPolygonCollider {
                 // Try to collide with step
                 val collisionWithStep = collideWithStep(
                     entityBoundingBox, collidingPolygons, entityVelocity, maxSlopeClimbAngle, entityStepHeight
-                )
+                ) ?: return collideWithoutStep(entityBoundingBox, collidingPolygons, entityVelocity, maxSlopeClimbAngle)
                 return if (collisionWithStep.first.differenceHorLengthSq(entityVelocity) < 1e-8) {
                     // If the step collision doesn't change the horizontal velocity, then return it
                     collisionWithStep
@@ -81,7 +79,7 @@ object EntityPolygonCollider {
     private fun collideWithStep(
         entityAABB: AABBdc, collidingPolygons: List<ConvexPolygonc>, entityVel: Vector3dc, maxSlopeClimbAngle: Double,
         stepHeight: Double
-    ): Pair<Vector3dc, ShipId?> {
+    ): Pair<Vector3dc, ShipId?>? {
         // region Validate inputs
         assert(stepHeight >= 0.0) { "StepHeight was $stepHeight, which is less than 0.0!" }
         assert(maxSlopeClimbAngle >= 0.0) { "MaxSlopeClimbAngle was $maxSlopeClimbAngle, which is less than 0.0!" }
@@ -89,11 +87,11 @@ object EntityPolygonCollider {
             "MaxSlopeClimbAngle was $maxSlopeClimbAngle, which is greater than or equal to 90.0!"
         }
         // endregion
-        var upCollisionResultVel = collide(
+        val upCollisionResultVel = collide(
             entityAABB, collidingPolygons, Vector3d(0.0, stepHeight, 0.0), maxSlopeClimbAngle, Y_NORMAL
         ).first
-        // Clamp the y-component of [upCollisionResultVel] to be between 0.0 and [stepHeight]
-        upCollisionResultVel = Vector3d(0.0, max(min(upCollisionResultVel.y(), stepHeight), 0.0), 0.0)
+        // Limit the y-component of [upCollisionResultVel] to be between 0.0 and [stepHeight]
+        if (upCollisionResultVel.y() !in 0.0..stepHeight) return null
 
         val playerBBMovedUp = entityAABB.translate(upCollisionResultVel, AABBd())
         val horizontalCollisionResultVel = collide(
@@ -109,20 +107,22 @@ object EntityPolygonCollider {
 
         val downCollisionResultVel = downCollisionResult.first
         val lastShipCollided = downCollisionResult.second
-
         val finalVelocity = Vector3d(upCollisionResultVel).add(horizontalCollisionResultVel).add(downCollisionResultVel)
 
         // Check if the player can step
-        val canStepAfter = canStep4(entityAABB.translate(finalVelocity, AABBd()), collidingPolygons, maxSlopeClimbAngle)
+        val playerBBAfterMove = entityAABB.translate(finalVelocity, AABBd())
+        val canStepAfter = canStep4(playerBBAfterMove, collidingPolygons, maxSlopeClimbAngle)
         if (!canStepAfter) {
             val downCollisionResult2 = collide(
-                playerBBMovedUpThenHorizontal, collidingPolygons, Vector3d(0.0, -moveDown, 0.0), maxSlopeClimbAngle
+                playerBBAfterMove, collidingPolygons, Vector3d(0.0, -moveDown - downCollisionResultVel.y(), 0.0),
+                maxSlopeClimbAngle
             )
-            val newFinalVelocity =
-                Vector3d(upCollisionResultVel).add(horizontalCollisionResultVel).add(downCollisionResult2.first)
+            val newFinalVelocity = Vector3d(finalVelocity).add(downCollisionResult2.first)
+            if (newFinalVelocity.y() !in 0.0..stepHeight) return null
             return Pair(roundNewVelToOriginal(newFinalVelocity, entityVel), downCollisionResult2.second)
         }
 
+        if (finalVelocity.y() !in 0.0..stepHeight) return null
         return Pair(roundNewVelToOriginal(finalVelocity, entityVel), lastShipCollided)
     }
 
@@ -264,7 +264,7 @@ object EntityPolygonCollider {
     private fun canStep4(
         entityAABB: AABBdc, collidingPolygons: List<ConvexPolygonc>, maxSlopeClimbAngle: Double
     ): Boolean {
-        val relativeHeight = 1e-2
+        val relativeHeight = 1e-3
         val yDepth = (entityAABB.maxY() - entityAABB.minY()) * relativeHeight
 
         // region Check if the foot box is colliding with anything
