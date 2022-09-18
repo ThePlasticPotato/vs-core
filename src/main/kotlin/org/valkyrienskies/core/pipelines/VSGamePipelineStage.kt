@@ -33,7 +33,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
      * Push a physics frame to the game stage
      */
     fun pushPhysicsFrame(physicsFrame: VSPhysicsFrame) {
-        if (physicsFramesQueue.size >= 100) {
+        if (physicsFramesQueue.size >= 300) {
             // throw IllegalStateException("Too many physics frames in the physics frame queue. Is the game stage broken?")
             logger.warn("Too many physics frames in the physics frame queue. Is the game stage broken?")
             Thread.sleep(1000L)
