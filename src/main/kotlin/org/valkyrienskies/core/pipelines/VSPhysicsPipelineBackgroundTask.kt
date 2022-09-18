@@ -85,7 +85,7 @@ class VSPhysicsPipelineBackgroundTask(private val vsPipeline: VSPipeline, privat
 
     companion object {
         private const val MAX_LOST_TIME: Long = 1e9.toLong()
-        private const val PHYS_TICK_AVERAGE_WINDOW_MS = 5000
+        private const val PHYS_TICK_AVERAGE_WINDOW_MS = 1000
         private val logger by logger()
     }
 }
