@@ -19,6 +19,8 @@ import org.valkyrienskies.physics_api_krunch.KrunchBootstrap
 import org.valkyrienskies.physics_api_krunch.KrunchPhysicsWorldSettings
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
 class VSPhysicsPipelineStage @Inject constructor() {
     private val gameFramesQueue: ConcurrentLinkedQueue<VSGameFrame> = ConcurrentLinkedQueue()
@@ -27,6 +29,9 @@ class VSPhysicsPipelineStage @Inject constructor() {
     // Map ships ids to rigid bodies, and map rigid bodies to ship ids
     private val shipIdToPhysShip: MutableMap<ShipId, PhysShip> = HashMap()
     private var physTick = 0
+
+    private var pendingUpdates: MutableList<Pair<ShipId, List<IVoxelShapeUpdate>>> = ArrayList()
+    private var pendingUpdatesSize: Int = 0
 
     init {
         // Apply physics engine settings
@@ -178,12 +183,62 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     "Tried sending voxel updates to rigid body from ship with UUID $shipId," +
                         " but no rigid body exists for this ship!"
                 )
-
             val shipRigidBodyReference = shipRigidBodyReferenceAndId.rigidBodyReference
-            val voxelRigidBodyShapeUpdates =
-                VoxelRigidBodyShapeUpdates(shipRigidBodyReference.rigidBodyId, voxelUpdatesList.toTypedArray())
-            physicsEngine.queueVoxelShapeUpdates(arrayOf(voxelRigidBodyShapeUpdates))
+            if (!shipRigidBodyReference.isStatic) {
+                // Always process updates to non-static ships immediately
+                val voxelRigidBodyShapeUpdates =
+                    VoxelRigidBodyShapeUpdates(shipRigidBodyReference.rigidBodyId, voxelUpdatesList.toTypedArray())
+                physicsEngine.queueVoxelShapeUpdates(arrayOf(voxelRigidBodyShapeUpdates))
+            } else {
+                // Queue updates to static ships for later
+                pendingUpdates.add(Pair(shipId, voxelUpdatesList))
+                pendingUpdatesSize += voxelUpdatesList.size
+            }
         }
+
+        // region Send updates to static ships, staggered to limit number of updates per tick
+        val updatesToSend =
+            max(min(pendingUpdatesSize, MAX_UPDATES_PER_PHYS_TICK), pendingUpdatesSize - MAX_PENDING_UPDATES_SIZE)
+        var updatesSent = 0
+        for (i in 0 until pendingUpdates.size) {
+            val curUpdate = pendingUpdates[i]
+            val shipId = curUpdate.first
+            val shipRigidBodyReferenceAndId = shipIdToPhysShip[shipId]
+                ?: throw IllegalStateException(
+                    "Tried sending voxel updates to rigid body from ship with UUID $shipId," +
+                        " but no rigid body exists for this ship!"
+                )
+            val shipRigidBodyReference = shipRigidBodyReferenceAndId.rigidBodyReference
+
+            var isAllOfISent = false
+
+            if (curUpdate.second.size <= updatesToSend - updatesSent) {
+                // Send all of it
+                val voxelRigidBodyShapeUpdates =
+                    VoxelRigidBodyShapeUpdates(shipRigidBodyReference.rigidBodyId, curUpdate.second.toTypedArray())
+                physicsEngine.queueVoxelShapeUpdates(arrayOf(voxelRigidBodyShapeUpdates))
+                updatesSent += curUpdate.second.size
+                isAllOfISent = true
+            } else {
+                // Send part of it
+                val toSend = curUpdate.second.subList(0, updatesToSend - updatesSent)
+                val toKeepForNextPhysTick = curUpdate.second.subList(updatesToSend - updatesSent, curUpdate.second.size)
+                val voxelRigidBodyShapeUpdates =
+                    VoxelRigidBodyShapeUpdates(shipRigidBodyReference.rigidBodyId, toSend.toTypedArray())
+                physicsEngine.queueVoxelShapeUpdates(arrayOf(voxelRigidBodyShapeUpdates))
+                updatesSent += toSend.size
+                pendingUpdates[i] = Pair(shipId, toKeepForNextPhysTick)
+            }
+            if (updatesSent == updatesToSend) {
+                pendingUpdates = if (isAllOfISent)
+                    ArrayList(pendingUpdates.subList(i + 1, pendingUpdates.size))
+                else
+                    ArrayList(pendingUpdates.subList(i, pendingUpdates.size))
+                break
+            }
+        }
+        pendingUpdatesSize -= updatesSent
+        // endregion
     }
 
     private fun createPhysicsFrame(): VSPhysicsFrame {
@@ -219,6 +274,11 @@ class VSPhysicsPipelineStage @Inject constructor() {
 
             return RigidBodyInertiaData(invMass, invInertiaMatrix)
         }
+
+        private const val MAX_UPDATES_PER_PHYS_TICK = 1000
+
+        // Store up to 60 physics ticks worth of voxel updates before we force Krunch to process them more quickly
+        private const val MAX_PENDING_UPDATES_SIZE = MAX_UPDATES_PER_PHYS_TICK * 60
 
         private val logger by logger()
     }
