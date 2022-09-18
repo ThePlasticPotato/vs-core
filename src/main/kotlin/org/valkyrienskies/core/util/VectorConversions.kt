@@ -2,6 +2,10 @@ package org.valkyrienskies.core.util
 
 import org.joml.Vector3dc
 import org.joml.Vector3ic
+import org.joml.primitives.AABBdc
+import org.joml.primitives.AABBi
+import org.joml.primitives.AABBic
+import kotlin.math.round
 
 // region JOML
 
@@ -38,14 +42,20 @@ fun Vector3dc.differenceHorLengthSq(other: Vector3dc): Double {
 
 fun Vector3dc.horizontalLength() = kotlin.math.sqrt(horizontalLengthSq())
 
-// Matrix4dc
+// AABBdc
+fun AABBdc.toAABBi(dest: AABBi = AABBi()): AABBi {
+    dest.setMin(round(minX()).toInt(), round(minY()).toInt(), round(minZ()).toInt())
+    dest.setMax(round(maxX()).toInt(), round(maxY()).toInt(), round(maxZ()).toInt())
+    return dest
+}
 
-// Matrix3dc
-
-// endregion
-
-// region GDX
-
-// Vector3
-
-// Matrix4
+// AABBic
+fun AABBic.expand(expansion: Int, dest: AABBi = AABBi()): AABBi {
+    dest.minX = minX() - expansion
+    dest.minY = minY() - expansion
+    dest.minZ = minZ() - expansion
+    dest.maxX = maxX() + expansion
+    dest.maxY = maxY() + expansion
+    dest.maxZ = maxZ() + expansion
+    return dest
+}
