@@ -16,6 +16,8 @@ data class PhysShip internal constructor(
     var poseVel: PoseVel,
     var segments: SegmentTracker
 ) {
+    var buoyantFactor by rigidBodyReference::buoyantFactor
+  
     val inertia: PhysInertia
         get() = _inertia
 }
