@@ -159,21 +159,21 @@ fun asLong(x: Int, y: Int): Long = x.toLong() or (y.toLong() shl 32)
 fun asInts(x: Long): Pair<Int, Int> = Pair(x.toInt(), (x shr 32).toInt())
 
 inline fun Byte.iterateBits(func: (Boolean, Int) -> Unit) {
-    for (i in 8 downTo 0) {
+    for (i in 7 downTo 0) {
         val masked = (this.toInt() and (1 shl i))
         func(masked != 0, i)
     }
 }
 
 inline fun Int.iterateBits(func: (Boolean, Int) -> Unit) {
-    for (i in 32 downTo 0) {
+    for (i in 31 downTo 0) {
         val masked = this and (1 shl i)
         func(masked != 0, i)
     }
 }
 
 inline fun Long.iterateBits(func: (Boolean, Int) -> Unit) {
-    for (i in 64 downTo 0) {
+    for (i in 63 downTo 0) {
         val masked = this and (1L shl i)
         func(masked != 0L, i)
     }
@@ -194,11 +194,17 @@ inline fun ByteBuffer.iterateBits(func: (Boolean, Int) -> Unit) {
  * Take (x, y, z) and produce index (i)
  */
 fun unwrapIndex(index: Int, dimensions: Vector3ic, v: Vector3i): Vector3i {
+    return unwrapIndex(index, dimensions) { x, y, z ->
+        v.set(x, y, z)
+    }
+}
+
+inline fun <R> unwrapIndex(index: Int, dimensions: Vector3ic, out: (Int, Int, Int) -> R): R {
     val z = index / (dimensions.x * dimensions.y)
     val y = (index - (z * dimensions.x * dimensions.y)) / dimensions.x
     val x = (index - (z * dimensions.x * dimensions.y)) % dimensions.x
 
-    return v.set(x, y, z)
+    return out(x, y, z)
 }
 
 fun wrapIndex(x: Int, y: Int, z: Int, dimensions: Vector3ic): Int =
