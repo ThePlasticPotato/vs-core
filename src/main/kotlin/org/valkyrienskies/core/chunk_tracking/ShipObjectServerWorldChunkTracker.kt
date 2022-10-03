@@ -126,10 +126,13 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
 
                     val isPlayerWatchingThisChunk = playersWatchingChunk.contains(player)
 
-                    if (shipData.chunkClaimDimension != player.dimension && isPlayerWatchingThisChunk) {
-                        // if the chunk dimension is different from the player dimension,
-                        // lets just unwatch it for now
-                        newPlayersUnwatching.add(player)
+                    if (shipData.chunkClaimDimension != player.dimension) {
+                        if (isPlayerWatchingThisChunk) {
+                            // if the chunk dimension is different from the player dimension,
+                            // lets just unwatch it for now
+                            newPlayersUnwatching.add(player)
+                        }
+
                         continue
                     }
 

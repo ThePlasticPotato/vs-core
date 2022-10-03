@@ -108,6 +108,143 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
 
     }
 
+    "tracks player leaving the dimension and returning" {
+        val dimension = "fake_dimension"
+        val ship = VSBlankUtils.blankShipData(chunkClaimDimension = dimension)
+        ship.shipActiveChunksSet.addChunkPos(0, 0)
+        val ships = listOf(ship)
+
+        val player = FakePlayer(dimension = dimension)
+        val players = setOf(player)
+
+        val config = VSCoreConfig.Server()
+        config.shipLoadDistance = 50.0
+        config.shipUnloadDistance = 100.0
+
+        val tracker = ShipObjectServerWorldChunkTracker(config)
+
+        // Single player at same coordinate as chunk should watch it
+        run {
+            val (watchTasks, unwatchTasks) = tracker.generateChunkWatchTasksAndUpdatePlayers(
+                players, players, ships, listOf()
+            )
+
+            watchTasks shouldHaveSize 1
+            unwatchTasks shouldHaveSize 0
+            val task = watchTasks.first()
+
+            task.getChunkX() shouldBe 0
+            task.getChunkZ() shouldBe 0
+
+            val trackingInfo = tracker.applyTasksAndGenerateTrackingInfo(watchTasks, unwatchTasks)
+
+            trackingInfo.playersToShipsNewlyWatchingMap shouldHaveSize 1
+            trackingInfo.playersToShipsWatchingMap shouldHaveSize 1
+            trackingInfo.playersToShipsNoLongerWatchingMap shouldHaveSize 0
+            trackingInfo.shipsToLoad shouldHaveSize 1
+            trackingInfo.shipsToUnload shouldHaveSize 0
+        }
+
+        // nothing changes
+        run {
+            val (watchTasks, unwatchTasks) = tracker.generateChunkWatchTasksAndUpdatePlayers(
+                players, players, ships, listOf()
+            )
+
+            watchTasks shouldHaveSize 0
+            unwatchTasks shouldHaveSize 0
+
+            val trackingInfo = tracker.applyTasksAndGenerateTrackingInfo(watchTasks, unwatchTasks)
+
+            trackingInfo.playersToShipsNewlyWatchingMap shouldHaveSize 0
+            trackingInfo.playersToShipsWatchingMap shouldHaveSize 1
+            trackingInfo.playersToShipsNoLongerWatchingMap shouldHaveSize 0
+            trackingInfo.shipsToLoad shouldHaveSize 0
+            trackingInfo.shipsToUnload shouldHaveSize 0
+        }
+
+        // move the player to a new dimension
+        player.dimension = "fake_dimension2"
+
+        // ship should unload
+        run {
+            val (watchTasks, unwatchTasks) = tracker.generateChunkWatchTasksAndUpdatePlayers(
+                players, players, ships, listOf()
+            )
+
+            watchTasks shouldHaveSize 0
+            unwatchTasks shouldHaveSize 1
+
+            val trackingInfo = tracker.applyTasksAndGenerateTrackingInfo(watchTasks, unwatchTasks)
+            trackingInfo.playersToShipsNewlyWatchingMap shouldHaveSize 0
+            trackingInfo.playersToShipsWatchingMap shouldHaveSize 0
+            trackingInfo.playersToShipsNoLongerWatchingMap shouldHaveSize 1
+            trackingInfo.shipsToLoad shouldHaveSize 0
+            trackingInfo.shipsToUnload shouldHaveSize 1
+        }
+
+        // nothing changes
+        run {
+            val (watchTasks, unwatchTasks) = tracker.generateChunkWatchTasksAndUpdatePlayers(
+                players, players, ships, listOf()
+            )
+
+            watchTasks shouldHaveSize 0
+            unwatchTasks shouldHaveSize 0
+
+            val trackingInfo = tracker.applyTasksAndGenerateTrackingInfo(watchTasks, unwatchTasks)
+
+            trackingInfo.playersToShipsNewlyWatchingMap shouldHaveSize 0
+            trackingInfo.playersToShipsWatchingMap shouldHaveSize 0
+            trackingInfo.playersToShipsNoLongerWatchingMap shouldHaveSize 0
+            trackingInfo.shipsToLoad shouldHaveSize 0
+            trackingInfo.shipsToUnload shouldHaveSize 0
+        }
+
+        // move player back to their original dimension
+        player.dimension = "fake_dimension"
+
+        // ship should load
+        run {
+            val (watchTasks, unwatchTasks) = tracker.generateChunkWatchTasksAndUpdatePlayers(
+                players, players, ships, listOf()
+            )
+
+            watchTasks shouldHaveSize 1
+            unwatchTasks shouldHaveSize 0
+            val task = watchTasks.first()
+
+            task.getChunkX() shouldBe 0
+            task.getChunkZ() shouldBe 0
+
+            val trackingInfo = tracker.applyTasksAndGenerateTrackingInfo(watchTasks, unwatchTasks)
+
+            trackingInfo.playersToShipsNewlyWatchingMap shouldHaveSize 1
+            trackingInfo.playersToShipsWatchingMap shouldHaveSize 1
+            trackingInfo.playersToShipsNoLongerWatchingMap shouldHaveSize 0
+            trackingInfo.shipsToLoad shouldHaveSize 1
+            trackingInfo.shipsToUnload shouldHaveSize 0
+        }
+
+        // nothing changes
+        run {
+            val (watchTasks, unwatchTasks) = tracker.generateChunkWatchTasksAndUpdatePlayers(
+                players, players, ships, listOf()
+            )
+
+            watchTasks shouldHaveSize 0
+            unwatchTasks shouldHaveSize 0
+
+            val trackingInfo = tracker.applyTasksAndGenerateTrackingInfo(watchTasks, unwatchTasks)
+
+            trackingInfo.playersToShipsNewlyWatchingMap shouldHaveSize 0
+            trackingInfo.playersToShipsWatchingMap shouldHaveSize 1
+            trackingInfo.playersToShipsNoLongerWatchingMap shouldHaveSize 0
+            trackingInfo.shipsToLoad shouldHaveSize 0
+            trackingInfo.shipsToUnload shouldHaveSize 0
+        }
+    }
+
     "tracks multiple players and multiple chunks" {
         val dimension = "fake_dimension"
         val ship = VSBlankUtils.blankShipData(chunkClaimDimension = dimension)
