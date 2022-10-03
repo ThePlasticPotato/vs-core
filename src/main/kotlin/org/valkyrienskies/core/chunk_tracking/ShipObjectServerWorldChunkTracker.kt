@@ -91,9 +91,7 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
         val newChunkUnwatchTasks = TreeSet<ChunkUnwatchTask>()
 
         // Reuse these vector objects across iterations
-        val tempVector0 = Vector3d()
-        val tempVector1 = Vector3d()
-
+        val tempVector = Vector3d()
         val tempAABB = AABBd()
 
         ships.forEach { shipData ->
@@ -120,7 +118,7 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
                 val playersWatchingChunk = getPlayersWatchingChunk(chunkX, chunkZ, shipData.chunkClaimDimension)
 
                 for (player in players) {
-                    val playerPositionInWorldCoordinates: Vector3dc = player.getPosition(tempVector1)
+                    val playerPositionInWorldCoordinates: Vector3dc = player.getPosition(tempVector)
                     val displacementDistance =
                         chunkAABBInWorld.signedDistanceTo(playerPositionInWorldCoordinates)
 
