@@ -148,11 +148,15 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
                         val scaling = buf.readVec3fAsDouble()
                         val rotation = buf.read3FAsNormQuatd()
                         val position = buf.readVec3d()
+                        val velocity = buf.readVec3fAsDouble()
+                        val omega = buf.readVec3fAsDouble()
 
                         ship.latestNetworkTransform = ShipTransform.createFromCoordinatesAndRotationAndScaling(
                             position, centerOfMass, rotation, scaling
                         )
                         ship.latestNetworkTTick = tickNum
+                        ship.shipData.physicsData.angularVelocity = omega
+                        ship.shipData.physicsData.linearVelocity = velocity
                     }
                 }
             } catch (e: Exception) {

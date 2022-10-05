@@ -66,10 +66,15 @@ class VSNetworkPipelineStage @Inject constructor(
                 buf.writeNormQuatdAs3F(transform.shipCoordinatesToWorldCoordinatesRotation) // 4 * 3 = 12
                 buf.writeVec3d(transform.shipPositionInWorldCoordinates) // 8 * 3 = 24
                 // 8 + 24 + 12 + 12 + 24 = 80
+
+                // TODO remove, this is wasted bytes
+                buf.writeVec3AsFloat(shipData.velocity)
+                buf.writeVec3AsFloat(shipData.omega)
+                // 80 + 12 + 12 = 104
             }
         }
 
-        const val TRANSFORM_SIZE = 80
+        const val TRANSFORM_SIZE = 104
         private val logger by logger()
     }
 }
