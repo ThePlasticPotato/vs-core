@@ -23,6 +23,25 @@ fun AABBd.expand(expansion: Double): AABBd {
     return this
 }
 
+fun AABBd.getSize(): Double {
+    val d: Double = getXsize()
+    val e: Double = getYsize()
+    val f: Double = getZsize()
+    return (d + e + f) / 3.0
+}
+
+fun AABBd.getXsize(): Double {
+    return maxX - minX
+}
+
+fun AABBd.getYsize(): Double {
+    return maxY - minY
+}
+
+fun AABBd.getZsize(): Double {
+    return maxZ - minZ
+}
+
 fun AABBd.extend(extension: Vector3dc): AABBd {
     if (extension.x() > 0) maxX += extension.x() else minX += extension.x()
     if (extension.y() > 0) maxY += extension.y() else minY += extension.y()
