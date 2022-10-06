@@ -32,6 +32,11 @@ object VSCoreConfig {
             description = "Ship unload distance in blocks"
         )
         var shipUnloadDistance = 196.0
+
+        @JsonSchema(
+            description = "All related settings to the physics engine"
+        )
+        var physics = PhysicsConfig()
     }
 }
 

@@ -5,6 +5,7 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBd
 import org.valkyrienskies.core.api.impl.APIForcesApplier
+import org.valkyrienskies.core.config.VSCoreConfig
 import org.valkyrienskies.core.game.ships.PhysInertia
 import org.valkyrienskies.core.game.ships.PhysShip
 import org.valkyrienskies.core.game.ships.ShipId
@@ -16,7 +17,6 @@ import org.valkyrienskies.physics_api.SegmentTracker
 import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.VoxelRigidBodyShapeUpdates
 import org.valkyrienskies.physics_api_krunch.KrunchBootstrap
-import org.valkyrienskies.physics_api_krunch.KrunchPhysicsWorldSettings
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
 import kotlin.math.max
@@ -35,13 +35,10 @@ class VSPhysicsPipelineStage @Inject constructor() {
 
     init {
         // Apply physics engine settings
-        val settings = KrunchPhysicsWorldSettings()
-        // Only use 10 sub-steps
-        settings.subSteps = 10
-        // Decrease max de-penetration speed so that rigid bodies don't go
-        // flying apart when they overlap
-        settings.maxDePenetrationSpeed = 10.0
-        KrunchBootstrap.setKrunchSettings(physicsEngine, settings)
+        KrunchBootstrap.setKrunchSettings(
+            physicsEngine,
+            VSCoreConfig.SERVER.physics.makeKrunchSettings()
+        )
     }
 
     /**
