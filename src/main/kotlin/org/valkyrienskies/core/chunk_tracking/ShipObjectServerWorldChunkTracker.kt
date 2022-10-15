@@ -23,9 +23,6 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
     val config: VSCoreConfig.Server
 ) {
 
-    private val chunkWatchDistance: Double = config.shipLoadDistance
-    private val chunkUnwatchDistance: Double = config.shipUnloadDistance
-
     private val chunkToPlayersWatchingMap: Long2ObjectMap<MutableSet<IPlayer>> = Long2ObjectOpenHashMap()
 
     /**
@@ -90,21 +87,24 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
         val newChunkWatchTasks = TreeSet<ChunkWatchTask>()
         val newChunkUnwatchTasks = TreeSet<ChunkUnwatchTask>()
 
+        val chunkWatchDistance = config.shipLoadDistance
+        val chunkUnwatchDistance = config.shipUnloadDistance
+
         // Reuse these vector objects across iterations
         val tempVector = Vector3d()
         val tempAABB = AABBd()
 
         ships.forEach { shipData ->
             val shipTransform = shipData.shipTransform
-
+            val voxelAABB = shipData.shipVoxelAABB
             shipData.shipActiveChunksSet.iterateChunkPos { chunkX, chunkZ ->
                 val chunkAABBInWorld = tempAABB
                     .set(
                         (chunkX shl 4).toDouble(),
-                        0.0,
+                        voxelAABB?.minY()?.toDouble() ?: 0.0, // start at the minY of the ship if available
                         (chunkZ shl 4).toDouble(),
                         (chunkX shl 4).toDouble() + 16.0,
-                        256.0,
+                        (voxelAABB?.maxY()?.toDouble() ?: 255.0) + 1.0, // end at the maxY of the ship if available
                         (chunkZ shl 4).toDouble() + 16.0
                     )
                     .transform(shipTransform.shipToWorldMatrix)
