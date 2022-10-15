@@ -150,7 +150,7 @@ inline fun <reified T> Array<T>.filterToArray(predicate: (T) -> Boolean): Array<
     if (count != newArray.size)
         throw ConcurrentModificationException("Array was modified while filtering")
 
-    // Unchecked cast is valid because because if the whole array were not filled we would have thrown already
+    // Unchecked cast is valid because if the whole array were not filled we would have thrown already
     @Suppress("UNCHECKED_CAST")
     return newArray as Array<T>
 }
