@@ -10,6 +10,7 @@ import org.valkyrienskies.core.hooks.AbstractCoreHooks
 import org.valkyrienskies.core.util.WorldScoped
 import javax.inject.Inject
 import kotlin.concurrent.thread
+import kotlin.concurrent.withLock
 
 @WorldScoped
 @Subcomponent(modules = [SerializedShipDataModule::class])
@@ -47,6 +48,15 @@ class VSPipeline @Inject constructor(
     // start paused on client, start unpaused on server
     @Volatile
     var arePhysicsRunning = !hooks.isPhysicalClient
+        set(value) {
+            field = value
+
+            if (value) {
+                physicsPipelineBackgroundTask.pauseLock.withLock {
+                    physicsPipelineBackgroundTask.shouldUnpausePhysicsTick.signal()
+                }
+            }
+        }
 
     // The thread the physics engine runs on
     private val physicsThread: Thread = thread(start = true, priority = 8, name = "Physics thread") {
@@ -56,30 +66,33 @@ class VSPipeline @Inject constructor(
     var deleteResources = false
 
     fun preTickGame() {
+        val prevSynchronizePhysics = synchronizePhysics
         synchronizePhysics = VSCoreConfig.SERVER.pt.synchronizePhysics
-        if (synchronizePhysics) {
-            physicsPipelineBackgroundTask.lock.lock()
 
-            val physicsTicksPerGameTick = VSCoreConfig.SERVER.pt.physicsTicksPerGameTick
-
-            // in the event the physics thread hasn't produced all the required ticks yet,
-            // wait until it does
-            while (physicsPipelineBackgroundTask.physicsTicksSinceLastGameTick <= physicsTicksPerGameTick)
-                physicsPipelineBackgroundTask.shouldRunGameTick.await()
+        if (prevSynchronizePhysics) {
+            physicsPipelineBackgroundTask.syncLock.withLock {
+                // indicate the game tick has completed and signal the physics thread
+                physicsPipelineBackgroundTask.physicsTicksSinceLastGameTick = 0
+                physicsPipelineBackgroundTask.shouldRunPhysicsTick.signal()
+            }
         }
 
         gameStage.preTickGame()
     }
 
     fun postTickGame() {
+        if (synchronizePhysics) {
+            physicsPipelineBackgroundTask.syncLock.withLock {
+                val physicsTicksPerGameTick = VSCoreConfig.SERVER.pt.physicsTicksPerGameTick
+
+                // in the event the physics thread hasn't produced all the required ticks yet, wait until it does
+                while (physicsPipelineBackgroundTask.physicsTicksSinceLastGameTick < physicsTicksPerGameTick)
+                    physicsPipelineBackgroundTask.shouldRunGameTick.await()
+            }
+        }
+
         val gameFrame = gameStage.postTickGame()
         physicsStage.pushGameFrame(gameFrame)
-
-        if (synchronizePhysics) {
-            // indicate the game tick has completed and signal the physics thread
-            physicsPipelineBackgroundTask.physicsTicksSinceLastGameTick = 0
-            physicsPipelineBackgroundTask.shouldRunPhysicsTick.signal()
-        }
     }
 
     fun tickPhysics(gravity: Vector3dc, timeStep: Double) {
@@ -89,7 +102,7 @@ class VSPipeline @Inject constructor(
             return
         }
 
-        val physicsFrame = physicsStage.tickPhysics(gravity, timeStep, arePhysicsRunning)
+        val physicsFrame = physicsStage.tickPhysics(gravity, timeStep, true)
         gameStage.pushPhysicsFrame(physicsFrame)
         networkStage.pushPhysicsFrame(physicsFrame)
     }

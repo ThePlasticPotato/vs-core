@@ -126,6 +126,21 @@ fun ObjectMapper.insertAnnotationIntrospector(ai: AnnotationIntrospector) {
     })
 }
 
+/**
+ * The source overrides the target
+ */
+fun merge(target: ObjectNode, source: ObjectNode): ObjectNode {
+    val new = target.shallowCopy()
+    for ((key, value) in source.fields()) {
+        if (value.isObject && new.has(key) && new[key].isObject) {
+            new.replace(key, merge(new[key] as ObjectNode, value as ObjectNode))
+        } else {
+            new.replace(key, value.deepCopy())
+        }
+    }
+    return new
+}
+
 fun ObjectMapper.appendAnnotationIntrospector(ai: AnnotationIntrospector) {
     this.registerModule(object : SimpleModule() {
         override fun setupModule(context: SetupContext) {

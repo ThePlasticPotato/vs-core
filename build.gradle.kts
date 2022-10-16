@@ -64,6 +64,7 @@ dependencies {
     api("com.fasterxml.jackson.dataformat", "jackson-dataformat-cbor", jacksonVersion)
     api("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml", jacksonVersion)
     api("com.fasterxml.jackson.datatype", "jackson-datatype-guava", jacksonVersion)
+    api("com.github.Rubydesic:jackson-kotlin-dsl:1.2.0")
 
     api("com.networknt", "json-schema-validator", "1.0.71")
     api("com.github.imifou", "jsonschema-module-addon", "1.2.1")
@@ -94,6 +95,7 @@ dependencies {
 
     // Log4j2 for Logging
     implementation("org.apache.logging.log4j:log4j-api:${properties["mc_log4j2_version"]}")
+
 }
 
 tasks.withType<Checkstyle> {

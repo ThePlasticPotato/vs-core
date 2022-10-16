@@ -2,12 +2,15 @@ package org.valkyrienskies.core.pipelines
 
 import org.valkyrienskies.core.config.VSCoreConfig
 import org.valkyrienskies.core.pipelines.VSGamePipelineStage.Companion.GAME_TPS
+import org.valkyrienskies.core.util.ThreadHints
 import org.valkyrienskies.core.util.logger
 import java.util.LinkedList
 import java.util.Queue
+import java.util.concurrent.locks.LockSupport
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.math.min
+import kotlin.system.measureNanoTime
 
 class VSPhysicsPipelineBackgroundTask(private val vsPipeline: VSPipeline, private var idealPhysicsTps: Int = 60) :
     Runnable {
@@ -20,9 +23,12 @@ class VSPhysicsPipelineBackgroundTask(private val vsPipeline: VSPipeline, privat
     @Volatile
     var physicsTicksSinceLastGameTick = 0
 
-    val lock = ReentrantLock()
-    val shouldRunGameTick = lock.newCondition()
-    val shouldRunPhysicsTick = lock.newCondition()
+    val syncLock = ReentrantLock()
+    val shouldRunGameTick = syncLock.newCondition()
+    val shouldRunPhysicsTick = syncLock.newCondition()
+
+    val pauseLock = ReentrantLock()
+    val shouldUnpausePhysicsTick = pauseLock.newCondition()
 
     override fun run() {
         try {
@@ -32,7 +38,7 @@ class VSPhysicsPipelineBackgroundTask(private val vsPipeline: VSPipeline, privat
                 if (vsPipeline.synchronizePhysics) {
                     val physicsTicksPerGameTick = VSCoreConfig.SERVER.pt.physicsTicksPerGameTick
                     val timeStep = 1.0 / (GAME_TPS * physicsTicksPerGameTick)
-                    lock.withLock {
+                    syncLock.withLock {
                         // in the event we've done all 3 physics ticks for this tick, wait for game tick to run,
                         // set the physicsTicksSinceLastGameTick to 0, and signal
                         while (physicsTicksSinceLastGameTick >= physicsTicksPerGameTick)
@@ -48,42 +54,28 @@ class VSPhysicsPipelineBackgroundTask(private val vsPipeline: VSPipeline, privat
                         }
                     }
                 } else {
-                    val timeToSimulateNs = 1e9 / idealPhysicsTps.toDouble()
-                    val timeBeforePhysicsTick = System.nanoTime()
+                    // If paused, wait until not paused
+                    if (!vsPipeline.arePhysicsRunning) {
+                        // reset timing stuff
+                        lostTime = 0
+                        prevPhysTicksTimeMillis.clear()
 
-                    val timeStep = timeToSimulateNs / 1e9
-
-                    // Run the physics tick
-                    vsPipeline.tickPhysics(vsPipeline.getPhysicsGravity(), timeStep)
-
-                    val timeToRunPhysTick = System.nanoTime() - timeBeforePhysicsTick
-
-                    // Keep track of when physics tick finished
-                    val currentTimeMillis = System.currentTimeMillis()
-                    prevPhysTicksTimeMillis.add(currentTimeMillis)
-                    // Remove physics ticks that were over [PHYS_TICK_AVERAGE_WINDOW_MS] ms ago
-                    while (prevPhysTicksTimeMillis.isNotEmpty() &&
-                        prevPhysTicksTimeMillis.peek() + PHYS_TICK_AVERAGE_WINDOW_MS < currentTimeMillis
-                    ) {
-                        prevPhysTicksTimeMillis.remove()
-                    }
-
-                    // Ideal time minus actual time to run physics tick
-                    val timeDif = timeToSimulateNs - timeToRunPhysTick
-
-                    if (timeDif < 0) {
-                        // Physics tick took too long, store some lost time to catch up
-                        lostTime = min(lostTime - timeDif.toLong(), MAX_LOST_TIME)
-                    } else {
-                        if (lostTime > timeDif) {
-                            // Catch up
-                            lostTime -= timeDif.toLong()
-                        } else {
-                            val timeToWait = timeDif - lostTime
-                            lostTime = 0
-                            Thread.sleep((timeToWait / 1e6).toLong())
+                        pauseLock.withLock {
+                            while (!vsPipeline.arePhysicsRunning)
+                                shouldUnpausePhysicsTick.await()
                         }
                     }
+
+                    val timeToSimulateNs = 1e9 / idealPhysicsTps.toDouble()
+                    val timeStep = timeToSimulateNs / 1e9
+
+                    val timeToRunPhysTick = measureNanoTime {
+                        // Run the physics tick
+                        vsPipeline.tickPhysics(vsPipeline.getPhysicsGravity(), timeStep)
+                    }
+
+                    trackTickEnd()
+                    sleepOnLostTime(timeToSimulateNs, timeToRunPhysTick)
                 }
             }
         } catch (e: Exception) {
@@ -97,13 +89,55 @@ class VSPhysicsPipelineBackgroundTask(private val vsPipeline: VSPipeline, privat
         killTask = true
     }
 
+    private fun trackTickEnd() {
+        // Keep track of when physics tick finished
+        val currentTimeMillis = System.currentTimeMillis()
+        prevPhysTicksTimeMillis.add(currentTimeMillis)
+        // Remove physics ticks that were over [PHYS_TICK_AVERAGE_WINDOW_MS] ms ago
+        while (prevPhysTicksTimeMillis.isNotEmpty() &&
+            prevPhysTicksTimeMillis.peek() + PHYS_TICK_AVERAGE_WINDOW_MS < currentTimeMillis
+        ) {
+            prevPhysTicksTimeMillis.remove()
+        }
+    }
+
+    private fun sleepOnLostTime(timeToSimulateNs: Double, timeToRunPhysTick: Long) {
+        // Ideal time minus actual time to run physics tick
+        val timeDif = timeToSimulateNs - timeToRunPhysTick
+
+        if (timeDif < 0) {
+            // Physics tick took too long, store some lost time to catch up
+            lostTime = min(lostTime - timeDif.toLong(), MAX_LOST_TIME)
+        } else {
+            if (lostTime > timeDif) {
+                // Catch up
+                lostTime -= timeDif.toLong()
+            } else {
+                val timeToWait = timeDif - lostTime
+                lostTime = 0
+                sleepExact(timeToWait.toLong())
+            }
+        }
+    }
+
+    private fun sleepExact(sleepTimeNanos: Long) {
+        val startTime = System.nanoTime()
+        val timeToSleep = sleepTimeNanos - 1_000_000
+
+        LockSupport.parkNanos(timeToSleep)
+
+        while (System.nanoTime() - startTime < sleepTimeNanos) {
+            ThreadHints.onSpinWait()
+        }
+    }
+
     fun computePhysicsTPS(): Double {
-        return prevPhysTicksTimeMillis.size.toDouble() / (PHYS_TICK_AVERAGE_WINDOW_MS.toDouble() / 1000.0)
+        return prevPhysTicksTimeMillis.size.toDouble() / (PHYS_TICK_AVERAGE_WINDOW_MS / 1000.0)
     }
 
     companion object {
         private const val MAX_LOST_TIME: Long = 1e9.toLong()
-        private const val PHYS_TICK_AVERAGE_WINDOW_MS = 1000
+        private const val PHYS_TICK_AVERAGE_WINDOW_MS = 5000
         private val logger by logger()
     }
 }

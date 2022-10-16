@@ -14,6 +14,7 @@ import com.networknt.schema.JsonSchema
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
 import com.networknt.schema.ValidationMessage
+import com.rubydesic.jacksonktdsl.obj
 import org.valkyrienskies.core.config.VSConfigClass.VSConfigClassSide.CLIENT
 import org.valkyrienskies.core.config.VSConfigClass.VSConfigClassSide.COMMON
 import org.valkyrienskies.core.config.VSConfigClass.VSConfigClassSide.SERVER
@@ -28,6 +29,7 @@ import org.valkyrienskies.core.networking.simple.sendToAllClients
 import org.valkyrienskies.core.networking.simple.sendToClient
 import org.valkyrienskies.core.networking.simple.sendToServer
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
+import org.valkyrienskies.core.util.serialization.merge
 import java.lang.reflect.Modifier
 import java.nio.file.Files
 import java.nio.file.Path
@@ -280,7 +282,7 @@ class SidedVSConfigClass(
 ) {
 
     fun generateInstJson(): ObjectNode = VSConfigClass.mapper.valueToTree(inst)
-    fun generateInstJsonWith(key: String, value: JsonNode) = generateInstJson().also { it.replace(key, value) }
+    fun generateInstJsonAndMergeWith(key: String, value: JsonNode) = merge(generateInstJson(), obj { key to value })
 
     fun attemptUpdate(newConfig: JsonNode): Set<ValidationMessage> {
         val errors = schema.validate(newConfig as ObjectNode)

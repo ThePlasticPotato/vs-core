@@ -22,6 +22,7 @@ import org.valkyrienskies.core.game.ships.types.MutableShipVoxelUpdates
 import org.valkyrienskies.core.game.ships.types.ShipVoxelUpdates
 import org.valkyrienskies.core.hooks.VSEvents
 import org.valkyrienskies.core.hooks.VSEvents.ShipLoadEvent
+import org.valkyrienskies.core.networking.NetworkChannel.Companion.logger
 import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.util.InternalInject
 import org.valkyrienskies.core.util.WorldScoped
@@ -232,6 +233,13 @@ class ShipObjectServerWorld @Inject constructor(
         // For now, just make a [ShipObject] for every [ShipData]
         for (shipData in queryableShipData) {
             val shipID = shipData.id
+
+            // save us from the invMass is not finite! error
+            if (shipData.inertiaData.getShipMass() == 0.0) {
+                logger.warn("Ship with ID $shipID has a mass of 0.0, not creating a ShipObject")
+                continue
+            }
+
             if (!_loadedShips.contains(shipID)) {
                 val newShipObject = ShipObjectServer(shipData)
                 newShipObjects.add(newShipObject)
