@@ -12,10 +12,6 @@ import org.valkyrienskies.core.networking.impl.PacketRequestUdp
 import org.valkyrienskies.core.networking.impl.PacketUdpState
 import org.valkyrienskies.core.networking.simple.SimplePacketNetworking
 import org.valkyrienskies.core.networking.simple.SimplePacketNetworkingImpl
-import org.valkyrienskies.core.networking.simple.registerClientHandler
-import org.valkyrienskies.core.networking.simple.registerServerHandler
-import org.valkyrienskies.core.networking.simple.sendToClient
-import org.valkyrienskies.core.networking.simple.sendToServer
 import org.valkyrienskies.core.util.logger
 import java.net.DatagramSocket
 import java.net.InetSocketAddress
@@ -41,7 +37,8 @@ class VSNetworking @Inject constructor(
      */
     @TCP val TCP: NetworkChannel,
 
-    packets: Packets // don't actually need this, but for now force it to init for VSConfigClass
+    packets: Packets, // don't actually need this, but for now force it to init for VSConfigClass
+    private val simplePackets: SimplePacketNetworking,
 ) {
 
     @Module
@@ -100,12 +97,15 @@ class VSNetworking @Inject constructor(
             val udpServer = UdpServerImpl(udpSocket, UDP, TCP_UDP_FALLBACK)
             serverUsesUDP = true
 
-            PacketRequestUdp::class.registerServerHandler { packet, player ->
-                udpServer.prepareIdentifier(player, packet)?.let {
-                    PacketUdpState(udpSocket.localPort, serverUsesUDP, it)
-                        .sendToClient(player)
+            with(simplePackets) {
+                PacketRequestUdp::class.registerServerHandler { packet, player ->
+                    udpServer.prepareIdentifier(player, packet)?.let {
+                        PacketUdpState(udpSocket.localPort, serverUsesUDP, it)
+                            .sendToClient(player)
+                    }
                 }
             }
+            
             return udpServer
         } catch (e: SocketException) {
             logger.error("Tried to bind to ${VSCoreConfig.SERVER.udpPort} but failed!", e)
@@ -127,24 +127,27 @@ class VSNetworking @Inject constructor(
      */
     fun tryUdpClient(server: SocketAddress, secretKey: SecretKey, supportsUdp: BooleanConsumer) {
         prevStateHandler?.unregister()
-        prevStateHandler = PacketUdpState::class.registerClientHandler {
-            supportsUdp.accept(it.state)
-            if (it.state) {
-                var server = server
 
-                // If server is not an InetSocketAddress, just use the same 'thing' as tcp
-                if (server is InetSocketAddress) {
-                    if (server.port != it.port) {
-                        server = InetSocketAddress(server.address, it.port)
+        with(simplePackets) {
+            prevStateHandler = PacketUdpState::class.registerClientHandler {
+                supportsUdp.accept(it.state)
+                if (it.state) {
+                    var server = server
+
+                    // If server is not an InetSocketAddress, just use the same 'thing' as tcp
+                    if (server is InetSocketAddress) {
+                        if (server.port != it.port) {
+                            server = InetSocketAddress(server.address, it.port)
+                        }
+                    }
+
+                    if (!setupUdpClient(server, it.id)) {
+                        tcp4udpFallback()
                     }
                 }
-
-                if (!setupUdpClient(server, it.id)) {
-                    tcp4udpFallback()
-                }
             }
+            PacketRequestUdp(0, secretKey.encoded).sendToServer()
         }
-        PacketRequestUdp(0, secretKey.encoded).sendToServer()
     }
 
     private fun setupUdpClient(socketAddress: SocketAddress, id: Long): Boolean {
@@ -163,9 +166,12 @@ class VSNetworking @Inject constructor(
         clientUsesUDP = false
         serverUsesUDP = false
 
-        PacketRequestUdp::class.registerServerHandler { packet, player ->
-            PacketUdpState(-1, serverUsesUDP, -1).sendToClient(player)
+        with(simplePackets) {
+            PacketRequestUdp::class.registerServerHandler { packet, player ->
+                PacketUdpState(-1, serverUsesUDP, -1).sendToClient(player)
+            }
         }
+
 
         UDP.rawSendToClient = { data, player ->
             TCP_UDP_FALLBACK.sendToClient(data, player)
