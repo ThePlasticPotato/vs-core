@@ -91,26 +91,28 @@ class VSNetworking @Inject constructor(
      */
     fun tryUdpServer(): UdpServerImpl? {
 
-        try {
-            val udpSocket = DatagramSocket(VSCoreConfig.SERVER.udpPort)
+        if (!VSCoreConfig.SERVER.enableUdp) {
+            try {
+                val udpSocket = DatagramSocket(VSCoreConfig.SERVER.udpPort)
 
-            val udpServer = UdpServerImpl(udpSocket, UDP, TCP_UDP_FALLBACK)
-            serverUsesUDP = true
+                val udpServer = UdpServerImpl(udpSocket, UDP, TCP_UDP_FALLBACK)
+                serverUsesUDP = true
 
-            with(simplePackets) {
-                PacketRequestUdp::class.registerServerHandler { packet, player ->
-                    udpServer.prepareIdentifier(player, packet)?.let {
-                        PacketUdpState(udpSocket.localPort, serverUsesUDP, it)
-                            .sendToClient(player)
+                with(simplePackets) {
+                    PacketRequestUdp::class.registerServerHandler { packet, player ->
+                        udpServer.prepareIdentifier(player, packet)?.let {
+                            PacketUdpState(udpSocket.localPort, serverUsesUDP, it)
+                                .sendToClient(player)
+                        }
                     }
                 }
+
+                return udpServer
+            } catch (e: SocketException) {
+                logger.error("Tried to bind to ${VSCoreConfig.SERVER.udpPort} but failed!", e)
+            } catch (e: Exception) {
+                logger.error("Tried to setup udp with port: ${VSCoreConfig.SERVER.udpPort} but failed!", e)
             }
-            
-            return udpServer
-        } catch (e: SocketException) {
-            logger.error("Tried to bind to ${VSCoreConfig.SERVER.udpPort} but failed!", e)
-        } catch (e: Exception) {
-            logger.error("Tried to setup udp with port: ${VSCoreConfig.SERVER.udpPort} but failed!", e)
         }
 
         tcp4udpFallback()
@@ -162,7 +164,7 @@ class VSNetworking @Inject constructor(
     }
 
     private fun tcp4udpFallback() {
-        logger.warn("Failed to create UDP socket, falling back to TCP")
+        logger.info("We are not using UDP, falling back to TCP")
         clientUsesUDP = false
         serverUsesUDP = false
 

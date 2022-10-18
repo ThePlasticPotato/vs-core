@@ -91,7 +91,7 @@ class ShipObjectServerWorld @Inject constructor(
     private val updatedShipObjects: MutableList<ShipObjectServer> = ArrayList()
     private val deletedShipObjects: MutableList<ShipData> = ArrayList()
 
-    val udpServer = networking.tryUdpServer()
+    private val udpServer = networking.tryUdpServer()
 
     /**
      * A map of voxel updates pending to be applied to ships.
