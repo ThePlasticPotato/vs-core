@@ -91,7 +91,7 @@ class VSNetworking @Inject constructor(
      */
     fun tryUdpServer(): UdpServerImpl? {
 
-        if (!VSCoreConfig.SERVER.enableUdp) {
+        if (VSCoreConfig.SERVER.enableUdp) {
             try {
                 val udpSocket = DatagramSocket(VSCoreConfig.SERVER.udpPort)
 
