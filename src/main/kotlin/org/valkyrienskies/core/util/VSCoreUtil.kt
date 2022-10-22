@@ -10,6 +10,7 @@ import org.joml.Vector3dc
 import org.joml.Vector3i
 import org.joml.Vector3ic
 import java.nio.ByteBuffer
+import java.util.Queue
 import java.util.function.Consumer
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -213,22 +214,16 @@ fun wrapIndex(x: Int, y: Int, z: Int, dimensions: Vector3ic): Int =
 fun wrapIndex(point: Vector3ic, dimensions: Vector3ic): Int =
     wrapIndex(point.x, point.y, point.z, dimensions)
 
-inline fun timeNanos(func: () -> Unit): Long {
-    val start = System.nanoTime()
-    func()
-    return System.nanoTime() - start
-}
-
-inline fun timeMillis(func: () -> Unit): Long {
-    val start = System.currentTimeMillis()
-    func()
-    return System.currentTimeMillis() - start
-}
-
 inline fun tryAndPrint(func: () -> Unit) {
     try {
         func()
     } catch (ex: Exception) {
         ex.printStackTrace()
+    }
+}
+
+inline fun <T> Queue<T>.pollUntilEmpty(func: (T) -> Unit) {
+    while (true) {
+        func(poll() ?: return)
     }
 }

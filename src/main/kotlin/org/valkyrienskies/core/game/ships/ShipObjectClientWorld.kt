@@ -2,6 +2,8 @@ package org.valkyrienskies.core.game.ships
 
 import dagger.Subcomponent
 import org.valkyrienskies.core.game.ships.networking.ShipObjectNetworkManagerClient
+import org.valkyrienskies.core.hooks.VSEvents
+import org.valkyrienskies.core.hooks.VSEvents.ShipLoadEventClient
 import org.valkyrienskies.core.util.WorldScoped
 import javax.inject.Inject
 
@@ -34,7 +36,9 @@ class ShipObjectClientWorld @Inject constructor(
     }
 
     fun addShip(ship: ShipDataCommon) {
-        _loadedShips.addShipData(ShipObjectClient(ship))
+        val shipObject = ShipObjectClient(ship)
+        _loadedShips.addShipData(shipObject)
+        VSEvents.shipLoadEventClient.emit(ShipLoadEventClient(shipObject))
     }
 
     fun removeShip(shipId: ShipId) {

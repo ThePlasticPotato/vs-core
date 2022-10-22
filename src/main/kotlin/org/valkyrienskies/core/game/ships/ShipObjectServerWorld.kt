@@ -265,9 +265,9 @@ class ShipObjectServerWorld @Inject constructor(
         }
         // endregion
 
-        shipsLoadedThisTick.forEach { VSEvents.shipLoadEvent.emit(ShipLoadEvent(it)) }
-
         loadManager.postTick(players)
+
+        shipsLoadedThisTick.forEach { VSEvents.shipLoadEvent.emit(ShipLoadEvent(it)) }
     }
 
     /**
