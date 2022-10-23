@@ -4,7 +4,7 @@ import org.valkyrienskies.core.game.ships.ShipObjectServer
 import org.valkyrienskies.core.util.events.EventEmitter
 import org.valkyrienskies.core.util.events.EventEmitterImpl
 
-object VSEvents {
+object VSCoreEvents {
 
     internal val shipLoadEvent = EventEmitterImpl<ShipLoadEvent>()
 

@@ -20,8 +20,8 @@ import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_DI
 import org.valkyrienskies.core.game.ships.loading.ShipLoadManagerServer
 import org.valkyrienskies.core.game.ships.types.MutableShipVoxelUpdates
 import org.valkyrienskies.core.game.ships.types.ShipVoxelUpdates
-import org.valkyrienskies.core.hooks.VSEvents
-import org.valkyrienskies.core.hooks.VSEvents.ShipLoadEvent
+import org.valkyrienskies.core.hooks.VSCoreEvents
+import org.valkyrienskies.core.hooks.VSCoreEvents.ShipLoadEvent
 import org.valkyrienskies.core.networking.NetworkChannel.Companion.logger
 import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.util.InternalInject
@@ -105,7 +105,7 @@ class ShipObjectServerWorld @Inject constructor(
         message = "All events moved to VSEvents",
         replaceWith = ReplaceWith("ShipLoadEvent", "org.valkyrienskies.core.hooks.VSEvents.ShipLoadEvent")
     )
-    val shipLoadEvent by VSEvents::shipLoadEvent
+    val shipLoadEvent by VSCoreEvents::shipLoadEvent
 
     internal data class LevelVoxelUpdates(
         val dimensionId: DimensionId,
@@ -265,7 +265,7 @@ class ShipObjectServerWorld @Inject constructor(
         }
         // endregion
 
-        shipsLoadedThisTick.forEach { VSEvents.shipLoadEvent.emit(ShipLoadEvent(it)) }
+        shipsLoadedThisTick.forEach { VSCoreEvents.shipLoadEvent.emit(ShipLoadEvent(it)) }
 
         loadManager.postTick(players)
     }
