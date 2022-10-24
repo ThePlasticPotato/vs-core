@@ -44,10 +44,10 @@ class UdpClientImpl(
         // Initial confirmation packet
         socket.soTimeout = 1000
         socket.receive(recvPacket)
+        // Check if the confirmation packet is 16 bytes long (UUID of player)
         if (recvPacket.length != 16) {
             throw IllegalStateException("Invalid confirmation packet")
         }
-        // TODO check player uuid is the same
 
         socket.soTimeout = 0
         onConfirm()
@@ -65,7 +65,7 @@ class UdpClientImpl(
                 }
 
                 if (lastPacketPrint + 1000 < System.currentTimeMillis()) {
-                    logger.info("Received $packetCount UDP packets")
+                    logger.trace("Received $packetCount UDP packets")
                     packetCount = 0
                     lastPacketPrint = System.currentTimeMillis()
                 }

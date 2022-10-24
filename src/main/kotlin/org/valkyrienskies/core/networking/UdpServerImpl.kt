@@ -48,7 +48,7 @@ class UdpServerImpl(
         } else {
             packetCount++
             if (lastPacketPrint + 1000 < System.currentTimeMillis()) {
-                logger.info("Sended $packetCount UDP packets")
+                logger.trace("Sended $packetCount UDP packets")
                 packetCount = 0
                 lastPacketPrint = System.currentTimeMillis()
             }
@@ -67,13 +67,11 @@ class UdpServerImpl(
                 // Skip if no player was found
                 val sender = connections[recvPacket.socketAddress]
                 val buffer = Unpooled.wrappedBuffer(recvBuffer, 0, recvPacket.length)
-                // TODO logger here
-                // println("Received UDP Packet from $sender, size: ${recvPacket.length}")
 
                 if (sender == null) {
                     // If no player was found, try to identify the player
                     if (buffer.capacity() != 8) continue
-                    // TODO make this spamfree, ppl can spam this packet to guess a player's id ??
+                    // TODO make this more secure aka encryption
                     val newConnection = identification.remove(buffer.readLong()) ?: continue
 
                     connections[recvPacket.socketAddress] = newConnection

@@ -39,6 +39,11 @@ object VSCoreConfig {
         var udpPort = 25565
 
         @JsonSchema(
+            description = "Is udp enabled? If not, the server will only use TCP"
+        )
+        var enableUdp = true
+
+        @JsonSchema(
             description = "Ship load distance in blocks"
         )
         var shipLoadDistance = 128.0
