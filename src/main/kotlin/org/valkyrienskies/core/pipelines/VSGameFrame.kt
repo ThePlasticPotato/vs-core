@@ -37,7 +37,7 @@ data class NewShipInGameFrameData(
     val voxelOffset: Vector3dc,
     val isStatic: Boolean,
     val shipVoxelsFullyLoaded: Boolean,
-    val forcesInducers: List<ShipForcesInducer> // TODO unsafe
+    val forcesInducers: List<ShipForcesInducer>
 )
 
 data class UpdateShipInGameFrameData(
@@ -46,5 +46,6 @@ data class UpdateShipInGameFrameData(
     val inertiaData: PhysInertia,
     val physicsData: ShipPhysicsData,
     val isStatic: Boolean,
-    val shipVoxelsFullyLoaded: Boolean
+    val shipVoxelsFullyLoaded: Boolean,
+    val forcesInducers: List<ShipForcesInducer>
 )

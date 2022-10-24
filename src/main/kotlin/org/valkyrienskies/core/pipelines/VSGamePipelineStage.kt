@@ -189,7 +189,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 voxelOffset,
                 isStatic,
                 isVoxelsFullyLoaded,
-                it.forceInducers.toMutableList()
+                it.forceInducers.toMutableList() //Copy the list
             )
             newShips.add(newShipInGameFrameData)
         }
@@ -206,7 +206,8 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 it.shipData.inertiaData.copyToPhyInertia(),
                 it.shipData.physicsData.copy(),
                 isStatic,
-                isVoxelsFullyLoaded
+                isVoxelsFullyLoaded,
+                it.forceInducers.toMutableList() //Copy the list
             )
             updatedShips[uuid] = updateShipInGameFrameData
         }
