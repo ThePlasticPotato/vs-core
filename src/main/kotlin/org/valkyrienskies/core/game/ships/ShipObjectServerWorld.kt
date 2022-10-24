@@ -22,6 +22,7 @@ import org.valkyrienskies.core.game.ships.types.MutableShipVoxelUpdates
 import org.valkyrienskies.core.game.ships.types.ShipVoxelUpdates
 import org.valkyrienskies.core.hooks.VSEvents
 import org.valkyrienskies.core.hooks.VSEvents.ShipLoadEvent
+import org.valkyrienskies.core.hooks.VSEvents.TickEndEvent
 import org.valkyrienskies.core.networking.NetworkChannel.Companion.logger
 import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.util.InternalInject
@@ -268,6 +269,8 @@ class ShipObjectServerWorld @Inject constructor(
         loadManager.postTick(players)
 
         shipsLoadedThisTick.forEach { VSEvents.shipLoadEvent.emit(ShipLoadEvent(it)) }
+
+        VSEvents.tickEndEvent.emit(TickEndEvent(this))
     }
 
     /**

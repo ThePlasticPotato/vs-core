@@ -2,6 +2,7 @@ package org.valkyrienskies.core.hooks
 
 import org.valkyrienskies.core.game.ships.ShipObjectClient
 import org.valkyrienskies.core.game.ships.ShipObjectServer
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
 import org.valkyrienskies.core.util.events.EventEmitter
 import org.valkyrienskies.core.util.events.EventEmitterImpl
 
@@ -21,5 +22,7 @@ object VSEvents {
 
     internal val tickEndEvent = EventEmitterImpl<TickEndEvent>()
 
-    object TickEndEvent : EventEmitter<TickEndEvent> by tickEndEvent
+    data class TickEndEvent(val world: ShipObjectServerWorld) {
+        companion object : EventEmitter<TickEndEvent> by tickEndEvent
+    }
 }
