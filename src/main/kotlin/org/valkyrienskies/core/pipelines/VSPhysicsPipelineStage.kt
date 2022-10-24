@@ -167,6 +167,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             )
 
             physShip._inertia = shipUpdate.inertiaData
+            physShip.forceInducers = shipUpdate.forcesInducers
 
             shipRigidBody.collisionShapeOffset = newVoxelOffset
             shipRigidBody.poseVel = newShipPoseVel

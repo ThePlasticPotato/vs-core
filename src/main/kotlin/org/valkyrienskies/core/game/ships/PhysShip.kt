@@ -9,7 +9,7 @@ data class PhysShip internal constructor(
     val shipId: ShipId,
     // Don't use these outside of vs-core, I beg of thee
     internal val rigidBodyReference: RigidBodyReference,
-    internal val forceInducers: List<ShipForcesInducer>,
+    internal var forceInducers: List<ShipForcesInducer>,
     internal var _inertia: PhysInertia,
 
     // TODO transformation matrix
@@ -17,7 +17,7 @@ data class PhysShip internal constructor(
     var segments: SegmentTracker
 ) {
     var buoyantFactor by rigidBodyReference::buoyantFactor
-  
+
     val inertia: PhysInertia
         get() = _inertia
 }
