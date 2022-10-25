@@ -9,16 +9,24 @@ import org.valkyrienskies.core.datastructures.MurmurHash3.mix32
 class BlockPos2ObjectOpenHashMap<T>(expected: Int = 10, loadFactor: Float = 0.75f) {
 
     companion object {
-        private const val NUM_KEYS = 3
+        @PublishedApi
+        internal const val NUM_KEYS = 3
     }
 
-    private var n: Int = 0 // table capacity
+    @PublishedApi
+    internal var n: Int = 0 // table capacity
+        private set
     private var size: Int = 0
 
-    private var keys: IntArray
-    private var values: Array<T?>
+    @PublishedApi
+    internal var keys: IntArray
 
-    private var containsNullKey = false
+    @PublishedApi
+    internal var values: Array<T?>
+
+    @PublishedApi
+    internal var containsNullKey = false
+        private set
     private var maxFill: Int
 
     var defRetValue: T? = null
@@ -40,6 +48,36 @@ class BlockPos2ObjectOpenHashMap<T>(expected: Int = 10, loadFactor: Float = 0.75
     fun get(x: Int, y: Int, z: Int): T? {
         val pos = find(x, y, z)
         return if (pos < 0) defRetValue else values[pos]
+    }
+
+    fun clear() {
+        if (size == 0) return
+        size = 0
+        containsNullKey = false
+        keys.fill(0)
+        values.fill(null)
+    }
+
+    fun getOrPut(x: Int, y: Int, z: Int, default: () -> T): T {
+        return if (contains(x, y, z)) {
+            get(x, y, z) as T
+        } else {
+            val newValue = default()
+            put(x, y, z, newValue)
+            newValue
+        }
+    }
+
+    inline fun forEach(fn: (Int, Int, Int, T) -> Unit) {
+        if (containsNullKey) fn(
+            keys[n * NUM_KEYS], keys[n * NUM_KEYS + 1], keys[n * NUM_KEYS + 2], values[n] as T
+        )
+
+        for (pos in n downTo 0) {
+            if (keys[pos * NUM_KEYS] != 0 || keys[pos * NUM_KEYS + 1] != 0 || keys[pos * NUM_KEYS + 2] != 0) {
+                fn(keys[pos * NUM_KEYS], keys[pos * NUM_KEYS + 1], keys[pos * NUM_KEYS + 2], values[pos] as T)
+            }
+        }
     }
 
     fun put(x: Int, y: Int, z: Int, v: T?): T? {

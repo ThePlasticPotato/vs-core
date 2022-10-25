@@ -10,6 +10,7 @@ import org.joml.Vector3dc
 import org.joml.Vector3i
 import org.joml.Vector3ic
 import java.nio.ByteBuffer
+import java.util.Queue
 import java.util.function.Consumer
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -150,7 +151,7 @@ inline fun <reified T> Array<T>.filterToArray(predicate: (T) -> Boolean): Array<
     if (count != newArray.size)
         throw ConcurrentModificationException("Array was modified while filtering")
 
-    // Unchecked cast is valid because because if the whole array were not filled we would have thrown already
+    // Unchecked cast is valid because if the whole array were not filled we would have thrown already
     @Suppress("UNCHECKED_CAST")
     return newArray as Array<T>
 }
@@ -159,21 +160,21 @@ fun asLong(x: Int, y: Int): Long = x.toLong() or (y.toLong() shl 32)
 fun asInts(x: Long): Pair<Int, Int> = Pair(x.toInt(), (x shr 32).toInt())
 
 inline fun Byte.iterateBits(func: (Boolean, Int) -> Unit) {
-    for (i in 8 downTo 0) {
+    for (i in 7 downTo 0) {
         val masked = (this.toInt() and (1 shl i))
         func(masked != 0, i)
     }
 }
 
 inline fun Int.iterateBits(func: (Boolean, Int) -> Unit) {
-    for (i in 32 downTo 0) {
+    for (i in 31 downTo 0) {
         val masked = this and (1 shl i)
         func(masked != 0, i)
     }
 }
 
 inline fun Long.iterateBits(func: (Boolean, Int) -> Unit) {
-    for (i in 64 downTo 0) {
+    for (i in 63 downTo 0) {
         val masked = this and (1L shl i)
         func(masked != 0L, i)
     }
@@ -194,11 +195,17 @@ inline fun ByteBuffer.iterateBits(func: (Boolean, Int) -> Unit) {
  * Take (x, y, z) and produce index (i)
  */
 fun unwrapIndex(index: Int, dimensions: Vector3ic, v: Vector3i): Vector3i {
+    return unwrapIndex(index, dimensions) { x, y, z ->
+        v.set(x, y, z)
+    }
+}
+
+inline fun <R> unwrapIndex(index: Int, dimensions: Vector3ic, out: (Int, Int, Int) -> R): R {
     val z = index / (dimensions.x * dimensions.y)
     val y = (index - (z * dimensions.x * dimensions.y)) / dimensions.x
     val x = (index - (z * dimensions.x * dimensions.y)) % dimensions.x
 
-    return v.set(x, y, z)
+    return out(x, y, z)
 }
 
 fun wrapIndex(x: Int, y: Int, z: Int, dimensions: Vector3ic): Int =
@@ -207,22 +214,16 @@ fun wrapIndex(x: Int, y: Int, z: Int, dimensions: Vector3ic): Int =
 fun wrapIndex(point: Vector3ic, dimensions: Vector3ic): Int =
     wrapIndex(point.x, point.y, point.z, dimensions)
 
-inline fun timeNanos(func: () -> Unit): Long {
-    val start = System.nanoTime()
-    func()
-    return System.nanoTime() - start
-}
-
-inline fun timeMillis(func: () -> Unit): Long {
-    val start = System.currentTimeMillis()
-    func()
-    return System.currentTimeMillis() - start
-}
-
 inline fun tryAndPrint(func: () -> Unit) {
     try {
         func()
     } catch (ex: Exception) {
         ex.printStackTrace()
+    }
+}
+
+inline fun <T> Queue<T>.pollUntilEmpty(func: (T) -> Unit) {
+    while (true) {
+        func(poll() ?: return)
     }
 }

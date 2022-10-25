@@ -65,6 +65,10 @@ data class ChunkClaim(val xIndex: Int, val zIndex: Int) {
      */
     val zEnd = (zIndex * DIAMETER) + DIAMETER - 1
 
+    val xMiddle = xStart + DIAMETER / 2
+
+    val zMiddle = zStart + DIAMETER / 2
+
     /**
      * The number of chunks owned by this claim
      */

@@ -38,9 +38,9 @@ repositories {
 
 dependencies {
     // Kotlin
-    implementation(kotlin("stdlib-jdk8"))
-    implementation(kotlin("reflect"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    api(kotlin("stdlib-jdk8"))
+    api(kotlin("reflect"))
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     val jacksonVersion = "2.13.3"
     val nettyVersion = "4.1.25.Final"
@@ -61,6 +61,7 @@ dependencies {
 
     // Jackson Binary Dataformat for Object Serialization
     api("com.fasterxml.jackson.module", "jackson-module-kotlin", jacksonVersion)
+    api("com.fasterxml.jackson.module", "jackson-module-parameter-names", jacksonVersion)
     api("com.fasterxml.jackson.dataformat", "jackson-dataformat-cbor", jacksonVersion)
     api("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml", jacksonVersion)
     api("com.fasterxml.jackson.datatype", "jackson-datatype-guava", jacksonVersion)

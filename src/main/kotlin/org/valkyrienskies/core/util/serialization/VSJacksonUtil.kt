@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufInputStream
 import org.valkyrienskies.core.game.ships.ShipData
@@ -49,6 +50,13 @@ object VSJacksonUtil {
         configureConfigMapper(configMapper)
     }
 
+    fun configureAll(configure: (ObjectMapper) -> Unit) {
+        configure(defaultMapper)
+        configure(packetMapper)
+        configure(deltaMapper)
+        configure(configMapper)
+    }
+
     @JsonSerialize(`as` = ShipDataCommon::class)
     private object ShipDataServerMixin
 
@@ -82,6 +90,7 @@ object VSJacksonUtil {
             .registerModule(JOMLSerializationModule())
             .registerModule(VSSerializationModule())
             .registerModule(GuaveSerializationModule())
+            .registerModule(ParameterNamesModule())
             .registerKotlinModule()
             .setVisibility(
                 mapper.visibilityChecker

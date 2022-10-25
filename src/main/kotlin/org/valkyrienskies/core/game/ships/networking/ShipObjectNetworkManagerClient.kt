@@ -90,7 +90,7 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
         while (buf.isReadable) {
             val shipId = buf.readLong()
 
-            val ship = parent.shipObjects[shipId]
+            val ship = parent.loadedShips.getById(shipId)
             if (ship == null) {
                 logger.warn("Received ship data delta for ship with unknown ID!")
                 buf.release()
