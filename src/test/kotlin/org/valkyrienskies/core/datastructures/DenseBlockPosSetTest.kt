@@ -16,8 +16,13 @@ class DenseBlockPosSetTest : StringSpec({
 
     "should be able to store a lot of blocks" {
         val set = DenseBlockPosSet()
+        // This should take up a max of 128*128*16*512 bytes = 128 MiB
         for (i in 0..10_000_000) {
-            set.add(Random.nextInt(-10_000, 10_000), Random.nextInt(-10_000, 10_000), Random.nextInt(-10_000, 10_000))
+            set.add(
+                Random.nextInt(-64 * 16, 64 * 16),
+                Random.nextInt(0, 256),
+                Random.nextInt(-64 * 16, 64 * 16)
+            )
         }
         set.size shouldBeInRange 9_000_000..10_000_000
     }
