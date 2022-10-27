@@ -1,7 +1,7 @@
 package org.valkyrienskies.core.chunk_tracking
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap
-import it.unimi.dsi.fastutil.objects.Object2IntMap
+import it.unimi.dsi.fastutil.longs.LongSet
 import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.game.ships.ShipData
 
@@ -10,10 +10,10 @@ import org.valkyrienskies.core.game.ships.ShipData
  * Many of the maps/sets will be reused for efficiency's sake.
  */
 data class ChunkTrackingInfo(
-    val playersToShipsWatchingMap: Map<IPlayer, Object2IntMap<ShipData>>,
+    val playersToShipsWatchingMap: Map<IPlayer, Map<ShipData, LongSet>>,
     val shipsToPlayersWatchingMap: Long2ObjectMap<MutableSet<IPlayer>>,
-    val playersToShipsNewlyWatchingMap: Map<IPlayer, MutableSet<ShipData>>,
-    val playersToShipsNoLongerWatchingMap: Map<IPlayer, MutableSet<ShipData>>,
+    val playersToShipsNewlyWatchingMap: Map<IPlayer, Set<ShipData>>,
+    val playersToShipsNoLongerWatchingMap: Map<IPlayer, Set<ShipData>>,
     val shipsToLoad: Set<ShipData>,
     val shipsToUnload: Set<ShipData>,
 ) {

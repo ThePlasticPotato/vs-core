@@ -42,6 +42,7 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
 
             trackingInfo.playersToShipsNewlyWatchingMap shouldHaveSize 1
             trackingInfo.playersToShipsWatchingMap shouldHaveSize 1
+            trackingInfo.playersToShipsWatchingMap.getValue(player).getValue(ship) shouldHaveSize 1
             trackingInfo.playersToShipsNoLongerWatchingMap shouldHaveSize 0
             trackingInfo.shipsToLoad shouldHaveSize 1
             trackingInfo.shipsToUnload shouldHaveSize 0
@@ -60,6 +61,7 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
 
             trackingInfo.playersToShipsNewlyWatchingMap shouldHaveSize 0
             trackingInfo.playersToShipsWatchingMap shouldHaveSize 1
+            trackingInfo.playersToShipsWatchingMap.getValue(player).getValue(ship) shouldHaveSize 1
             trackingInfo.playersToShipsNoLongerWatchingMap shouldHaveSize 0
             trackingInfo.shipsToLoad shouldHaveSize 0
             trackingInfo.shipsToUnload shouldHaveSize 0
@@ -81,6 +83,7 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
 
             trackingInfo.playersToShipsNewlyWatchingMap shouldHaveSize 0
             trackingInfo.playersToShipsWatchingMap shouldHaveSize 1
+            trackingInfo.playersToShipsWatchingMap.getValue(player).getValue(ship) shouldHaveSize 1
             trackingInfo.playersToShipsNoLongerWatchingMap shouldHaveSize 0
             trackingInfo.shipsToLoad shouldHaveSize 0
             trackingInfo.shipsToUnload shouldHaveSize 0
@@ -173,7 +176,8 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
             )
 
             watchTasks shouldHaveSize 0
-            unwatchTasks shouldHaveSize 1
+            // it should NOT generate an unwatch task, it should immediately remove the chunk
+            unwatchTasks shouldHaveSize 0
 
             val trackingInfo = tracker.applyTasksAndGenerateTrackingInfo(watchTasks, unwatchTasks)
             trackingInfo.playersToShipsNewlyWatchingMap shouldHaveSize 0
@@ -279,6 +283,8 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
 
             trackingInfo.playersToShipsNewlyWatchingMap shouldHaveSize 2
             trackingInfo.playersToShipsWatchingMap shouldHaveSize 2
+            trackingInfo.playersToShipsWatchingMap.getValue(player1).getValue(ship) shouldHaveSize 1
+            trackingInfo.playersToShipsWatchingMap.getValue(player2).getValue(ship) shouldHaveSize 1
             trackingInfo.playersToShipsNoLongerWatchingMap shouldHaveSize 0
             trackingInfo.shipsToLoad shouldHaveSize 1
             trackingInfo.shipsToUnload shouldHaveSize 0
@@ -297,6 +303,8 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
 
             trackingInfo.playersToShipsNewlyWatchingMap shouldHaveSize 0
             trackingInfo.playersToShipsWatchingMap shouldHaveSize 2
+            trackingInfo.playersToShipsWatchingMap.getValue(player1).getValue(ship) shouldHaveSize 1
+            trackingInfo.playersToShipsWatchingMap.getValue(player2).getValue(ship) shouldHaveSize 1
             trackingInfo.playersToShipsNoLongerWatchingMap shouldHaveSize 0
             trackingInfo.shipsToLoad shouldHaveSize 0
             trackingInfo.shipsToUnload shouldHaveSize 0

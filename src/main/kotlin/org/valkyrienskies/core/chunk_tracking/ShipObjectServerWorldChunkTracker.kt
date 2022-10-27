@@ -2,8 +2,8 @@ package org.valkyrienskies.core.chunk_tracking
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
-import it.unimi.dsi.fastutil.objects.Object2IntMap
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet
+import it.unimi.dsi.fastutil.longs.LongSet
 import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBd
@@ -26,9 +26,9 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
     private val chunkToPlayersWatchingMap: Long2ObjectMap<MutableSet<IPlayer>> = Long2ObjectOpenHashMap()
 
     /**
-     * Player -> Ship Id -> Number of chunks on that ship the player is tracking
+     * Player -> Ship Id -> chunks on that ship the player is tracking
      */
-    private val playersToShipsWatchingMap = HashMap<IPlayer, Object2IntMap<ShipData>>()
+    private val playersToShipsWatchingMap = HashMap<IPlayer, MutableMap<ShipData, LongSet>>()
 
     /**
      * Ship Id -> Players watching
@@ -55,7 +55,7 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
 
     private fun cleanDeletedShips(deletedShips: Iterable<ShipData>) {
         for (ship in deletedShips) {
-            playersToShipsWatchingMap.values.forEach { it.removeInt(ship) }
+            playersToShipsWatchingMap.values.forEach { it.remove(ship) }
             shipsToPlayersWatchingMap.remove(ship.id)
             shipsToUnload.add(ship)
         }
@@ -116,6 +116,7 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
                 var minUnwatchingDistance = Double.MAX_VALUE
 
                 val playersWatchingChunk = getPlayersWatchingChunk(chunkX, chunkZ, shipData.chunkClaimDimension)
+                val chunkPosAsLong = IShipActiveChunksSet.chunkPosToLong(chunkX, chunkZ)
 
                 for (player in players) {
                     val playerPositionInWorldCoordinates: Vector3dc = player.getPosition(tempVector)
@@ -127,8 +128,8 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
                     if (shipData.chunkClaimDimension != player.dimension) {
                         if (isPlayerWatchingThisChunk) {
                             // if the chunk dimension is different from the player dimension,
-                            // lets just unwatch it for now
-                            newPlayersUnwatching.add(player)
+                            // unwatch it immediately, since the game already has
+                            removeWatchersFromChunk(shipData, chunkPosAsLong, listOf(player))
                         }
 
                         continue
@@ -151,7 +152,6 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
                     }
                 }
 
-                val chunkPosAsLong = IShipActiveChunksSet.chunkPosToLong(chunkX, chunkZ)
                 // TODO distanceSqToClosestPlayer is for the watch and unwatch tasks incorrect
                 // ( doesn't matter as long as we still do all of the watching in one tick though )
                 if (newPlayersWatching.isNotEmpty()) {
@@ -217,9 +217,9 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
 
         newWatchingPlayers.forEach { player ->
             playersToShipsWatchingMap
-                .computeIfAbsent(player) { Object2IntOpenHashMap() }
-                .compute(shipData) { _, count ->
-                    if (count == null) {
+                .computeIfAbsent(player) { HashMap() }
+                .compute(shipData) { _, chunks ->
+                    if (chunks == null) {
                         // This ship was not already tracked by this [player]
                         playersToShipsNewlyWatchingMap
                             .computeIfAbsent(player) { HashSet() }
@@ -235,11 +235,12 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
 
                         playersWatchingShip.add(player)
 
-                        // return 1 (the player is now watching one chunk on this ship)
-                        1
+                        // create a new set with this chunk in it that the player is now watching
+                        LongOpenHashSet().apply { add(chunkPos) }
                     } else {
-                        // other chunks on this ship were already tracked by this [player], increase the count by one
-                        count + 1
+                        // other chunks on this ship were already tracked by this [player], add the chunk to the set
+                        chunks.add(chunkPos)
+                        chunks
                     }
                 }
         }
@@ -257,8 +258,9 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
 
         removedWatchingPlayers.forEach { player ->
             playersToShipsWatchingMap.computeIfPresent(player) { _, shipsWatchingMap ->
-                shipsWatchingMap.computeIfPresent(shipData) { _, count ->
-                    if (count == 1) {
+                shipsWatchingMap.computeIfPresent(shipData) { _, chunks ->
+                    if (chunks.size == 1) {
+                        check(chunks.contains(chunkPos)) { "Last chunk on ship was not what we expected it to be" }
                         // This was the last chunk on the ship that [player] was tracking
                         playersToShipsNoLongerWatchingMap
                             .computeIfAbsent(player) { HashSet() }
@@ -272,10 +274,12 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
                             shipsToUnload.add(shipData)
                         }
 
+                        chunks.clear()
                         null // return null to remove the hashmap entry for this [shipId]
                     } else {
-                        // There are remaining chunks on the ship that [player] is tracking
-                        count - 1
+                        // There are remaining chunks on the ship that [player] is tracking, just remove this one
+                        check(chunks.remove(chunkPos)) { "Player not watching chunk that we thought they were" }
+                        chunks
                     }
                 }
 
