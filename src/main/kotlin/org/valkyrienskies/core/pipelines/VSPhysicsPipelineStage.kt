@@ -15,6 +15,7 @@ import org.valkyrienskies.physics_api.PhysicsWorldReference
 import org.valkyrienskies.physics_api.PoseVel
 import org.valkyrienskies.physics_api.RigidBodyInertiaData
 import org.valkyrienskies.physics_api.SegmentTracker
+import org.valkyrienskies.physics_api.dummy_impl.DummyPhysicsWorldReference
 import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.VoxelRigidBodyShapeUpdates
 import org.valkyrienskies.physics_api_krunch.KrunchBootstrap
@@ -26,7 +27,7 @@ import kotlin.math.min
 
 class VSPhysicsPipelineStage @Inject constructor() {
     private val gameFramesQueue: ConcurrentLinkedQueue<VSGameFrame> = ConcurrentLinkedQueue()
-    private val physicsEngine: PhysicsWorldReference = KrunchBootstrap.createKrunchPhysicsWorld()
+    private val physicsEngine: PhysicsWorldReference
 
     // Map ships ids to rigid bodies, and map rigid bodies to ship ids
     private val shipIdToPhysShip: MutableMap<ShipId, PhysShip> = HashMap()
@@ -36,11 +37,20 @@ class VSPhysicsPipelineStage @Inject constructor() {
     private var pendingUpdatesSize: Int = 0
 
     init {
-        // Apply physics engine settings
-        KrunchBootstrap.setKrunchSettings(
-            physicsEngine,
-            VSCoreConfig.SERVER.physics.makeKrunchSettings()
-        )
+        // Try creating the physics engine
+        physicsEngine = try {
+            val temp = KrunchBootstrap.createKrunchPhysicsWorld()
+            // Apply physics engine settings
+            KrunchBootstrap.setKrunchSettings(
+                temp,
+                VSCoreConfig.SERVER.physics.makeKrunchSettings()
+            )
+            temp
+        } catch (e: Exception) {
+            // Fallback to dummy physics engine if Krunch isn't supported
+            e.printStackTrace()
+            DummyPhysicsWorldReference()
+        }
     }
 
     /**
