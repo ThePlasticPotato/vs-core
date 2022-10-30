@@ -76,6 +76,7 @@ class ShipData(
         for (attachment in this.persistentAttachedData) {
             if (
                 ServerShipUser::class.java.isAssignableFrom(attachment.key) &&
+                attachment.value != null &&
                 (attachment.value as ServerShipUser).ship == null
             ) {
                 (attachment.value as ServerShipUser).ship = this
@@ -138,11 +139,8 @@ class ShipData(
     }
 
     override fun <T> saveAttachment(clazz: Class<T>, value: T?) {
-        if (
-            ServerShipUser::class.java.isAssignableFrom(clazz) &&
-            (value as ServerShipUser).ship == null
-        ) {
-            (value as ServerShipUser).ship = this
+        if (value is ServerShipUser && value.ship == null) {
+            value.ship = this
         }
 
         if (value == null)

@@ -54,16 +54,14 @@ class ShipObjectServer(
             forceInducers.removeIf { clazz.isAssignableFrom(it::class.java) }
             toBeTicked.removeIf { clazz.isAssignableFrom(it::class.java) }
         } else {
-            if (ShipForcesInducer::class.java.isAssignableFrom(clazz)) {
-                forceInducers.add(value as ShipForcesInducer)
+            if (value is ShipForcesInducer) {
+                forceInducers.add(value)
             }
-
-            if (ServerShipUser::class.java.isAssignableFrom(clazz)) {
-                (value as ServerShipUser).ship = this
+            if (value is ServerShipUser) {
+                value.ship = this
             }
-
-            if (Ticked::class.java.isAssignableFrom(clazz)) {
-                toBeTicked.add(value as Ticked)
+            if (value is Ticked) {
+                toBeTicked.add(value)
             }
         }
     }
