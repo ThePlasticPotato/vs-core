@@ -32,13 +32,12 @@ class ShipObjectServer(
 
     override fun <T> setAttachment(clazz: Class<T>, value: T?) {
         if (value == null) {
-            val r = attachedData.remove(clazz)
-            forceInducers.remove(r)
-            toBeTicked.remove(r)
+            attachedData.remove(clazz)
         } else {
-            applyAttachmentInterfaces(clazz, value)
             attachedData[clazz] = value
         }
+
+        applyAttachmentInterfaces(clazz, value)
     }
 
     override fun <T> getAttachment(clazz: Class<T>): T? =
@@ -51,16 +50,21 @@ class ShipObjectServer(
     }
 
     private fun applyAttachmentInterfaces(clazz: Class<*>, value: Any?) {
-        if (ShipForcesInducer::class.java.isAssignableFrom(clazz)) {
-            forceInducers.add(value as ShipForcesInducer)
-        }
+        if (value == null) {
+            forceInducers.removeIf { clazz.isAssignableFrom(it::class.java) }
+            toBeTicked.removeIf { clazz.isAssignableFrom(it::class.java) }
+        } else {
+            if (ShipForcesInducer::class.java.isAssignableFrom(clazz)) {
+                forceInducers.add(value as ShipForcesInducer)
+            }
 
-        if (ServerShipUser::class.java.isAssignableFrom(clazz)) {
-            (value as ServerShipUser).ship = this
-        }
+            if (ServerShipUser::class.java.isAssignableFrom(clazz)) {
+                (value as ServerShipUser).ship = this
+            }
 
-        if (Ticked::class.java.isAssignableFrom(clazz)) {
-            toBeTicked.add(value as Ticked)
+            if (Ticked::class.java.isAssignableFrom(clazz)) {
+                toBeTicked.add(value as Ticked)
+            }
         }
     }
 

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
+import com.fasterxml.jackson.datatype.guava.GuavaModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
@@ -90,6 +91,7 @@ object VSJacksonUtil {
             .registerModule(JOMLSerializationModule())
             .registerModule(VSSerializationModule())
             .registerModule(GuaveSerializationModule())
+            .registerModule(GuavaModule())
             .registerModule(ParameterNamesModule())
             .registerKotlinModule()
             .setVisibility(
