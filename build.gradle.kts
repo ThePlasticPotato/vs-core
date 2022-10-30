@@ -47,7 +47,7 @@ dependencies {
     val kotestVersion = "5.4.1"
 
     // VS Physics
-    api("org.valkyrienskies:physics_api_krunch:1.0.0+482de819e0")
+    api("org.valkyrienskies:physics_api_krunch:1.0.0+0702694a78")
 
     // JOML for Math
     api("org.joml:joml:1.10.4")
