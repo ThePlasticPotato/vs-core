@@ -7,5 +7,5 @@ class PhysicsConfig {
     @JsonSchema(
         description = "The detail of the collision LOD of ships, higher values are more detailed but heavier to compute"
     )
-    var lodDetail = 64
+    var lodDetail = 4096
 }
