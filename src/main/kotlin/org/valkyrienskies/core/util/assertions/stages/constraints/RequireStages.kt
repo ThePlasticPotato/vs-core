@@ -9,7 +9,7 @@ internal class RequireStages<S>(vararg stages: S) : StageConstraint<S> {
 
     override fun check(stagesSinceReset: List<S>, isReset: Boolean): String? {
         if (isReset && !stagesSinceReset.containsAll(stages)) {
-            return "Required all stages $stages"
+            return "Required all stages $stages - missing ${stages - stagesSinceReset.toSet()})"
         }
         return null
     }

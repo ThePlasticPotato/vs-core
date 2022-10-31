@@ -106,7 +106,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
         val updatedShips = HashMap<ShipId, UpdateShipInGameFrameData>() // Map of ship updates
         val gameFrameVoxelUpdatesMap = HashMap<ShipId, List<IVoxelShapeUpdate>>() // Voxel updates applied by this frame
 
-        val lastTickChanges = shipWorld.getLastTickChanges()
+        val lastTickChanges = shipWorld.getCurrentTickChanges()
 
         val newGroundRigidBodyObjects = lastTickChanges.getNewGroundRigidBodyObjects()
         val newShipObjects = lastTickChanges.newShipObjects

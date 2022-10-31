@@ -221,4 +221,31 @@ class TickStageEnforcerTest : StringSpec({
         }
     }
 
+    "require multiple orders (predicate)" {
+        val enforcer = TickStageEnforcer("a") {
+            requireOrder {
+                single("a")
+                single("g")
+                single("z")
+            }
+
+            requireOrder {
+                single("a")
+                single("c")
+            }
+        }
+
+        enforcer.stage("a")
+        enforcer.stage("z")
+        shouldThrow<ConstraintFailedException> {
+            enforcer.stage("g")
+        }
+
+        enforcer.stage("a")
+        enforcer.stage("b")
+        enforcer.stage("g")
+        enforcer.stage("c")
+        enforcer.stage("z")
+    }
+
 })

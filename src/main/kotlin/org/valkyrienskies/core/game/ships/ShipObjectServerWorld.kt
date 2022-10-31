@@ -12,7 +12,12 @@ import org.valkyrienskies.core.game.ChunkAllocator
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.game.IPlayer
 import org.valkyrienskies.core.game.VSBlockType
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.POST_TICK
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.CLEAR_FOR_RESET
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.GET_CURRENT_TICK_CHANGES
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.GET_LAST_TICK_CHANGES
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.POST_TICK_FINISH
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.POST_TICK_GENERATED
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.POST_TICK_START
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.PRE_TICK
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_BLOCKS
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_CHUNKS
@@ -46,7 +51,20 @@ class ShipObjectServerWorld @Inject constructor(
 ) : ShipObjectWorld<ShipObjectServer>() {
 
     private enum class Stages {
-        PRE_TICK, POST_TICK, UPDATE_DIMENSIONS, UPDATE_BLOCKS, UPDATE_CHUNKS
+        PRE_TICK,
+        POST_TICK_START,
+
+        /**
+         * Fires once [ShipObjectServerWorld.getCurrentTickChanges] can be called and is updated with the correct data
+         */
+        POST_TICK_GENERATED,
+        POST_TICK_FINISH,
+        GET_CURRENT_TICK_CHANGES,
+        GET_LAST_TICK_CHANGES,
+        UPDATE_DIMENSIONS,
+        UPDATE_BLOCKS,
+        UPDATE_CHUNKS,
+        CLEAR_FOR_RESET
     }
 
     private val enforcer = TickStageEnforcer(PRE_TICK) {
@@ -55,10 +73,16 @@ class ShipObjectServerWorld @Inject constructor(
         requireOrder {
             single(PRE_TICK)
             anyOf(UPDATE_DIMENSIONS, UPDATE_BLOCKS, UPDATE_CHUNKS)
-            single(POST_TICK)
+            single(POST_TICK_START)
+            single(POST_TICK_GENERATED)
+            single(POST_TICK_FINISH)
+            single(CLEAR_FOR_RESET)
         }
 
-        requireFinal(POST_TICK)
+        requireOrder(POST_TICK_GENERATED, GET_CURRENT_TICK_CHANGES, CLEAR_FOR_RESET)
+        requireStages(PRE_TICK, POST_TICK_START, POST_TICK_GENERATED, POST_TICK_FINISH, CLEAR_FOR_RESET)
+
+        requireFinal(CLEAR_FOR_RESET)
     }
 
     var lastTickPlayers: Set<IPlayer> = setOf()
@@ -91,6 +115,8 @@ class ShipObjectServerWorld @Inject constructor(
     private val newShipObjects: MutableList<ShipObjectServer> = ArrayList()
     private val updatedShipObjects: MutableList<ShipObjectServer> = ArrayList()
     private val deletedShipObjects: MutableList<ShipData> = ArrayList()
+    private var lastTickDeletedShipObjects: List<ShipData> = listOf()
+        get() = enforcer.stage(GET_LAST_TICK_CHANGES).run { field }
 
     private val udpServer = networking.tryUdpServer()
 
@@ -114,10 +140,10 @@ class ShipObjectServerWorld @Inject constructor(
     )
 
     /**
-     * A class containing the result of the last tick. **This object is only valid for the tick it was produced in!**
+     * A class containing the result of the current tick. **This object is only valid for the tick it was produced in!**
      * Many of the maps/sets will be reused for efficiency's sake.
      */
-    internal inner class LastTickChanges(
+    internal inner class CurrentTickChanges(
         val newShipObjects: Collection<ShipObjectServer>,
         val updatedShipObjects: Collection<ShipObjectServer>,
         val deletedShipObjects: Collection<ShipData>,
@@ -207,11 +233,11 @@ class ShipObjectServerWorld @Inject constructor(
         enforcer.stage(PRE_TICK)
         super.preTick()
 
-        loadManager.preTick(players, lastTickPlayers, queryableShipData, deletedShipObjects)
+        loadManager.preTick(players, lastTickPlayers, queryableShipData, lastTickDeletedShipObjects)
     }
 
     public override fun postTick() {
-        enforcer.stage(POST_TICK)
+        enforcer.stage(POST_TICK_START)
 
         val shipsLoadedThisTick = mutableListOf<ShipObjectServer>()
         val it = _loadedShips.iterator()
@@ -265,12 +291,15 @@ class ShipObjectServerWorld @Inject constructor(
             }
         }
         // endregion
+        enforcer.stage(POST_TICK_GENERATED)
 
         loadManager.postTick(players)
 
         shipsLoadedThisTick.forEach { VSEvents.shipLoadEvent.emit(ShipLoadEvent(it)) }
 
         VSEvents.tickEndEvent.emit(TickEndEvent(this))
+
+        enforcer.stage(POST_TICK_FINISH)
     }
 
     /**
@@ -352,8 +381,10 @@ class ShipObjectServerWorld @Inject constructor(
     override fun destroyWorld() {
     }
 
-    internal fun getLastTickChanges(): LastTickChanges {
-        return LastTickChanges(
+    internal fun getCurrentTickChanges(): CurrentTickChanges {
+        enforcer.stage(GET_CURRENT_TICK_CHANGES)
+
+        return CurrentTickChanges(
             newShipObjects,
             updatedShipObjects,
             deletedShipObjects,
@@ -364,8 +395,10 @@ class ShipObjectServerWorld @Inject constructor(
     }
 
     fun clearNewUpdatedDeletedShipObjectsAndVoxelUpdates() {
+        enforcer.stage(CLEAR_FOR_RESET)
         newShipObjects.clear()
         updatedShipObjects.clear()
+        lastTickDeletedShipObjects = deletedShipObjects.toList()
         deletedShipObjects.clear()
         shipToVoxelUpdates.clear()
         voxelShapeUpdatesList.clear()

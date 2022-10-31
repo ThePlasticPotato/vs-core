@@ -12,6 +12,10 @@ internal class RequireOrderPredicate<S>(val stages: List<StagePredicate<S>>) : S
         for (stage in stagesSinceReset) {
             val firstMatching = stages.indexOfFirst { predicate -> predicate.test(stage) }
 
+            if (firstMatching == -1) {
+                continue
+            }
+
             if (firstMatching < minMatching) {
                 return "Required stages matching predicate in the following order: $stages"
             }
