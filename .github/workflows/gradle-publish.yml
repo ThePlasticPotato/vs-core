@@ -11,7 +11,7 @@ on:
 jobs:
   validate-gradle:
     name: "Validate Gradle wrapper"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
         with:
@@ -19,7 +19,7 @@ jobs:
       - uses: gradle/wrapper-validation-action@v1
   build-and-publish:
     name: "Build and Publish"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
         with:
