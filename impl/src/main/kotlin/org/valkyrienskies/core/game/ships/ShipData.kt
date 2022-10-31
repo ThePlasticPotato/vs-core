@@ -29,7 +29,7 @@ import org.valkyrienskies.core.util.serialization.PacketIgnore
  */
 class ShipData(
     id: ShipId,
-    name: String,
+    slug: String,
     chunkClaim: ChunkClaim,
     chunkClaimDimension: DimensionId,
     physicsData: ShipPhysicsData,
@@ -42,7 +42,7 @@ class ShipData(
     var isStatic: Boolean = false,
     val persistentAttachedData: MutableClassToInstanceMap<Any> = MutableClassToInstanceMap.create(),
 ) : ShipDataCommon(
-    id, name, chunkClaim, chunkClaimDimension, physicsData, shipTransform, prevTickShipTransform,
+    id, slug, chunkClaim, chunkClaimDimension, physicsData, shipTransform, prevTickShipTransform,
     shipAABB, shipVoxelAABB, shipActiveChunksSet
 ), ServerShipInternal {
     /**
@@ -160,7 +160,7 @@ class ShipData(
          * so it must be filled with blocks by other code.
          */
         fun createEmpty(
-            name: String,
+            slug: String,
             shipId: ShipId,
             chunkClaim: ChunkClaim,
             chunkClaimDimension: DimensionId,
@@ -178,7 +178,7 @@ class ShipData(
 
             return ShipData(
                 id = shipId,
-                name = name,
+                slug = slug,
                 chunkClaim = chunkClaim,
                 chunkClaimDimension = chunkClaimDimension,
                 physicsData = ShipPhysicsData.createEmpty(),

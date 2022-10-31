@@ -22,7 +22,7 @@ class ServerShipDataConverterImpl @Inject constructor(
 ) : ServerShipDataConverter {
     override fun convertToDto(model: ShipData) = ServerShipDataV3(
         id = model.id,
-        name = model.name,
+        name = model.slug,
         chunkClaim = model.chunkClaim,
         chunkClaimDimension = model.chunkClaimDimension,
         velocity = model.physicsData.linearVelocity,
@@ -39,7 +39,7 @@ class ServerShipDataConverterImpl @Inject constructor(
 
     override fun convertToModel(dto: ServerShipDataV3): ShipData = ShipData(
         id = dto.id,
-        name = dto.name,
+        slug = dto.name,
         chunkClaim = dto.chunkClaim,
         chunkClaimDimension = dto.chunkClaimDimension,
         physicsData = ShipPhysicsData(dto.velocity, dto.omega),

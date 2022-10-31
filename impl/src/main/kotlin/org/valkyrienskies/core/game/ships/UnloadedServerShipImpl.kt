@@ -30,6 +30,9 @@ class AbstractUnloadedShip(private val data: ShipDataCommon) : ShipInternal {
     override val id: ShipId
         get() = data.id
 
+    override val slug: String
+        get() = data.slug
+
     @DeltaIgnore
     override var transform: ShipTransform = shipTransform
         set(shipTransform) {

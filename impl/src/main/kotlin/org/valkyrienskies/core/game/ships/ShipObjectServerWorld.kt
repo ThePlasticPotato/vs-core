@@ -6,6 +6,7 @@ import org.joml.Vector3i
 import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ServerShipInternal
 import org.valkyrienskies.core.api.ships.QueryableShipData
+import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.world.IPlayer
 import org.valkyrienskies.core.api.world.ServerShipWorldCore
@@ -273,11 +274,9 @@ class ShipObjectServerWorld @Inject constructor(
         val it = _loadedShips.iterator()
         while (it.hasNext()) {
             val shipObjectServer = it.next()
+            // When the ship has a enormous low mass delete it
             if (shipObjectServer.shipData.inertiaData.mass < 1e-8) {
-                // Delete this ship
-                deletedShipObjects.add(shipObjectServer.shipData)
-                allShips.removeShipData(shipObjectServer.shipData)
-                shipToVoxelUpdates.remove(shipObjectServer.shipData.id)
+                deleteShip(shipObjectServer)
                 it.remove()
             }
         }
@@ -393,7 +392,7 @@ class ShipObjectServerWorld @Inject constructor(
         val blockPosInShipCoordinates: Vector3ic = chunkClaim.getCenterBlockCoordinates(getYRange(dimensionId))
         val shipCenterInShipCoordinates: Vector3dc = Vector3d(blockPosInShipCoordinates).add(0.5, 0.5, 0.5)
         val newShipData = ShipData.createEmpty(
-            name = shipName,
+            slug = shipName,
             shipId = chunkAllocator.allocateShipId(),
             chunkClaim = chunkClaim,
             chunkClaimDimension = dimensionId,
@@ -466,6 +465,24 @@ class ShipObjectServerWorld @Inject constructor(
 
     override fun onDisconnect(player: IPlayer) {
         udpServer?.disconnect(player)
+    }
+
+    override fun deleteShip(ship: ServerShip) {
+        if (_loadedShips.contains(ship.id)) {
+            // TODO Fix this (ruby u know how?)
+            val shipData = if (ship is ShipObjectServer) {
+                ship.shipData
+            } else {
+                ship as ShipData
+            }
+
+            // Only try to unload the ship if it was loaded
+            deletedShipObjects.add(shipData)
+            _loadedShips.remove(ship.id)
+        }
+
+        allShips.remove(ship.id)
+        shipToVoxelUpdates.remove(ship.id)
     }
 
     data class LevelVoxelUpdates(

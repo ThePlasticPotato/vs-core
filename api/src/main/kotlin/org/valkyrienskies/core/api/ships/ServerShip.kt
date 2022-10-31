@@ -4,6 +4,8 @@ import org.jetbrains.annotations.ApiStatus
 import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
 
 interface ServerShip : Ship {
+    // Slug is modifiable on server-side
+    override var slug: String
 
     val inertiaData: ShipInertiaData
 

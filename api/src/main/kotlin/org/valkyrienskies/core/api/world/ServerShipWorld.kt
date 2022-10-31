@@ -15,4 +15,6 @@ interface ServerShipWorld : ShipWorld {
 
     @Deprecated("renamed", ReplaceWith("allShips"))
     override val queryableShipData: QueryableShipData<ServerShip> get() = allShips
+
+    fun deleteShip(ship: ServerShip)
 }

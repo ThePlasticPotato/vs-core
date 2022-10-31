@@ -19,7 +19,7 @@ import org.valkyrienskies.core.util.toAABBd
 
 open class ShipDataCommon(
     override val id: ShipId,
-    var name: String,
+    override var slug: String,
     override val chunkClaim: ChunkClaim,
     override val chunkClaimDimension: DimensionId,
     @DeltaIgnore

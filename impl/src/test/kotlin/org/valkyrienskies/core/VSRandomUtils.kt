@@ -207,7 +207,7 @@ object VSRandomUtils {
     fun randomShipData(random: Random = defaultRandom): ShipData {
         return ShipData(
             id = randomShipId(),
-            name = randomString(random, random.nextInt(10)),
+            slug = randomString(random, 5 + random.nextInt(10)),
             chunkClaim = randomChunkClaim(random),
             chunkClaimDimension = randomString(random, random.nextInt(10)),
             physicsData = randomShipPhysicsData(random),
