@@ -2,6 +2,7 @@ package org.valkyrienskies.core.util.serialization
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.databind.AnnotationIntrospector
+import com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT
@@ -99,6 +100,8 @@ object VSJacksonUtil {
                     .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
                     .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
             )
+
+        mapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false)
     }
 }
 
