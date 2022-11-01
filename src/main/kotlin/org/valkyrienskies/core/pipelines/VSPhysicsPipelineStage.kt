@@ -36,6 +36,9 @@ class VSPhysicsPipelineStage @Inject constructor() {
     private var pendingUpdates: MutableList<Pair<ShipId, List<IVoxelShapeUpdate>>> = ArrayList()
     private var pendingUpdatesSize: Int = 0
 
+    var isUsingDummy = false
+        private set
+
     init {
         // Try creating the physics engine
         physicsEngine = try {
@@ -49,6 +52,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
         } catch (e: Exception) {
             // Fallback to dummy physics engine if Krunch isn't supported
             e.printStackTrace()
+            isUsingDummy = true
             DummyPhysicsWorldReference()
         }
     }

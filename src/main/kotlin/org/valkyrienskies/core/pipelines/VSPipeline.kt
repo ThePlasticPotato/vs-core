@@ -65,6 +65,8 @@ class VSPipeline @Inject constructor(
 
     var deleteResources = false
 
+    val isUsingDummyPhysics get() = physicsStage.isUsingDummy
+
     fun preTickGame() {
         val prevSynchronizePhysics = synchronizePhysics
         synchronizePhysics = VSCoreConfig.SERVER.pt.synchronizePhysics
