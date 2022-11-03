@@ -8,7 +8,7 @@ import org.valkyrienskies.core.datastructures.IBlockPosSetAABB
 import org.valkyrienskies.core.datastructures.SmallBlockPosSet
 import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
 
-class VSSerializationModule : SimpleModule() {
+internal class VSSerializationModule : SimpleModule() {
     init {
         addAbstractTypeMapping<IBlockPosSet, SmallBlockPosSet>()
         addAbstractTypeMapping<IBlockPosSetAABB, SmallBlockPosSetAABB>()

@@ -5,7 +5,7 @@ import org.joml.Vector3dc
 /**
  * A [ConvexPolygonCollider] computes whether two polygons are colliding or not, and returns the result.
  */
-interface ConvexPolygonCollider {
+internal interface ConvexPolygonCollider {
     /**
      * The polygons tested for collision are [firstPolygon] and [secondPolygon], the normals they are tested with are [normals].
      *

@@ -7,7 +7,7 @@ import org.valkyrienskies.core.util.assertions.stages.constraints.StageConstrain
 import org.valkyrienskies.core.util.assertions.stages.predicates.StagePredicate
 import java.util.function.Predicate
 
-open class StageConstraintsBuilder<S> {
+internal open class StageConstraintsBuilder<S> {
     private val constraints = ArrayList<StageConstraint<S>>()
 
     fun constraint(constraint: StageConstraint<S>) {

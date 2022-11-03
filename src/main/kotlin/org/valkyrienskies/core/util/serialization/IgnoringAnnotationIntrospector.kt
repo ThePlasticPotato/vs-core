@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector
 /**
  * Will ignore fields annotated with specified annotations
  */
-class IgnoringAnnotationIntrospector(
+internal class IgnoringAnnotationIntrospector(
     /**
      * Fields with these annotations are ignored
      */

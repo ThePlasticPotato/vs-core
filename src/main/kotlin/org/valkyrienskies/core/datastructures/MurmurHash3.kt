@@ -5,7 +5,7 @@ package org.valkyrienskies.core.datastructures
  *
  * @see https://commons.apache.org/proper/commons-codec/jacoco/org.apache.commons.codec.digest/MurmurHash3.java.html
  */
-object MurmurHash3 {
+internal object MurmurHash3 {
 
     private const val C1_32 = -0x3361d2af
     private const val C2_32 = 0x1b873593

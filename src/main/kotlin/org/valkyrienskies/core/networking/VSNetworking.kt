@@ -89,7 +89,7 @@ class VSNetworking @Inject constructor(
      *
      * @return null if failed, otherwise the udp server
      */
-    fun tryUdpServer(): UdpServerImpl? {
+    internal fun tryUdpServer(): UdpServerImpl? {
 
         if (VSCoreConfig.SERVER.enableUdp) {
             try {
@@ -127,7 +127,7 @@ class VSNetworking @Inject constructor(
      * @param supportsUdp get called with true if server udp is supported,
      *  false otherwise
      */
-    fun tryUdpClient(server: SocketAddress, secretKey: SecretKey, supportsUdp: BooleanConsumer) {
+    internal fun tryUdpClient(server: SocketAddress, secretKey: SecretKey, supportsUdp: BooleanConsumer) {
         prevStateHandler?.unregister()
 
         with(simplePackets) {

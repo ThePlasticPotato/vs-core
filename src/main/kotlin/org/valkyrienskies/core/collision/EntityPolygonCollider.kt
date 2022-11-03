@@ -1,5 +1,6 @@
 package org.valkyrienskies.core.collision
 
+import org.joml.Matrix4dc
 import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBd
@@ -19,6 +20,10 @@ object EntityPolygonCollider {
     private val Y_NORMAL: Vector3dc = Vector3d(0.0, 1.0, 0.0)
     private val Z_NORMAL: Vector3dc = Vector3d(0.0, 0.0, 1.0)
     private val UNIT_NORMALS = arrayOf(X_NORMAL, Y_NORMAL, Z_NORMAL)
+
+    fun createPolygonFromAABB(aabb: AABBdc, transform: Matrix4dc? = null, shipFrom: ShipId? = null): ConvexPolygonc {
+        return TransformedCuboidPolygon.createFromAABB(aabb, transform, shipFrom)
+    }
 
     /**
      * @return [movement] modified such that the entity is colliding with [collidingPolygons]

@@ -3,7 +3,7 @@ package org.valkyrienskies.core.collision
 import org.joml.Vector3d
 import org.joml.Vector3dc
 
-data class CollisionResultTimeToCollision internal constructor(
+internal data class CollisionResultTimeToCollision internal constructor(
     internal var _initiallyColliding: Boolean,
     internal var _collisionAxis: Vector3d,
     internal var _timeToCollision: Double

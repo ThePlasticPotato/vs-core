@@ -43,7 +43,7 @@ import java.util.concurrent.CompletableFuture
 import javax.inject.Inject
 
 @WorldScoped
-class ShipObjectServerWorld @Inject constructor(
+class ShipObjectServerWorld @Inject internal constructor(
     @AllShips override val queryableShipData: MutableQueryableShipDataServer,
     @InternalInject private val chunkAllocator: ChunkAllocator,
     private val loadManager: ShipLoadManagerServer,

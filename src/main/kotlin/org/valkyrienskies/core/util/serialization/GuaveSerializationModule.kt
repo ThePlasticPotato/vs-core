@@ -14,7 +14,7 @@ import com.google.common.collect.ClassToInstanceMap
 import com.google.common.collect.MutableClassToInstanceMap
 import java.text.ParseException
 
-class GuaveSerializationModule : SimpleModule() {
+internal class GuaveSerializationModule : SimpleModule() {
 
     init {
         addSerializer(MutableClassToInstanceMap::class.java, ClassToInstanceMapSerializer)

@@ -6,7 +6,7 @@ import dagger.Provides
 import javax.inject.Named
 
 @Module
-class VSJacksonModule {
+internal class VSJacksonModule {
 
     @Provides
     fun defaultMapper(): ObjectMapper = VSJacksonUtil.defaultMapper

@@ -2,7 +2,7 @@ package org.valkyrienskies.core.networking.delta
 
 import io.netty.buffer.ByteBuf
 
-class DeltaEncodedChannelClientTCP<T>(
+internal class DeltaEncodedChannelClientTCP<T>(
     private val algorithm: DeltaAlgorithm<T>,
     initialSnapshot: T? = null
 ) {

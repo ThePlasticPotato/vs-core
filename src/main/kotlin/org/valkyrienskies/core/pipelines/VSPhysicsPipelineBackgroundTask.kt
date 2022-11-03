@@ -12,7 +12,9 @@ import kotlin.concurrent.withLock
 import kotlin.math.min
 import kotlin.system.measureNanoTime
 
-class VSPhysicsPipelineBackgroundTask(private val vsPipeline: VSPipeline, private var idealPhysicsTps: Int = 60) :
+internal class VSPhysicsPipelineBackgroundTask(
+    private val vsPipeline: VSPipeline, private var idealPhysicsTps: Int = 60
+) :
     Runnable {
     // When this is set to true, this task will kill itself at the next opportunity
     private var killTask = false

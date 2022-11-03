@@ -10,7 +10,7 @@ import kotlin.math.tan
 /**
  * A basic implementation of [ConvexPolygonCollider] using the Separating Axis Theorem algorithm.
  */
-object SATConvexPolygonCollider : ConvexPolygonCollider {
+internal object SATConvexPolygonCollider : ConvexPolygonCollider {
     override fun checkIfColliding(
         firstPolygon: ConvexPolygonc,
         secondPolygon: ConvexPolygonc,

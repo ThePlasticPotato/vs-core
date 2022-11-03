@@ -24,6 +24,6 @@ open class ShipObject(
 
     companion object {
         @JvmStatic
-        protected val jsonDiffDeltaAlgorithm = JsonDiffDeltaAlgorithm(VSJacksonUtil.deltaMapper)
+        internal val jsonDiffDeltaAlgorithm = JsonDiffDeltaAlgorithm(VSJacksonUtil.deltaMapper)
     }
 }

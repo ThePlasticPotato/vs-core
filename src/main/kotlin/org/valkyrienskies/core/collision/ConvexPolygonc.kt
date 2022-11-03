@@ -8,6 +8,22 @@ import org.valkyrienskies.core.game.ships.ShipId
 import kotlin.math.max
 import kotlin.math.min
 
+internal fun ConvexPolygonc.getProjectionAlongAxis(normalAxis: Vector3dc, output: CollisionRange): CollisionRange {
+    var minProjection = Double.POSITIVE_INFINITY
+    var maxProjection = Double.NEGATIVE_INFINITY
+
+    for (point in points) {
+        val projection = point.dot(normalAxis)
+        minProjection = min(minProjection, projection)
+        maxProjection = max(maxProjection, projection)
+    }
+
+    output._min = minProjection
+    output._max = maxProjection
+
+    return output
+}
+
 /**
  * An immutable view of [ConvexPolygon].
  */
@@ -16,22 +32,6 @@ interface ConvexPolygonc {
     val normals: Iterable<Vector3dc>
     val shipFrom: ShipId?
     val aabb: AABBdc
-
-    fun getProjectionAlongAxis(normalAxis: Vector3dc, output: CollisionRange): CollisionRange {
-        var minProjection = Double.POSITIVE_INFINITY
-        var maxProjection = Double.NEGATIVE_INFINITY
-
-        for (point in points) {
-            val projection = point.dot(normalAxis)
-            minProjection = min(minProjection, projection)
-            maxProjection = max(maxProjection, projection)
-        }
-
-        output._min = minProjection
-        output._max = maxProjection
-
-        return output
-    }
 
     fun getEnclosingAABB(output: AABBd): AABBd {
         output.minX = Double.POSITIVE_INFINITY

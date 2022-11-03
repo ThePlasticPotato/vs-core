@@ -33,7 +33,7 @@ interface VSPipelineComponent {
  * Game <--> Physics --> Network
  */
 @WorldScoped
-class VSPipeline @Inject constructor(
+class VSPipeline @Inject internal constructor(
     val shipWorld: ShipObjectServerWorld,
     private val gameStage: VSGamePipelineStage,
     private val physicsStage: VSPhysicsPipelineStage,

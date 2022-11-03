@@ -12,7 +12,7 @@ import org.valkyrienskies.core.util.writeVec3AsFloat
 import org.valkyrienskies.core.util.writeVec3d
 import javax.inject.Inject
 
-class VSNetworkPipelineStage @Inject constructor(
+internal class VSNetworkPipelineStage @Inject constructor(
     private val shipWorld: ShipObjectServerWorld,
     private val networking: VSNetworking,
     private val packets: Packets

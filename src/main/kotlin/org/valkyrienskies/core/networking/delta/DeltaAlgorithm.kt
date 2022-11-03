@@ -5,7 +5,7 @@ import io.netty.buffer.ByteBuf
 /**
  * Delta encodes type T. It does not necessarily delta the whole object, it may just do a few fields.
  */
-interface DeltaAlgorithm<T> {
+internal interface DeltaAlgorithm<T> {
     /**
      * Takes the [old] and the [new] and writes the size of the delta and the delta to [dest], then returns it.
      */

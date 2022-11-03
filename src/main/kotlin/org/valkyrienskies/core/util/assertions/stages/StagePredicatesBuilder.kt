@@ -2,7 +2,7 @@ package org.valkyrienskies.core.util.assertions.stages
 
 import org.valkyrienskies.core.util.assertions.stages.predicates.StagePredicate
 
-class StagePredicatesBuilder<S> {
+internal class StagePredicatesBuilder<S> {
     private val predicates = ArrayList<StagePredicate<S>>()
 
     fun matches(predicate: StagePredicate<S>) {

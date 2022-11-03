@@ -8,7 +8,7 @@ import org.valkyrienskies.core.networking.VSNetworkingConfigurator
 import org.valkyrienskies.core.pipelines.VSPipelineComponent
 import javax.inject.Inject
 
-class VSCoreImpl @Inject constructor(
+internal class VSCoreImpl @Inject constructor(
     override val networking: VSNetworking,
     override val hooks: AbstractCoreHooks,
     override val configurator: VSNetworkingConfigurator,

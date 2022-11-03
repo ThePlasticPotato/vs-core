@@ -7,7 +7,7 @@ import org.joml.Vector3ic
 /**
  * Allocates [ChunkClaim]s to be used by [ShipData].
  */
-data class ChunkAllocator(
+data class ChunkAllocator internal constructor(
     private var nextClaimX: Int,
     private var nextClaimZ: Int,
     private var nextShipId: Long,
@@ -85,7 +85,7 @@ data class ChunkAllocator(
         }
     }
 
-    fun allocateShipId(): Long {
+    internal fun allocateShipId(): Long {
         return nextShipId++
     }
 
@@ -93,7 +93,7 @@ data class ChunkAllocator(
      * This finds the next empty chunkSet for use, currently only increases the xPos to get new
      * positions
      */
-    fun allocateNewChunkClaim(): ChunkClaim {
+    internal fun allocateNewChunkClaim(): ChunkClaim {
         val nextClaim = ChunkClaim(nextClaimX, nextClaimZ)
         // Setup coordinates for the next claim
         nextClaimX++
