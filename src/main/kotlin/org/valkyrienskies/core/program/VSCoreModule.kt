@@ -3,6 +3,7 @@ package org.valkyrienskies.core.program
 import dagger.Module
 import dagger.Provides
 import org.valkyrienskies.core.config.VSCoreConfig.ServerConfigModule
+import org.valkyrienskies.core.game.ships.serialization.ShipSerializationModule
 import org.valkyrienskies.core.hooks.AbstractCoreHooks
 import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule
 import org.valkyrienskies.core.networking.VSNetworkingConfigurator
@@ -14,7 +15,8 @@ import org.valkyrienskies.core.util.serialization.VSJacksonModule
     includes = [
         NetworkingModule::class,
         VSJacksonModule::class,
-        ServerConfigModule::class
+        ServerConfigModule::class,
+        ShipSerializationModule::class
     ]
 )
 class VSCoreModule(

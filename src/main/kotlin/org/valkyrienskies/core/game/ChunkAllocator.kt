@@ -1,5 +1,6 @@
 package org.valkyrienskies.core.game
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.joml.Vector2i
 import org.joml.Vector3dc
 import org.joml.Vector3ic
@@ -7,6 +8,7 @@ import org.joml.Vector3ic
 /**
  * Allocates [ChunkClaim]s to be used by [ShipData].
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY) // serialize our private constructor vars
 data class ChunkAllocator internal constructor(
     private var nextClaimX: Int,
     private var nextClaimZ: Int,

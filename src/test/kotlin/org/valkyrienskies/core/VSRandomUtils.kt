@@ -17,6 +17,8 @@ import org.valkyrienskies.core.game.ships.ShipId
 import org.valkyrienskies.core.game.ships.ShipInertiaData
 import org.valkyrienskies.core.game.ships.ShipPhysicsData
 import org.valkyrienskies.core.game.ships.ShipTransform
+import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShipDataV0
+import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShipDataV3
 import org.valkyrienskies.core.pipelines.ShipInPhysicsFrameData
 import org.valkyrienskies.physics_api.PoseVel
 import org.valkyrienskies.physics_api.RigidBodyInertiaData
@@ -253,5 +255,40 @@ internal object VSRandomUtils {
         } while (s >= 1 || s == 0.0)
         val multiplier = StrictMath.sqrt(-2 * StrictMath.log(s) / s)
         return v1 * multiplier
+    }
+
+    fun randomServerShipDataV0(random: Random = defaultRandom): ServerShipDataV0 {
+        return ServerShipDataV0(
+            id = randomShipId(),
+            name = randomString(random, random.nextInt(10)),
+            chunkClaim = randomChunkClaim(random),
+            chunkClaimDimension = randomString(random, random.nextInt(10)),
+            physicsData = randomShipPhysicsData(random),
+            inertiaData = randomShipInertiaData(random),
+            shipTransform = randomShipTransform(random),
+            prevTickShipTransform = randomShipTransform(random),
+            shipAABB = randomAABBd(random),
+            shipVoxelAABB = null,
+            shipActiveChunksSet = randomShipActiveChunkSet(random, random.nextInt(100))
+        )
+    }
+
+    fun randomServerShipDataV3(random: Random = defaultRandom): ServerShipDataV3 {
+        return ServerShipDataV3(
+            id = randomShipId(),
+            name = randomString(random, random.nextInt(10)),
+            chunkClaim = randomChunkClaim(random),
+            chunkClaimDimension = randomString(random, random.nextInt(10)),
+            velocity = randomVector3d(random),
+            omega = randomVector3d(random),
+            inertiaData = randomShipInertiaData(random),
+            transform = randomShipTransform(random),
+            prevTickTransform = randomShipTransform(random),
+            worldAABB = randomAABBd(random),
+            shipAABB = null,
+            activeChunks = randomShipActiveChunkSet(random, random.nextInt(100)),
+            isStatic = random.nextBoolean(),
+            persistentAttachedData = HashMap()
+        )
     }
 }

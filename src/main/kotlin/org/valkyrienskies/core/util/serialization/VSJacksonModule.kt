@@ -12,6 +12,10 @@ internal class VSJacksonModule {
     fun defaultMapper(): ObjectMapper = VSJacksonUtil.defaultMapper
 
     @Provides
+    @Named("dto")
+    fun dtoMapper(): ObjectMapper = VSJacksonUtil.dtoMapper
+
+    @Provides
     @Named("config")
     fun configMapper(): ObjectMapper = VSJacksonUtil.configMapper
 

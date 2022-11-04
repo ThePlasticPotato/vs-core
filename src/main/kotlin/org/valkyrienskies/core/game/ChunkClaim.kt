@@ -1,5 +1,7 @@
 package org.valkyrienskies.core.game
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonIncludeProperties
 import org.joml.Vector3i
 import org.joml.primitives.AABBi
 import org.joml.primitives.AABBic
@@ -13,6 +15,8 @@ import java.lang.Math.floorDiv
  * So for example, if [xIndex] is 5, [zIndex] is 10, and [DIAMETER] is 50, then this claim contains all chunks between
  * (250, 500) and (299, 549)
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY) // Don't use getters, they have a weird name
+@JsonIncludeProperties("xIndex", "zIndex") // Serialize only the xIndex and zIndex fields
 data class ChunkClaim(val xIndex: Int, val zIndex: Int) {
 
     companion object {

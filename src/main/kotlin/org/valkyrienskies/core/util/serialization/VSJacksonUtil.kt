@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufInputStream
 import org.valkyrienskies.core.game.ships.ShipData
@@ -43,12 +42,19 @@ object VSJacksonUtil {
      */
     val configMapper = ObjectMapper()
 
+    /**
+     * The mapper to use for DTOs. Uses strict settings - only uses public getters/setters,
+     * fails on unknown properties, etc.
+     */
+    val dtoMapper = ObjectMapper()
+
     init {
         // Configure the mappers
         configureMapper(defaultMapper)
         configurePacketMapper(packetMapper)
         configureDeltaMapper(deltaMapper)
         configureConfigMapper(configMapper)
+        configureDtoMapper(dtoMapper)
     }
 
     fun configureAll(configure: (ObjectMapper) -> Unit) {
@@ -80,28 +86,49 @@ object VSJacksonUtil {
         mapper.addMixIn(ShipData::class.java, ShipDataServerMixin::class.java)
     }
 
+    private fun configureDtoMapper(mapper: ObjectMapper) {
+        registerStandardModules(mapper)
+        mapper.setVisibility(
+            mapper.visibilityChecker
+                .withGetterVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY)
+                .withIsGetterVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY)
+                .withCreatorVisibility(JsonAutoDetect.Visibility.PUBLIC_ONLY)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withFieldVisibility(JsonAutoDetect.Visibility.NONE)
+        )
+    }
+
     /**
      * Configures the selected object mapper to use the standard Valkyrien Skies configuration for
-     * serializing things, particularly [org.valkyrienskies.core.game.ShipData]
+     * serializing things
      *
      * @param mapper The ObjectMapper to configure
      */
     private fun configureMapper(mapper: ObjectMapper) {
+        registerStandardModules(mapper)
+
+        mapper.setVisibility(
+            mapper.visibilityChecker
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+        )
+
+        mapper.registerModule(FastUtilModule())
+
+        mapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false)
+    }
+
+    /**
+     * Registers standard VS serialization modules
+     */
+    private fun registerStandardModules(mapper: ObjectMapper) {
         mapper
             .registerModule(JOMLSerializationModule())
             .registerModule(VSSerializationModule())
             .registerModule(GuaveSerializationModule())
-            .registerModule(ParameterNamesModule())
             .registerKotlinModule()
-            .setVisibility(
-                mapper.visibilityChecker
-                    .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                    .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                    .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                    .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-            )
-
-        mapper.configure(FAIL_ON_UNKNOWN_PROPERTIES, false)
     }
 }
 

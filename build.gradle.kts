@@ -86,6 +86,10 @@ dependencies {
     kapt("com.google.dagger", "dagger-compiler", daggerVersion)
     kaptTest("com.google.dagger", "dagger-compiler", daggerVersion)
 
+    // MapStruct for DTO mapping (particularly ShipData)
+    implementation("org.mapstruct:mapstruct:1.5.4.RubyDaggerFork-2")
+    kapt("org.mapstruct:mapstruct-processor:1.5.4.RubyDaggerFork-2")
+
     // Junit 5 for Unit Testing
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.0")
     testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
@@ -96,6 +100,10 @@ dependencies {
     // Log4j2 for Logging
     implementation("org.apache.logging.log4j:log4j-api:${properties["mc_log4j2_version"]}")
 
+}
+
+kapt {
+    correctErrorTypes = true
 }
 
 tasks.withType<Checkstyle> {
@@ -124,7 +132,7 @@ ktlint {
 tasks {
     compileKotlin {
         kotlinOptions {
-            freeCompilerArgs += "-opt-in=org.valkyrienskies.core.util.PrivateApi"
+            freeCompilerArgs += listOf("-opt-in=org.valkyrienskies.core.util.PrivateApi", "-Xjvm-default=all")
         }
 
         kotlinOptions.jvmTarget = "1.8"

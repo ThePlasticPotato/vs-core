@@ -13,3 +13,9 @@ fun Arb.Companion.shipData() = fromVsRandom(VSRandomUtils::randomShipData)
 fun Arb.Companion.queryableShipData(size: Arb<Int>) = arbitrary { rs ->
     VSRandomUtils.randomQueryableShipData(rs.random, size.bind())
 }
+
+fun Arb.Companion.serverShipDataV0() = fromVsRandom(VSRandomUtils::randomServerShipDataV0)
+
+fun Arb.Companion.serverShipDataV3() = fromVsRandom(VSRandomUtils::randomServerShipDataV3)
+
+fun Arb.Companion.chunkClaim() = fromVsRandom(VSRandomUtils::randomChunkClaim)

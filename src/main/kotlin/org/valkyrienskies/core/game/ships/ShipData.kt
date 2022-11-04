@@ -36,7 +36,8 @@ class ShipData(
     shipAABB: AABBdc,
     shipVoxelAABB: AABBic?,
     shipActiveChunksSet: IShipActiveChunksSet,
-    var isStatic: Boolean = false
+    var isStatic: Boolean = false,
+    internal val persistentAttachedData: MutableClassToInstanceMap<Any> = MutableClassToInstanceMap.create()
 ) : ShipDataCommon(
     id, name, chunkClaim, chunkClaimDimension, physicsData, shipTransform, prevTickShipTransform,
     shipAABB, shipVoxelAABB, shipActiveChunksSet
@@ -51,8 +52,6 @@ class ShipData(
      */
     @JsonIgnore
     private val missingLoadedChunks: IShipActiveChunksSet = ShipActiveChunksSet.create()
-
-    internal val persistentAttachedData = MutableClassToInstanceMap.create<Any>() // TODO a serializable class
 
     /**
      * Generates the [shipVoxelAABB] in O(1) time. However, this object is too large for us to persistently store it,

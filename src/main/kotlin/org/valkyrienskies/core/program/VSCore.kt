@@ -3,6 +3,7 @@ package org.valkyrienskies.core.program
 import org.valkyrienskies.core.hooks.AbstractCoreHooks
 import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.networking.VSNetworkingConfigurator
+import org.valkyrienskies.core.pipelines.VSPipeline
 import org.valkyrienskies.core.pipelines.VSPipelineComponent
 
 /**
@@ -19,4 +20,14 @@ interface VSCore {
     val hooks: AbstractCoreHooks
     val configurator: VSNetworkingConfigurator
     val pipelineComponentFactory: VSPipelineComponent.Factory
+
+    fun newPipelineLegacyData(
+        queryableShipDataBytes: ByteArray, chunkAllocatorBytes: ByteArray
+    ): VSPipeline
+
+    fun newPipeline(): VSPipeline
+
+    fun newPipeline(data: ByteArray): VSPipeline
+
+    fun serializePipeline(pipeline: VSPipeline): ByteArray
 }

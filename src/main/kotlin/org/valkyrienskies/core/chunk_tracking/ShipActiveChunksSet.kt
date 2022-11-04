@@ -1,12 +1,14 @@
 package org.valkyrienskies.core.chunk_tracking
 
+import com.fasterxml.jackson.annotation.JsonIncludeProperties
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet.Companion.chunkPosToLong
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet.Companion.longToChunkX
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet.Companion.longToChunkZ
 
-class ShipActiveChunksSet private constructor(
-    private val chunkClaimSet: LongOpenHashSet
+@JsonIncludeProperties("chunkClaimSet")
+data class ShipActiveChunksSet constructor(
+    val chunkClaimSet: LongOpenHashSet
 ) : IShipActiveChunksSet {
     override fun addChunkPos(chunkX: Int, chunkZ: Int): Boolean {
         return chunkClaimSet.add(chunkPosToLong(chunkX, chunkZ))

@@ -16,4 +16,11 @@ annotation class AllShips
 class SerializedShipDataModule(
     @get:Provides @get:WorldScoped @get:AllShips val queryableShipData: MutableQueryableShipDataServer,
     @get:Provides @get:WorldScoped @get:InternalInject val chunkAllocator: ChunkAllocator
-)
+) {
+    companion object {
+        fun createEmpty() = SerializedShipDataModule(
+            queryableShipData = QueryableShipDataImpl(),
+            chunkAllocator = ChunkAllocator.create()
+        )
+    }
+}

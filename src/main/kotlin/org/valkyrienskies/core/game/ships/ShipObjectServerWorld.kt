@@ -45,7 +45,7 @@ import javax.inject.Inject
 @WorldScoped
 class ShipObjectServerWorld @Inject internal constructor(
     @AllShips override val queryableShipData: MutableQueryableShipDataServer,
-    @InternalInject private val chunkAllocator: ChunkAllocator,
+    @InternalInject internal val chunkAllocator: ChunkAllocator,
     private val loadManager: ShipLoadManagerServer,
     networking: VSNetworking
 ) : ShipObjectWorld<ShipObjectServer>() {
