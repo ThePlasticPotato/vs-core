@@ -185,7 +185,15 @@ class ShipObjectServerWorld @Inject internal constructor(
 
             val shipData: ShipData? = queryableShipData.getShipDataFromChunkPos(chunkPos.x(), chunkPos.z(), dimensionId)
 
-            val shipId: ShipId = shipData?.id ?: dimensionToGroundBodyId[dimensionId]!!
+            val shipId: ShipId? = shipData?.id ?: dimensionToGroundBodyId[dimensionId]
+
+            if (shipId == null) {
+                logger.error(
+                    "Could not find ship or dimension body for block update at $posX, $posY, $posZ in dimension $dimensionId"
+                )
+                return
+            }
+
             val voxelUpdates = shipToVoxelUpdates.getOrPut(shipId) { HashMap() }
 
             val voxelShapeUpdate =
