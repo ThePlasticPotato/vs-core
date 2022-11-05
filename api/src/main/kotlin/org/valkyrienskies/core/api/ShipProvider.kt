@@ -1,5 +1,7 @@
 package org.valkyrienskies.core.api
 
+import org.valkyrienskies.core.api.ships.ServerShip
+
 /**
  * ServerShipProvider: A interface that just specifies the existence of a ship field
  */

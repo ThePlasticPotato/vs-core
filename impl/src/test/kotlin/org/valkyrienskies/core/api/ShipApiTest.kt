@@ -46,15 +46,15 @@ internal class ShipApiTest {
         Assertions.assertEquals(shipData.getAttachment(TestShipUser::class.java)!!.ship, shipDataDeserialized)
     }
 
-    fun abstractShipSaver(ship: ServerShip) {
+    fun abstractShipSaver(ship: ServerShipCore) {
         ship.saveAttachment(3f)
     }
 
-    fun abstractShipSaver2(ship: LoadedServerShip) {
+    fun abstractShipSaver2(ship: LoadedServerShipCore) {
         ship.setAttachment(5)
     }
 
-    fun abstractShipUser(ship: ServerShip, checkInt: Boolean) {
+    fun abstractShipUser(ship: ServerShipCore, checkInt: Boolean) {
         if (checkInt) Assertions.assertEquals(5, ship.getAttachment<Int>())
         Assertions.assertEquals(3f, ship.getAttachment<Float>())
     }
@@ -62,5 +62,5 @@ internal class ShipApiTest {
 
 internal class TestShipUser : ServerShipUser {
     @JsonIgnore
-    override var ship: ServerShip? = null
+    override var ship: ServerShipCore? = null
 }

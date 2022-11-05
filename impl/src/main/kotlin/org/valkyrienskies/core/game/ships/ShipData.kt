@@ -8,13 +8,12 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
-import org.valkyrienskies.core.api.ServerShip
+import org.valkyrienskies.core.api.ServerShipCore
 import org.valkyrienskies.core.api.ServerShipUser
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.chunk_tracking.ShipActiveChunksSet
 import org.valkyrienskies.core.datastructures.IBlockPosSetAABB
 import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
-import org.valkyrienskies.core.game.ChunkClaim
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.game.VSBlockType
 import org.valkyrienskies.core.util.serialization.PacketIgnore
@@ -42,7 +41,7 @@ class ShipData(
     id, name, chunkClaim, chunkClaimDimension, physicsData, shipTransform, prevTickShipTransform,
     shipAABB, shipVoxelAABB, shipActiveChunksSet
 ),
-    ServerShip {
+    ServerShipCore {
     /**
      * The set of chunks that must be loaded before this ship is fully loaded.
      *

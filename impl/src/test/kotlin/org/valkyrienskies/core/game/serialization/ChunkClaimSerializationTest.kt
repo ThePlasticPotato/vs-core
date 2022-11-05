@@ -7,7 +7,6 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
 import io.kotest.property.checkAll
-import org.valkyrienskies.core.game.ChunkClaim
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
 import org.valkyrienskies.test_utils.generators.chunkClaim
 

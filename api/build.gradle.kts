@@ -6,8 +6,6 @@ dependencies {
     // JOML for Math
     api("org.joml:joml:1.10.4")
     api("org.joml:joml-primitives:1.10.0")
-
-    implementation(project(":impl"))
 }
 
 publishing {

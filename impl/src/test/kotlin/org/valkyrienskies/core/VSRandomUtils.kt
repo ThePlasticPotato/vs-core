@@ -10,6 +10,7 @@ import org.valkyrienskies.core.datastructures.IBlockPosSet
 import org.valkyrienskies.core.datastructures.SmallBlockPosSet
 import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
 import org.valkyrienskies.core.game.ChunkClaim
+import org.valkyrienskies.core.game.ChunkClaimImpl
 import org.valkyrienskies.core.game.ships.MutableQueryableShipDataServer
 import org.valkyrienskies.core.game.ships.QueryableShipDataImpl
 import org.valkyrienskies.core.game.ships.ShipData
@@ -114,7 +115,7 @@ internal object VSRandomUtils {
 
     @Suppress("WeakerAccess")
     fun randomChunkClaim(random: Random = defaultRandom): ChunkClaim {
-        return ChunkClaim.getClaim(randomIntegerNotCloseToLimit(random), randomIntegerNotCloseToLimit(random))
+        return ChunkClaimImpl.getClaim(randomIntegerNotCloseToLimit(random), randomIntegerNotCloseToLimit(random))
     }
 
     @Suppress("WeakerAccess")

@@ -1,7 +1,7 @@
 package org.valkyrienskies.core.game.ships
 
 import org.joml.primitives.AABBdc
-import org.valkyrienskies.core.api.Ship
+import org.valkyrienskies.core.api.ships.Ship
 import org.valkyrienskies.core.datastructures.ChunkClaimMap
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.util.intersectsAABB

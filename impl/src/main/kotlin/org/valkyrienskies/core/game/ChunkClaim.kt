@@ -6,6 +6,7 @@ import org.joml.Vector3i
 import org.joml.primitives.AABBi
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.game.ChunkClaim.Companion.DIAMETER
+import org.valkyrienskies.core.game.ChunkClaim.Companion.claimToLong
 import java.lang.Math.floorDiv
 
 /**
@@ -17,75 +18,53 @@ import java.lang.Math.floorDiv
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY) // Don't use getters, they have a weird name
 @JsonIncludeProperties("xIndex", "zIndex") // Serialize only the xIndex and zIndex fields
-data class ChunkClaim(val xIndex: Int, val zIndex: Int) {
+internal data class ChunkClaimImpl(override val xIndex: Int, override val zIndex: Int) : ChunkClaim {
 
     companion object {
         /**
-         * Every ship is given [DIAMETER] x [DIAMETER] chunks, hard-coded.
-         */
-        const val DIAMETER: Int = 256
-
-        private const val BOTTOM_32_BITS_MASK: Long = 0xFFFFFFFFL
-
-        /**
          * Get the claim for a specific chunk
          */
-        fun getClaim(chunkX: Int, chunkZ: Int) =
-            ChunkClaim(getClaimXIndex(chunkX), getClaimZIndex(chunkZ))
-
-        fun getClaimXIndex(chunkX: Int) = floorDiv(chunkX, DIAMETER)
-        fun getClaimZIndex(chunkZ: Int) = floorDiv(chunkZ, DIAMETER)
-
-        private fun claimToLong(claimXIndex: Int, claimZIndex: Int): Long {
-            return ((claimXIndex.toLong() shl 32) or (claimZIndex.toLong() and BOTTOM_32_BITS_MASK))
-        }
-
-        fun getClaimThenToLong(chunkX: Int, chunkZ: Int): Long {
-            // Compute the coordinates of the claim this chunk is in (not the same as chunk coordinates)
-            val claimXIndex = getClaimXIndex(chunkX)
-            val claimZIndex = getClaimZIndex(chunkZ)
-            // Then convert
-            return claimToLong(claimXIndex, claimZIndex)
-        }
+        fun getClaim(chunkX: Int, chunkZ: Int): ChunkClaim =
+            ChunkClaimImpl(ChunkClaim.getClaimXIndex(chunkX), ChunkClaim.getClaimZIndex(chunkZ))
     }
 
     /**
      * x start (inclusive)
      */
-    val xStart = xIndex * DIAMETER
+    override val xStart = xIndex * DIAMETER
 
     /**
      * x end (inclusive)
      */
-    val xEnd = (xIndex * DIAMETER) + DIAMETER - 1
+    override val xEnd = (xIndex * DIAMETER) + DIAMETER - 1
 
     /**
      * z start (inclusive)
      */
-    val zStart = zIndex * DIAMETER
+    override val zStart = zIndex * DIAMETER
 
     /**
      * z end (inclusive)
      */
-    val zEnd = (zIndex * DIAMETER) + DIAMETER - 1
+    override val zEnd = (zIndex * DIAMETER) + DIAMETER - 1
 
-    val xMiddle = xStart + DIAMETER / 2
+    override val xMiddle = xStart + DIAMETER / 2
 
-    val zMiddle = zStart + DIAMETER / 2
+    override val zMiddle = zStart + DIAMETER / 2
 
     /**
      * The number of chunks owned by this claim
      */
-    val size = (xEnd - xStart + 1) * (zEnd - zStart + 1)
+    override val size = (xEnd - xStart + 1) * (zEnd - zStart + 1)
 
-    fun toLong(): Long {
+    override fun toLong(): Long {
         return claimToLong(xIndex, zIndex)
     }
 
-    fun contains(x: Int, z: Int) =
+    override fun contains(x: Int, z: Int) =
         (x in xStart..xEnd) and (z in zStart..zEnd)
 
-    fun getCenterBlockCoordinates(destination: Vector3i): Vector3i {
+    override fun getCenterBlockCoordinates(destination: Vector3i): Vector3i {
         val minBlockX = xStart shl 4
         val maxBlockX = (xEnd shl 4) + 15
         val minBlockZ = zStart shl 4
@@ -97,7 +76,7 @@ data class ChunkClaim(val xIndex: Int, val zIndex: Int) {
         return destination.set(centerX, centerY, centerZ)
     }
 
-    fun getBlockSize(destination: Vector3i): Vector3i {
+    override fun getBlockSize(destination: Vector3i): Vector3i {
         val xSize = (xEnd - xStart + 1) * 16
         val ySize = 256
         val zSize = (zEnd - zStart + 1) * 16
@@ -107,7 +86,7 @@ data class ChunkClaim(val xIndex: Int, val zIndex: Int) {
     /**
      * The region of all blocks contained in this [ChunkClaim].
      */
-    fun getTotalVoxelRegion(destination: AABBi): AABBic {
+    override fun getTotalVoxelRegion(destination: AABBi): AABBic {
         destination.minX = xStart shl 4
         destination.minY = 0
         destination.minZ = zStart shl 4

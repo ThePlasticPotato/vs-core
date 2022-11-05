@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.joml.Vector3d
-import org.valkyrienskies.core.game.ChunkClaim
 import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShipDataV0
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
 import java.nio.file.Files

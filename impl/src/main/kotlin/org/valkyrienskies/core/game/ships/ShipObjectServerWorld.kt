@@ -4,7 +4,7 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.Vector3i
 import org.joml.Vector3ic
-import org.valkyrienskies.core.api.ServerShip
+import org.valkyrienskies.core.api.ServerShipCore
 import org.valkyrienskies.core.chunk_tracking.ChunkUnwatchTask
 import org.valkyrienskies.core.chunk_tracking.ChunkWatchTask
 import org.valkyrienskies.core.chunk_tracking.ChunkWatchTasks
@@ -225,7 +225,7 @@ class ShipObjectServerWorld @Inject internal constructor(
         voxelShapeUpdatesList.add(LevelVoxelUpdates(dimensionId, voxelShapeUpdates))
     }
 
-    fun getShipObject(ship: ServerShip): ShipObjectServer? {
+    fun getShipObject(ship: ServerShipCore): ShipObjectServer? {
         return shipObjects[ship.id]
     }
 

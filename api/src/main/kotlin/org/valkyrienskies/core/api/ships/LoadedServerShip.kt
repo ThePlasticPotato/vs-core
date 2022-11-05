@@ -1,4 +1,4 @@
-package org.valkyrienskies.core.api
+package org.valkyrienskies.core.api.ships
 
 interface LoadedServerShip : LoadedShip, ServerShip {
 

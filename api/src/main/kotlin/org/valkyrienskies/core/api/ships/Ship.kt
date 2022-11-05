@@ -1,4 +1,4 @@
-package org.valkyrienskies.core.api
+package org.valkyrienskies.core.api.ships
 
 import org.joml.Matrix4dc
 import org.joml.Vector3dc
@@ -7,10 +7,7 @@ import org.joml.primitives.AABBic
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.game.ChunkClaim
 import org.valkyrienskies.core.game.DimensionId
-import org.valkyrienskies.core.game.VSBlockType
 import org.valkyrienskies.core.game.ships.ShipId
-import org.valkyrienskies.core.game.ships.ShipTransform
-import org.valkyrienskies.core.util.PrivateApi
 
 /**
  * Abstraction of a ship, there are many types such as offline ships
@@ -34,16 +31,4 @@ interface Ship {
 
     val shipToWorld: Matrix4dc get() = shipTransform.shipToWorldMatrix
     val worldToShip: Matrix4dc get() = shipTransform.worldToShipMatrix
-
-    @PrivateApi
-    @JvmSynthetic
-    fun onSetBlock(
-        posX: Int,
-        posY: Int,
-        posZ: Int,
-        oldBlockType: VSBlockType,
-        newBlockType: VSBlockType,
-        oldBlockMass: Double,
-        newBlockMass: Double
-    )
 }
