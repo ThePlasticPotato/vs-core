@@ -5,9 +5,12 @@ import org.joml.Vector3dc
 import org.joml.primitives.AABBd
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
+import org.valkyrienskies.core.api.ShipCore
 import org.valkyrienskies.core.api.ships.Ship
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.datastructures.IBlockPosSet
+import org.valkyrienskies.core.game.ChunkClaim
+import org.valkyrienskies.core.game.ChunkClaimImpl
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.game.VSBlockType
 import org.valkyrienskies.core.util.serialization.DeltaIgnore
@@ -26,7 +29,7 @@ open class ShipDataCommon(
     shipAABB: AABBdc = shipTransform.createEmptyAABB(),
     override var shipVoxelAABB: AABBic?,
     override val shipActiveChunksSet: IShipActiveChunksSet
-) : Ship {
+) : ShipCore {
 
     override val velocity: Vector3dc
         get() = physicsData.linearVelocity

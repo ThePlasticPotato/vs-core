@@ -8,6 +8,7 @@ import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.game.ChunkClaim
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.game.ships.ShipId
+import org.valkyrienskies.core.game.ships.ShipTransform
 
 /**
  * Abstraction of a ship, there are many types such as offline ships

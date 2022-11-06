@@ -4,11 +4,10 @@ import org.joml.Matrix3d
 import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBd
-import org.valkyrienskies.core.api.impl.APIForcesApplier
 import org.valkyrienskies.core.config.PhysicsConfig
 import org.valkyrienskies.core.config.VSCoreConfig
 import org.valkyrienskies.core.game.ships.PhysInertia
-import org.valkyrienskies.core.game.ships.PhysShip
+import org.valkyrienskies.core.game.ships.PhysShipImpl
 import org.valkyrienskies.core.game.ships.ShipId
 import org.valkyrienskies.core.util.logger
 import org.valkyrienskies.physics_api.PhysicsWorldReference
@@ -30,7 +29,7 @@ internal class VSPhysicsPipelineStage @Inject constructor() {
     private val physicsEngine: PhysicsWorldReference
 
     // Map ships ids to rigid bodies, and map rigid bodies to ship ids
-    private val shipIdToPhysShip: MutableMap<ShipId, PhysShip> = HashMap()
+    private val shipIdToPhysShip: MutableMap<ShipId, PhysShipImpl> = HashMap()
     private var physTick = 0
 
     private var pendingUpdates: MutableList<Pair<ShipId, List<IVoxelShapeUpdate>>> = ArrayList()
@@ -87,9 +86,9 @@ internal class VSPhysicsPipelineStage @Inject constructor() {
         }
 
         // Compute and apply forces/torques for ships
-        shipIdToPhysShip.values.forEach {
-            val applier = APIForcesApplier(it.rigidBodyReference)
-            it.forceInducers.forEach { i -> i.applyForces(applier, it) }
+        shipIdToPhysShip.values.forEach { ship ->
+            ship.forceInducers.forEach { it.applyForces(ship) }
+            ship.applyQueuedForces()
         }
 
         // Run the physics engine
@@ -150,7 +149,7 @@ internal class VSPhysicsPipelineStage @Inject constructor() {
             newRigidBodyReference.setSegmentDisplacement(0, segments.segments.values.first().segmentDisplacement)
 
             shipIdToPhysShip[shipId] =
-                PhysShip(
+                PhysShipImpl(
                     shipId,
                     newRigidBodyReference,
                     newShipInGameFrameData.forcesInducers,

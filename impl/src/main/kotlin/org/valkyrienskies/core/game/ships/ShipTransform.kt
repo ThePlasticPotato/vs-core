@@ -19,22 +19,22 @@ import org.joml.primitives.AABBdc
  * after that it is rotated by [shipCoordinatesToWorldCoordinatesRotation],
  * finally it is translated by [shipPositionInWorldCoordinates].
  */
-data class ShipTransform(
-    val shipPositionInWorldCoordinates: Vector3dc,
-    val shipPositionInShipCoordinates: Vector3dc,
-    val shipCoordinatesToWorldCoordinatesRotation: Quaterniondc,
-    val shipCoordinatesToWorldCoordinatesScaling: Vector3dc,
-) {
+data class ShipTransformImpl(
+    override val shipPositionInWorldCoordinates: Vector3dc,
+    override val shipPositionInShipCoordinates: Vector3dc,
+    override val shipCoordinatesToWorldCoordinatesRotation: Quaterniondc,
+    override val shipCoordinatesToWorldCoordinatesScaling: Vector3dc,
+) : ShipTransform {
 
     /**
      * Transforms positions and directions from ship coordinates to world coordinates
      */
-    val shipToWorldMatrix: Matrix4dc
+    override val shipToWorldMatrix: Matrix4dc
 
     /**
      * Transforms positions and directions from world coordinates to ships coordinates
      */
-    val worldToShipMatrix: Matrix4dc
+    override val worldToShipMatrix: Matrix4dc
 
     init {
         shipToWorldMatrix = Matrix4d()
@@ -49,14 +49,30 @@ data class ShipTransform(
         worldToShipMatrix = shipToWorldMatrix.invert(Matrix4d())
     }
 
+    override fun transformDirectionNoScalingFromShipToWorld(directionInShip: Vector3dc, dest: Vector3d): Vector3d {
+        return shipCoordinatesToWorldCoordinatesRotation.transform(directionInShip, dest)
+    }
+
+    override fun transformDirectionNoScalingFromWorldToShip(directionInWorld: Vector3dc, dest: Vector3d): Vector3d {
+        return shipCoordinatesToWorldCoordinatesRotation.transformInverse(directionInWorld, dest)
+    }
+
+    /**
+     * Create an empty [AABBdc] centered around [shipPositionInWorldCoordinates].
+     */
+    override fun createEmptyAABB(): AABBdc {
+        return AABBd(shipPositionInWorldCoordinates, shipPositionInWorldCoordinates)
+    }
+
     companion object {
+
         // The quaternion that represents no rotation
-        private val ZERO_ROTATION: Quaterniondc = Quaterniond()
+        val ZERO_ROTATION: Quaterniondc = Quaterniond()
 
         // The vector that represents no scaling
-        private val UNIT_SCALING: Vector3dc = Vector3d(1.0, 1.0, 1.0)
+        val UNIT_SCALING: Vector3dc = Vector3d(1.0, 1.0, 1.0)
 
-        private val ZERO: Vector3dc = Vector3d()
+        val ZERO: Vector3dc = Vector3d()
 
         fun createEmpty(): ShipTransform {
             return createFromCoordinates(ZERO, ZERO)
@@ -74,7 +90,12 @@ data class ShipTransform(
             centerCoordinateInShip: Vector3dc,
             shipRotation: Quaterniondc
         ): ShipTransform {
-            return ShipTransform(centerCoordinateInWorld, centerCoordinateInShip, shipRotation, UNIT_SCALING)
+            return ShipTransformImpl(
+                centerCoordinateInWorld,
+                centerCoordinateInShip,
+                shipRotation,
+                UNIT_SCALING
+            )
         }
 
         fun createFromCoordinatesAndRotationAndScaling(
@@ -83,7 +104,12 @@ data class ShipTransform(
             shipRotation: Quaterniondc,
             shipScaling: Vector3dc
         ): ShipTransform {
-            return ShipTransform(centerCoordinateInWorld, centerCoordinateInShip, shipRotation, shipScaling)
+            return ShipTransformImpl(
+                centerCoordinateInWorld,
+                centerCoordinateInShip,
+                shipRotation,
+                shipScaling
+            )
         }
 
         /**
@@ -126,20 +152,5 @@ data class ShipTransform(
                 newScaling
             )
         }
-    }
-
-    fun transformDirectionNoScalingFromShipToWorld(directionInShip: Vector3dc, dest: Vector3d): Vector3d {
-        return shipCoordinatesToWorldCoordinatesRotation.transform(directionInShip, dest)
-    }
-
-    fun transformDirectionNoScalingFromWorldToShip(directionInWorld: Vector3dc, dest: Vector3d): Vector3d {
-        return shipCoordinatesToWorldCoordinatesRotation.transformInverse(directionInWorld, dest)
-    }
-
-    /**
-     * Create an empty [AABBdc] centered around [shipPositionInWorldCoordinates].
-     */
-    fun createEmptyAABB(): AABBdc {
-        return AABBd(shipPositionInWorldCoordinates, shipPositionInWorldCoordinates)
     }
 }

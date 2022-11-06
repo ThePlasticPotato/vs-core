@@ -29,23 +29,6 @@ internal class ShipApiTest {
         abstractShipUser(shipObject, true)
     }
 
-    @Test
-    fun testAttachmentInterfaces() {
-        val shipData = VSRandomUtils.randomShipData()
-        val user = TestShipUser()
-
-        shipData.saveAttachment(user)
-
-        Assertions.assertEquals(user.ship, shipData)
-        Assertions.assertEquals(user, shipData.getAttachment(TestShipUser::class.java))
-
-        val shipDataSerialized = VSJacksonUtil.defaultMapper.writeValueAsBytes(shipData)
-        val shipDataDeserialized = VSJacksonUtil.defaultMapper.readValue(shipDataSerialized, ShipData::class.java)
-
-        Assertions.assertNotNull(shipData.getAttachment(TestShipUser::class.java))
-        Assertions.assertEquals(shipData.getAttachment(TestShipUser::class.java)!!.ship, shipDataDeserialized)
-    }
-
     fun abstractShipSaver(ship: ServerShipCore) {
         ship.saveAttachment(3f)
     }
@@ -58,9 +41,4 @@ internal class ShipApiTest {
         if (checkInt) Assertions.assertEquals(5, ship.getAttachment<Int>())
         Assertions.assertEquals(3f, ship.getAttachment<Float>())
     }
-}
-
-internal class TestShipUser : ServerShipUser {
-    @JsonIgnore
-    override var ship: ServerShipCore? = null
 }

@@ -1,8 +1,6 @@
 package org.valkyrienskies.core.api.ships
 
-import org.valkyrienskies.core.api.ServerShipProvider
-
-interface ServerShip : Ship, ServerShipProvider {
+interface ServerShip : Ship {
     /**
      * Sets data in the persistent storage
      *
@@ -21,9 +19,6 @@ interface ServerShip : Ship, ServerShipProvider {
      * @return the data stored inside the ship
      */
     fun <T> getAttachment(clazz: Class<T>): T?
-
-    override val ship: ServerShip
-        get() = this
 }
 
 inline fun <reified T> ServerShip.saveAttachment(value: T?) = saveAttachment(T::class.java, value)

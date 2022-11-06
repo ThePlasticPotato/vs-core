@@ -8,10 +8,7 @@ import org.joml.primitives.AABBic
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.game.ChunkClaim
 import org.valkyrienskies.core.game.DimensionId
-import org.valkyrienskies.core.game.ships.ShipId
-import org.valkyrienskies.core.game.ships.ShipInertiaData
-import org.valkyrienskies.core.game.ships.ShipPhysicsData
-import org.valkyrienskies.core.game.ships.ShipTransform
+import org.valkyrienskies.core.game.ships.*
 import org.valkyrienskies.core.util.serialization.DeltaIgnore
 import org.valkyrienskies.core.util.serialization.PacketIgnore
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
@@ -29,7 +26,7 @@ class ServerShipDataV0(
     chunkClaim: ChunkClaim,
     chunkClaimDimension: DimensionId,
     physicsData: ShipPhysicsData,
-    @PacketIgnore val inertiaData: ShipInertiaData,
+    @PacketIgnore val inertiaData: ShipInertiaDataImpl,
     shipTransform: ShipTransform,
     prevTickShipTransform: ShipTransform,
     shipAABB: AABBdc,

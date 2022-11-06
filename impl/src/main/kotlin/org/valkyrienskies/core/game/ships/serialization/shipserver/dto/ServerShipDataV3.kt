@@ -8,6 +8,7 @@ import org.valkyrienskies.core.game.ChunkClaim
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.game.ships.ShipId
 import org.valkyrienskies.core.game.ships.ShipInertiaData
+import org.valkyrienskies.core.game.ships.ShipInertiaDataImpl
 import org.valkyrienskies.core.game.ships.ShipTransform
 
 data class ServerShipDataV3(
@@ -17,7 +18,7 @@ data class ServerShipDataV3(
     val chunkClaimDimension: DimensionId,
     val velocity: Vector3dc,
     val omega: Vector3dc,
-    val inertiaData: ShipInertiaData,
+    val inertiaData: ShipInertiaDataImpl,
     val transform: ShipTransform,
     val prevTickTransform: ShipTransform,
     val worldAABB: AABBdc,

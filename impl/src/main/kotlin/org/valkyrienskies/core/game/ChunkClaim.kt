@@ -18,7 +18,7 @@ import java.lang.Math.floorDiv
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY) // Don't use getters, they have a weird name
 @JsonIncludeProperties("xIndex", "zIndex") // Serialize only the xIndex and zIndex fields
-internal data class ChunkClaimImpl(override val xIndex: Int, override val zIndex: Int) : ChunkClaim {
+data class ChunkClaimImpl(override val xIndex: Int, override val zIndex: Int) : ChunkClaim {
 
     companion object {
         /**

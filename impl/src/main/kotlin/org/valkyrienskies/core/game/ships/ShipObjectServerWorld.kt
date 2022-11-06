@@ -243,7 +243,7 @@ class ShipObjectServerWorld @Inject internal constructor(
         val it = _loadedShips.iterator()
         while (it.hasNext()) {
             val shipObjectServer = it.next()
-            if (shipObjectServer.shipData.inertiaData.getShipMass() < 1e-8) {
+            if (shipObjectServer.shipData.inertiaData.shipMass < 1e-8) {
                 // Delete this ship
                 deletedShipObjects.add(shipObjectServer.shipData)
                 queryableShipData.removeShipData(shipObjectServer.shipData)
@@ -262,7 +262,7 @@ class ShipObjectServerWorld @Inject internal constructor(
             val shipID = shipData.id
 
             // save us from the invMass is not finite! error
-            if (shipData.inertiaData.getShipMass() == 0.0) {
+            if (shipData.inertiaData.shipMass == 0.0) {
                 logger.warn("Ship with ID $shipID has a mass of 0.0, not creating a ShipObject")
                 continue
             }

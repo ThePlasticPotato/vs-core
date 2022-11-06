@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.plus
 import org.joml.primitives.AABBdc
+import org.valkyrienskies.core.api.ShipCore
 import org.valkyrienskies.core.api.ships.Ship
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.game.VSBlockType
@@ -16,7 +17,7 @@ import org.valkyrienskies.core.util.logger
  */
 abstract class ShipObjectWorld<ShipObjectType : ShipObject> {
 
-    abstract val queryableShipData: QueryableShipData<Ship>
+    abstract val queryableShipData: QueryableShipData<ShipCore>
     // abstract val loadedShips: QueryableShipData<LoadedShip>
 
     abstract val loadedShips: QueryableShipData<ShipObjectType>

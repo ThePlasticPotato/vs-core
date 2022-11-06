@@ -2,6 +2,7 @@ package org.valkyrienskies.core.api
 
 import org.joml.Vector3dc
 import org.valkyrienskies.core.game.ships.PhysShip
+import org.valkyrienskies.core.game.ships.PhysShipImpl
 
 /**
  * Ship force inducer
@@ -16,7 +17,7 @@ interface ShipForcesInducer {
      * @param physShip The ship in the physics pipeline stage, use this for computing forces.
      *                 Please don't use [ShipData], [ShipObject] or anything else from the game stage pipeline.
      */
-    fun applyForces(forcesApplier: ForcesApplier, physShip: PhysShip)
+    fun applyForces(physShip: PhysShip)
 }
 
 /**

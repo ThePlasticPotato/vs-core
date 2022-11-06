@@ -9,11 +9,12 @@ import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.ServerShipCore
-import org.valkyrienskies.core.api.ServerShipUser
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.chunk_tracking.ShipActiveChunksSet
 import org.valkyrienskies.core.datastructures.IBlockPosSetAABB
 import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
+import org.valkyrienskies.core.game.ChunkClaim
+import org.valkyrienskies.core.game.ChunkClaimImpl
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.game.VSBlockType
 import org.valkyrienskies.core.util.serialization.PacketIgnore
@@ -29,7 +30,7 @@ class ShipData(
     chunkClaim: ChunkClaim,
     chunkClaimDimension: DimensionId,
     physicsData: ShipPhysicsData,
-    @PacketIgnore val inertiaData: ShipInertiaData,
+    @PacketIgnore val inertiaData: ShipInertiaDataImpl,
     shipTransform: ShipTransform,
     prevTickShipTransform: ShipTransform,
     shipAABB: AABBdc,
@@ -40,8 +41,7 @@ class ShipData(
 ) : ShipDataCommon(
     id, name, chunkClaim, chunkClaimDimension, physicsData, shipTransform, prevTickShipTransform,
     shipAABB, shipVoxelAABB, shipActiveChunksSet
-),
-    ServerShipCore {
+), ServerShipCore {
     /**
      * The set of chunks that must be loaded before this ship is fully loaded.
      *
@@ -69,16 +69,6 @@ class ShipData(
     init {
         shipActiveChunksSet.iterateChunkPos { chunkX: Int, chunkZ: Int ->
             missingLoadedChunks.addChunkPos(chunkX, chunkZ)
-        }
-
-        for (attachment in this.persistentAttachedData) {
-            if (
-                ServerShipUser::class.java.isAssignableFrom(attachment.key) &&
-                attachment.value != null &&
-                (attachment.value as ServerShipUser).ship == null
-            ) {
-                (attachment.value as ServerShipUser).ship = this
-            }
         }
     }
 
@@ -137,10 +127,6 @@ class ShipData(
     }
 
     override fun <T> saveAttachment(clazz: Class<T>, value: T?) {
-        if (value is ServerShipUser && value.ship == null) {
-            value.ship = this
-        }
-
         if (value == null)
             persistentAttachedData.remove(clazz)
         else
@@ -164,7 +150,7 @@ class ShipData(
             scaling: Double = 1.0,
             isStatic: Boolean = false
         ): ShipData {
-            val shipTransform = ShipTransform.createFromCoordinatesAndRotationAndScaling(
+            val shipTransform = ShipTransformImpl.createFromCoordinatesAndRotationAndScaling(
                 shipCenterInWorldCoordinates,
                 shipCenterInShipCoordinates,
                 Quaterniond().fromAxisAngleDeg(0.0, 1.0, 0.0, 0.0),
@@ -177,7 +163,7 @@ class ShipData(
                 chunkClaim = chunkClaim,
                 chunkClaimDimension = chunkClaimDimension,
                 physicsData = ShipPhysicsData.createEmpty(),
-                inertiaData = ShipInertiaData.newEmptyShipInertiaData(),
+                inertiaData = ShipInertiaDataImpl.newEmptyShipInertiaData(),
                 shipTransform = shipTransform,
                 prevTickShipTransform = shipTransform,
                 shipAABB = shipTransform.createEmptyAABB(),

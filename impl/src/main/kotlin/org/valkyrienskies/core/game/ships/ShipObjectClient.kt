@@ -3,6 +3,8 @@ package org.valkyrienskies.core.game.ships
 import com.fasterxml.jackson.databind.JsonNode
 import org.joml.primitives.AABBd
 import org.joml.primitives.AABBdc
+import org.valkyrienskies.core.api.ClientShipCore
+import org.valkyrienskies.core.api.ShipCore
 import org.valkyrienskies.core.api.ships.ClientShip
 import org.valkyrienskies.core.api.ships.Ship
 import org.valkyrienskies.core.networking.delta.DeltaEncodedChannelClientTCP
@@ -12,7 +14,7 @@ import org.valkyrienskies.core.util.toAABBd
 class ShipObjectClient(
     shipData: ShipDataCommon,
     shipDataJson: JsonNode = VSJacksonUtil.defaultMapper.valueToTree(shipData)
-) : ShipObject(shipData), ClientShip, Ship by shipData {
+) : ShipObject(shipData), ClientShipCore, ShipCore by shipData {
     // The last ship transform sent by the sever
     internal var nextShipTransform: ShipTransform
 
@@ -36,12 +38,12 @@ class ShipObjectClient(
     fun tickUpdateShipTransform() {
         this.nextShipTransform = latestNetworkTransform
         shipData.updatePrevTickShipTransform()
-        shipData.shipTransform = ShipTransform.createFromSlerp(shipData.shipTransform, nextShipTransform, EMA_ALPHA)
+        shipData.shipTransform = ShipTransformImpl.createFromSlerp(shipData.shipTransform, nextShipTransform, EMA_ALPHA)
     }
 
     fun updateRenderShipTransform(partialTicks: Double) {
         renderTransform =
-            ShipTransform.createFromSlerp(shipData.prevTickShipTransform, shipData.shipTransform, partialTicks)
+            ShipTransformImpl.createFromSlerp(shipData.prevTickShipTransform, shipData.shipTransform, partialTicks)
         renderAABB = shipData.shipVoxelAABB?.toAABBd(AABBd())?.transform(renderTransform.shipToWorldMatrix, AABBd())
             ?: renderTransform.createEmptyAABB()
     }

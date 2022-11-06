@@ -9,14 +9,7 @@ import org.joml.Vector3i
 import org.joml.primitives.AABBi
 import org.valkyrienskies.core.api.Ticked
 import org.valkyrienskies.core.game.DimensionId
-import org.valkyrienskies.core.game.ships.PhysInertia
-import org.valkyrienskies.core.game.ships.ShipData
-import org.valkyrienskies.core.game.ships.ShipId
-import org.valkyrienskies.core.game.ships.ShipInertiaData
-import org.valkyrienskies.core.game.ships.ShipObjectServer
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
-import org.valkyrienskies.core.game.ships.ShipPhysicsData
-import org.valkyrienskies.core.game.ships.ShipTransform
+import org.valkyrienskies.core.game.ships.*
 import org.valkyrienskies.core.util.logger
 import org.valkyrienskies.physics_api.PhysicsWorldReference
 import org.valkyrienskies.physics_api.PoseVel
@@ -226,7 +219,7 @@ internal class VSGamePipelineStage @Inject constructor(private val shipWorld: Sh
         const val GAME_TPS = 20
 
         private fun getShipVoxelOffset(inertiaData: ShipInertiaData): Vector3dc {
-            val cm = inertiaData.getCenterOfMassInShipSpace()
+            val cm = inertiaData.centerOfMassInShipSpace
             return Vector3d(-cm.x(), -cm.y(), -cm.z())
         }
 
@@ -247,9 +240,9 @@ internal class VSGamePipelineStage @Inject constructor(private val shipWorld: Sh
             val scaling = physicsFrameData.segments.segments.values.first().segmentDisplacement.scaling
             val shipPosAccountingForSegment = shipPosAccountingForVoxelOffsetDifference.mul(scaling, Vector3d())
 
-            return ShipTransform.createFromCoordinatesAndRotationAndScaling(
+            return ShipTransformImpl.createFromCoordinatesAndRotationAndScaling(
                 shipPosAccountingForSegment,
-                shipData.inertiaData.getCenterOfMassInShipSpace().add(.5, .5, .5, Vector3d()),
+                shipData.inertiaData.centerOfMassInShipSpace.add(.5, .5, .5, Vector3d()),
                 poseVelFromPhysics.rot,
                 Vector3d(scaling)
             )

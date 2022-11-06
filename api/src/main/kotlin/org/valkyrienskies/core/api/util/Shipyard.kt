@@ -5,14 +5,18 @@ import org.joml.Vector2i
 
 import org.joml.Vector3dc
 import org.joml.Vector3ic
-import org.valkyrienskies.core.game.ChunkAllocator
 import org.valkyrienskies.core.game.ChunkClaim
+
+const val X_INDEX_START = -7000 // Start at X=-28672000 block coordinates
+const val X_INDEX_END = 7000 // End at X=28672000 block coordinates
+const val Z_INDEX_START = 3000 // Start at Z=12288000 block coordinates
+const val Z_INDEX_END = 7000 // End at Z=28672000 block coordinates
 
 fun isChunkInShipyard(chunkX: Int, chunkZ: Int): Boolean {
     val claimXIndex = ChunkClaim.getClaimXIndex(chunkX)
     val claimZIndex = ChunkClaim.getClaimZIndex(chunkZ)
 
-    return (claimXIndex in ChunkAllocator.X_INDEX_START..ChunkAllocator.X_INDEX_END) and (claimZIndex in ChunkAllocator.Z_INDEX_START..ChunkAllocator.Z_INDEX_END)
+    return (claimXIndex in X_INDEX_START..X_INDEX_END) and (claimZIndex in Z_INDEX_START..Z_INDEX_END)
 }
 
 /**

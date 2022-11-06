@@ -5,11 +5,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import io.netty.buffer.ByteBuf
 import kotlinx.coroutines.launch
-import org.valkyrienskies.core.game.ships.ShipDataCommon
-import org.valkyrienskies.core.game.ships.ShipId
-import org.valkyrienskies.core.game.ships.ShipObjectClient
-import org.valkyrienskies.core.game.ships.ShipObjectClientWorld
-import org.valkyrienskies.core.game.ships.ShipTransform
+import org.valkyrienskies.core.game.ships.*
 import org.valkyrienskies.core.networking.Packet
 import org.valkyrienskies.core.networking.Packets
 import org.valkyrienskies.core.networking.RegisteredHandler
@@ -151,7 +147,7 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
                         val velocity = buf.readVec3fAsDouble()
                         val omega = buf.readVec3fAsDouble()
 
-                        ship.latestNetworkTransform = ShipTransform.createFromCoordinatesAndRotationAndScaling(
+                        ship.latestNetworkTransform = ShipTransformImpl.createFromCoordinatesAndRotationAndScaling(
                             position, centerOfMass, rotation, scaling
                         )
                         ship.latestNetworkTTick = tickNum

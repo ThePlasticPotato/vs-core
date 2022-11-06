@@ -11,13 +11,7 @@ import org.valkyrienskies.core.datastructures.SmallBlockPosSet
 import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
 import org.valkyrienskies.core.game.ChunkClaim
 import org.valkyrienskies.core.game.ChunkClaimImpl
-import org.valkyrienskies.core.game.ships.MutableQueryableShipDataServer
-import org.valkyrienskies.core.game.ships.QueryableShipDataImpl
-import org.valkyrienskies.core.game.ships.ShipData
-import org.valkyrienskies.core.game.ships.ShipId
-import org.valkyrienskies.core.game.ships.ShipInertiaData
-import org.valkyrienskies.core.game.ships.ShipPhysicsData
-import org.valkyrienskies.core.game.ships.ShipTransform
+import org.valkyrienskies.core.game.ships.*
 import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShipDataV0
 import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShipDataV3
 import org.valkyrienskies.core.pipelines.ShipInPhysicsFrameData
@@ -124,8 +118,8 @@ internal object VSRandomUtils {
     }
 
     @Suppress("WeakerAccess")
-    fun randomShipInertiaData(random: Random = defaultRandom): ShipInertiaData {
-        return ShipInertiaData(randomVector3d(random), randomDoubleNotCloseToLimit(random), randomMatrix3d(random))
+    fun randomShipInertiaData(random: Random = defaultRandom): ShipInertiaDataImpl {
+        return ShipInertiaDataImpl(randomVector3d(random), randomDoubleNotCloseToLimit(random), randomMatrix3d(random))
     }
 
     @Suppress("WeakerAccess")
@@ -136,7 +130,7 @@ internal object VSRandomUtils {
             random.nextDouble(-scalingMaxMagnitude, scalingMaxMagnitude),
             random.nextDouble(-scalingMaxMagnitude, scalingMaxMagnitude)
         )
-        return ShipTransform(randomVector3d(random), randomVector3d(random), randomQuaterniond(random), randomScaling)
+        return ShipTransformImpl(randomVector3d(random), randomVector3d(random), randomQuaterniond(random), randomScaling)
     }
 
     @Suppress("WeakerAccess")

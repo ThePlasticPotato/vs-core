@@ -7,6 +7,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
 import io.kotest.property.checkAll
+import org.valkyrienskies.core.game.ChunkClaimImpl
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
 import org.valkyrienskies.test_utils.generators.chunkClaim
 
@@ -16,7 +17,7 @@ class ChunkClaimSerializationTest : StringSpec({
             val serialized = VSJacksonUtil.dtoMapper.valueToTree<ObjectNode>(claim)
             serialized shouldHaveSize 2
 
-            val deserialized = VSJacksonUtil.dtoMapper.readValue<ChunkClaim>(serialized.toString())
+            val deserialized = VSJacksonUtil.dtoMapper.readValue<ChunkClaimImpl>(serialized.toString())
             deserialized shouldBe claim
         }
     }

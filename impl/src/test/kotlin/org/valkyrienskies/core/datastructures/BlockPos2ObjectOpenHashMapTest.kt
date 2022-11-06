@@ -17,7 +17,7 @@ class BlockPos2ObjectOpenHashMapTest : StringSpec({
         val blockArb = Arb.pair(Arb.vector3i(), Arb.nullable(Arb.int()))
         val blocksArb = Arb.map(blockArb)
 
-        checkAll(50000, blocksArb) { blocks: Map<Vector3i, Int?> ->
+        checkAll(blocksArb) { blocks: Map<Vector3i, Int?> ->
             val map = BlockPos2ObjectOpenHashMap<Int?>()
 
             blocks.forEach { (pos, value) ->

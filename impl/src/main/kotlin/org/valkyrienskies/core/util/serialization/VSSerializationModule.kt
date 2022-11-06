@@ -7,11 +7,17 @@ import org.valkyrienskies.core.datastructures.IBlockPosSet
 import org.valkyrienskies.core.datastructures.IBlockPosSetAABB
 import org.valkyrienskies.core.datastructures.SmallBlockPosSet
 import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
+import org.valkyrienskies.core.game.ChunkClaim
+import org.valkyrienskies.core.game.ChunkClaimImpl
+import org.valkyrienskies.core.game.ships.ShipTransform
+import org.valkyrienskies.core.game.ships.ShipTransformImpl
 
 internal class VSSerializationModule : SimpleModule() {
     init {
         addAbstractTypeMapping<IBlockPosSet, SmallBlockPosSet>()
         addAbstractTypeMapping<IBlockPosSetAABB, SmallBlockPosSetAABB>()
         addAbstractTypeMapping<IShipActiveChunksSet, ShipActiveChunksSet>()
+        addAbstractTypeMapping<ChunkClaim, ChunkClaimImpl>()
+        addAbstractTypeMapping<ShipTransform, ShipTransformImpl>()
     }
 }
