@@ -63,7 +63,6 @@ dependencies {
     api("com.fasterxml.jackson.module", "jackson-module-kotlin", jacksonVersion)
     api("com.fasterxml.jackson.module", "jackson-module-parameter-names", jacksonVersion)
     api("com.fasterxml.jackson.dataformat", "jackson-dataformat-cbor", jacksonVersion)
-    api("com.fasterxml.jackson.dataformat", "jackson-dataformat-yaml", jacksonVersion)
     api("com.github.Rubydesic:jackson-kotlin-dsl:1.2.0")
 
     api("com.networknt", "json-schema-validator", "1.0.71")
