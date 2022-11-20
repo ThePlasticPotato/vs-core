@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.7.10"
-    kotlin("kapt") version "1.7.10"
+    kotlin("jvm") version "1.7.21"
+    kotlin("kapt") version "1.7.21"
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
     java
     checkstyle
@@ -42,7 +42,7 @@ dependencies {
     api(kotlin("reflect"))
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
-    val jacksonVersion = "2.13.3"
+    val jacksonVersion = "2.14.0"
     val nettyVersion = "4.1.25.Final"
     val kotestVersion = "5.4.1"
 
