@@ -53,7 +53,8 @@ public class SmallBlockPosSet implements IBlockPosSet {
     @Override
     public boolean add(final int x, final int y, final int z) throws IllegalArgumentException {
         if (!canStore(x, y, z)) {
-            throw new IllegalArgumentException("Cannot store block position at <" + x + "," + y + "," + z + ">");
+            throw new IllegalArgumentException("Cannot store block position at <" + x + "," + y + "," + z +
+                "> into SmallBlockPosSet centered at <" + centerX + "," + centerY + "," + centerZ + ">");
         }
         final int compressedPos = compress(x, y, z);
         if (listValueToIndex.containsKey(compressedPos)) {
