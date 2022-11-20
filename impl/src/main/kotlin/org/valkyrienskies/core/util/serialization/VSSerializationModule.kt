@@ -7,9 +7,9 @@ import org.valkyrienskies.core.datastructures.IBlockPosSet
 import org.valkyrienskies.core.datastructures.IBlockPosSetAABB
 import org.valkyrienskies.core.datastructures.SmallBlockPosSet
 import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
-import org.valkyrienskies.core.game.ChunkClaim
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.game.ChunkClaimImpl
-import org.valkyrienskies.core.game.ships.ShipTransform
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.game.ships.ShipTransformImpl
 
 internal class VSSerializationModule : SimpleModule() {

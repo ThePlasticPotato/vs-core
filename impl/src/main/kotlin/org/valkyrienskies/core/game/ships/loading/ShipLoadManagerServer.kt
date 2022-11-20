@@ -1,13 +1,12 @@
 package org.valkyrienskies.core.game.ships.loading
 
 import org.valkyrienskies.core.api.util.isChunkInShipyard
-import org.valkyrienskies.core.chunk_tracking.ChunkUnwatchTask
-import org.valkyrienskies.core.chunk_tracking.ChunkWatchTask
-import org.valkyrienskies.core.chunk_tracking.ChunkWatchTasks
+import org.valkyrienskies.core.api.world.chunks.ChunkUnwatchTask
+import org.valkyrienskies.core.api.world.chunks.ChunkWatchTask
+import org.valkyrienskies.core.api.world.chunks.ChunkWatchTasks
 import org.valkyrienskies.core.chunk_tracking.ShipObjectServerWorldChunkTracker
-import org.valkyrienskies.core.game.ChunkAllocator
-import org.valkyrienskies.core.game.DimensionId
-import org.valkyrienskies.core.game.IPlayer
+import org.valkyrienskies.core.api.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.IPlayer
 import org.valkyrienskies.core.game.ships.ShipData
 import org.valkyrienskies.core.game.ships.loading.ShipLoadManagerServer.Stages.POST_TICK
 import org.valkyrienskies.core.game.ships.loading.ShipLoadManagerServer.Stages.PRE_TICK

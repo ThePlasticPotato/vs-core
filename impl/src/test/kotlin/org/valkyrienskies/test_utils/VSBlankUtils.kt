@@ -1,11 +1,11 @@
 package org.valkyrienskies.test_utils
 
 import org.joml.Vector3d
-import org.valkyrienskies.core.game.ChunkClaim
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.game.ChunkClaimImpl
-import org.valkyrienskies.core.game.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.game.ships.ShipData
-import org.valkyrienskies.core.game.ships.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipId
 
 object VSBlankUtils {
 

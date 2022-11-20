@@ -1,7 +1,7 @@
 package org.valkyrienskies.core.networking
 
 import io.netty.buffer.ByteBuf
-import org.valkyrienskies.core.game.IPlayer
+import org.valkyrienskies.core.api.world.IPlayer
 
 data class Packet(val type: PacketType, val data: ByteBuf) {
     fun sendToServer() = type.sendToServer(data)

@@ -13,9 +13,9 @@ internal class ShipActiveChunksSetTest {
     @Test
     fun addChunkPos() {
         val shipActiveChunksSet = ShipActiveChunksSet.create()
-        assertTrue(shipActiveChunksSet.addChunkPos(0, 0))
-        assertTrue(shipActiveChunksSet.addChunkPos(1, 1))
-        assertFalse(shipActiveChunksSet.addChunkPos(0, 0))
+        assertTrue(shipActiveChunksSet.add(0, 0))
+        assertTrue(shipActiveChunksSet.add(1, 1))
+        assertFalse(shipActiveChunksSet.add(0, 0))
     }
 
     @RepeatedTest(25)
@@ -23,15 +23,15 @@ internal class ShipActiveChunksSetTest {
         val shipActiveChunksSet = ShipActiveChunksSet.create()
         val chunkX = VSRandomUtils.randomIntegerNotCloseToLimit()
         val chunkZ = VSRandomUtils.randomIntegerNotCloseToLimit()
-        assertTrue(shipActiveChunksSet.addChunkPos(chunkX, chunkZ))
-        assertTrue(shipActiveChunksSet.removeChunkPos(chunkX, chunkZ))
-        assertFalse(shipActiveChunksSet.removeChunkPos(chunkX, chunkZ))
+        assertTrue(shipActiveChunksSet.add(chunkX, chunkZ))
+        assertTrue(shipActiveChunksSet.remove(chunkX, chunkZ))
+        assertFalse(shipActiveChunksSet.remove(chunkX, chunkZ))
     }
 
     @Test
     fun iterateChunkPos() {
         val shipActiveChunksSet = ShipActiveChunksSet.create()
-        assertTrue(shipActiveChunksSet.addChunkPos(200, 300))
+        assertTrue(shipActiveChunksSet.add(200, 300))
 
         val sum: (Int, Int) -> Unit = { chunkX: Int, chunkZ: Int ->
             assertEquals(chunkX, 200)
@@ -61,11 +61,11 @@ internal class ShipActiveChunksSetTest {
     @Test
     fun containsChunkPos() {
         val shipActiveChunksSet = ShipActiveChunksSet.create()
-        assertTrue(shipActiveChunksSet.addChunkPos(0, 0))
-        assertTrue(shipActiveChunksSet.addChunkPos(1, 1))
+        assertTrue(shipActiveChunksSet.add(0, 0))
+        assertTrue(shipActiveChunksSet.add(1, 1))
 
-        assertTrue(shipActiveChunksSet.containsChunkPos(0, 0))
-        assertTrue(shipActiveChunksSet.containsChunkPos(1, 1))
-        assertFalse(shipActiveChunksSet.containsChunkPos(2, 2))
+        assertTrue(shipActiveChunksSet.contains(0, 0))
+        assertTrue(shipActiveChunksSet.contains(1, 1))
+        assertFalse(shipActiveChunksSet.contains(2, 2))
     }
 }

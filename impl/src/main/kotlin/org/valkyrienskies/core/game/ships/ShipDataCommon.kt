@@ -5,14 +5,14 @@ import org.joml.Vector3dc
 import org.joml.primitives.AABBd
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
-import org.valkyrienskies.core.api.ShipCore
-import org.valkyrienskies.core.api.ships.Ship
+import org.valkyrienskies.core.api.ShipInternal
+import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.datastructures.IBlockPosSet
-import org.valkyrienskies.core.game.ChunkClaim
-import org.valkyrienskies.core.game.ChunkClaimImpl
-import org.valkyrienskies.core.game.DimensionId
-import org.valkyrienskies.core.game.VSBlockType
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
+import org.valkyrienskies.core.api.world.properties.DimensionId
+import org.valkyrienskies.core.api.ships.properties.VSBlockType
 import org.valkyrienskies.core.util.serialization.DeltaIgnore
 import org.valkyrienskies.core.util.serialization.PacketIgnore
 import org.valkyrienskies.core.util.toAABBd
@@ -29,7 +29,7 @@ open class ShipDataCommon(
     shipAABB: AABBdc = shipTransform.createEmptyAABB(),
     override var shipVoxelAABB: AABBic?,
     override val shipActiveChunksSet: IShipActiveChunksSet
-) : ShipCore {
+) : ShipInternal {
 
     override val velocity: Vector3dc
         get() = physicsData.linearVelocity
@@ -79,13 +79,13 @@ open class ShipDataCommon(
         ) { "Block at <$posX, $posY, $posZ> is not in the chunk claim belonging to $this" }
 
         // Add the chunk to the active chunk set
-        shipActiveChunksSet.addChunkPos(posX shr 4, posZ shr 4)
+        shipActiveChunksSet.add(posX shr 4, posZ shr 4)
         // Add the neighbors too (Required for rendering code in MC 1.16, chunks without neighbors won't render)
         // TODO: Make a separate set for keeping track of neighbors
-        shipActiveChunksSet.addChunkPos((posX shr 4) - 1, (posZ shr 4))
-        shipActiveChunksSet.addChunkPos((posX shr 4) + 1, (posZ shr 4))
-        shipActiveChunksSet.addChunkPos((posX shr 4), (posZ shr 4) - 1)
-        shipActiveChunksSet.addChunkPos((posX shr 4), (posZ shr 4) + 1)
+        shipActiveChunksSet.add((posX shr 4) - 1, (posZ shr 4))
+        shipActiveChunksSet.add((posX shr 4) + 1, (posZ shr 4))
+        shipActiveChunksSet.add((posX shr 4), (posZ shr 4) - 1)
+        shipActiveChunksSet.add((posX shr 4), (posZ shr 4) + 1)
     }
 
     override val shipToWorld: Matrix4dc

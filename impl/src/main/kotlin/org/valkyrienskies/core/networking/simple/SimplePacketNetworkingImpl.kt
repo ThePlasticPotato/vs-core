@@ -1,7 +1,7 @@
 package org.valkyrienskies.core.networking.simple
 
 import dagger.Lazy
-import org.valkyrienskies.core.game.IPlayer
+import org.valkyrienskies.core.api.world.IPlayer
 import org.valkyrienskies.core.networking.NetworkChannel
 import org.valkyrienskies.core.networking.PacketType
 import org.valkyrienskies.core.networking.RegisteredHandler

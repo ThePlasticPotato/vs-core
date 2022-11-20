@@ -13,7 +13,7 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
     "tracks single player" {
         val dimension = "fake_dimension"
         val ship = VSBlankUtils.blankShipData(chunkClaimDimension = dimension)
-        ship.shipActiveChunksSet.addChunkPos(0, 0)
+        ship.shipActiveChunksSet.add(0, 0)
         val ships = listOf(ship)
 
         val player = FakePlayer(dimension = dimension)
@@ -35,8 +35,8 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
             unwatchTasks shouldHaveSize 0
             val task = watchTasks.first()
 
-            task.getChunkX() shouldBe 0
-            task.getChunkZ() shouldBe 0
+            task.chunkX shouldBe 0
+            task.chunkZ shouldBe 0
 
             val trackingInfo = tracker.applyTasksAndGenerateTrackingInfo(watchTasks, unwatchTasks)
 
@@ -114,7 +114,7 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
     "tracks player leaving the dimension and returning" {
         val dimension = "fake_dimension"
         val ship = VSBlankUtils.blankShipData(chunkClaimDimension = dimension)
-        ship.shipActiveChunksSet.addChunkPos(0, 0)
+        ship.shipActiveChunksSet.add(0, 0)
         val ships = listOf(ship)
 
         val player = FakePlayer(dimension = dimension)
@@ -136,8 +136,8 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
             unwatchTasks shouldHaveSize 0
             val task = watchTasks.first()
 
-            task.getChunkX() shouldBe 0
-            task.getChunkZ() shouldBe 0
+            task.chunkX shouldBe 0
+            task.chunkZ shouldBe 0
 
             val trackingInfo = tracker.applyTasksAndGenerateTrackingInfo(watchTasks, unwatchTasks)
 
@@ -218,8 +218,8 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
             unwatchTasks shouldHaveSize 0
             val task = watchTasks.first()
 
-            task.getChunkX() shouldBe 0
-            task.getChunkZ() shouldBe 0
+            task.chunkX shouldBe 0
+            task.chunkZ shouldBe 0
 
             val trackingInfo = tracker.applyTasksAndGenerateTrackingInfo(watchTasks, unwatchTasks)
 
@@ -252,8 +252,8 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
     "tracks multiple players and multiple chunks" {
         val dimension = "fake_dimension"
         val ship = VSBlankUtils.blankShipData(chunkClaimDimension = dimension)
-        ship.shipActiveChunksSet.addChunkPos(0, 0) // 0 to 16
-        ship.shipActiveChunksSet.addChunkPos(4, 0) // 64 to 80
+        ship.shipActiveChunksSet.add(0, 0) // 0 to 16
+        ship.shipActiveChunksSet.add(4, 0) // 64 to 80
         val ships = listOf(ship)
 
         val player1 = FakePlayer(dimension = dimension)
@@ -276,8 +276,8 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
             unwatchTasks shouldHaveSize 0
             val task = watchTasks.first()
 
-            task.getChunkX() shouldBe 0
-            task.getChunkZ() shouldBe 0
+            task.chunkX shouldBe 0
+            task.chunkZ shouldBe 0
 
             val trackingInfo = tracker.applyTasksAndGenerateTrackingInfo(watchTasks, unwatchTasks)
 

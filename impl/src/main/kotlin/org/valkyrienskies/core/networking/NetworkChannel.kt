@@ -3,7 +3,7 @@ package org.valkyrienskies.core.networking
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
-import org.valkyrienskies.core.game.IPlayer
+import org.valkyrienskies.core.api.world.IPlayer
 import org.valkyrienskies.core.hooks.CoreHooks
 import org.valkyrienskies.core.util.logger
 import java.util.function.IntFunction

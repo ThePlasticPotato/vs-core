@@ -1,14 +1,17 @@
 package org.valkyrienskies.core.game
 
+import org.valkyrienskies.core.api.ships.properties.VSBlockType
 import org.valkyrienskies.physics_api.voxel_updates.KrunchVoxelStates
 
-enum class VSBlockType {
-    AIR, SOLID, WATER, LAVA;
+data class VSBlockTypeImpl(val state: Byte) : VSBlockType {
+    @Deprecated("", ReplaceWith("state"))
+    override fun toByte(): Byte = state
 
-    fun toByte() = when (this) {
-        AIR -> KrunchVoxelStates.AIR_STATE
-        SOLID -> KrunchVoxelStates.SOLID_STATE
-        WATER -> KrunchVoxelStates.WATER_STATE
-        LAVA -> KrunchVoxelStates.LAVA_STATE
+    companion object {
+        val AIR: VSBlockType = VSBlockTypeImpl(KrunchVoxelStates.AIR_STATE)
+        val SOLID: VSBlockType = VSBlockTypeImpl(KrunchVoxelStates.SOLID_STATE)
+        val WATER: VSBlockType = VSBlockTypeImpl(KrunchVoxelStates.WATER_STATE)
+        val LAVA: VSBlockType = VSBlockTypeImpl(KrunchVoxelStates.LAVA_STATE)
     }
 }
+

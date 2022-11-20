@@ -2,7 +2,7 @@ package org.valkyrienskies.core.collision
 
 import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
-import org.valkyrienskies.core.game.ships.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipId
 
 /**
  * A convex polygon consists of points and normals.

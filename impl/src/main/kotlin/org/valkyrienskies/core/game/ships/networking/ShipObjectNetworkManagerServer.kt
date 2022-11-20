@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSet
 import dagger.Lazy
 import io.netty.buffer.Unpooled
 import org.valkyrienskies.core.chunk_tracking.ChunkTrackingInfo
-import org.valkyrienskies.core.game.IPlayer
+import org.valkyrienskies.core.api.world.IPlayer
 import org.valkyrienskies.core.game.ships.ShipData
 import org.valkyrienskies.core.game.ships.ShipObjectServer
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld

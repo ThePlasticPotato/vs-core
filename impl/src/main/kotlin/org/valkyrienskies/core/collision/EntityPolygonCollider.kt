@@ -5,7 +5,7 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBd
 import org.joml.primitives.AABBdc
-import org.valkyrienskies.core.game.ships.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.util.differenceHorLengthSq
 import org.valkyrienskies.core.util.extend
 import org.valkyrienskies.core.util.horizontalLengthSq

@@ -1,12 +1,11 @@
 package org.valkyrienskies.core.game.ships
 
-import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.joml.Matrix3d
 import org.joml.Matrix3dc
 import org.joml.Vector3d
 import org.joml.Vector3dc
-import java.beans.ConstructorProperties
+import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
 import kotlin.math.abs
 
 /**

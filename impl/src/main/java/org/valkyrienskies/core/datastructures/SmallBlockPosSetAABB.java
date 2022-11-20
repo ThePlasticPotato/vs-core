@@ -17,8 +17,8 @@ import javax.annotation.Nullable;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.joml.primitives.AABBi;
-import org.valkyrienskies.core.game.ChunkClaim;
-import org.valkyrienskies.core.util.IntTernaryConsumer;
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim;
+import org.valkyrienskies.core.api.util.functions.IntTernaryConsumer;
 
 /**
  * A wrapper around SmallBlockPosSet that can make create tight AxisAlignedBB containing all BlockPos in the Set. All

@@ -2,7 +2,7 @@ package org.valkyrienskies.core.chunk_tracking
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap
 import it.unimi.dsi.fastutil.longs.LongSet
-import org.valkyrienskies.core.game.IPlayer
+import org.valkyrienskies.core.api.world.IPlayer
 import org.valkyrienskies.core.game.ships.ShipData
 
 /**

@@ -1,7 +1,7 @@
 package org.valkyrienskies.core.hooks
 
 import org.valkyrienskies.core.config.VSConfigClass
-import org.valkyrienskies.core.game.IPlayer
+import org.valkyrienskies.core.api.world.IPlayer
 import org.valkyrienskies.core.game.ships.ShipObjectClientWorld
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
 import java.nio.file.Path

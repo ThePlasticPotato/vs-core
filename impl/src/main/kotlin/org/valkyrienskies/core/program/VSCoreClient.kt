@@ -10,4 +10,4 @@ import javax.inject.Inject
 class VSCoreClient @Inject internal constructor(
     private val base: VSCoreImpl,
     val shipWorldComponentFactory: ShipObjectClientWorldComponent.Factory
-) : VSCore by base
+) : VSCoreInternal by base

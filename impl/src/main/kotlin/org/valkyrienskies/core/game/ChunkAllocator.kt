@@ -1,6 +1,7 @@
 package org.valkyrienskies.core.game
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 
 /**
  * Allocates [ChunkClaim]s to be used by [ShipData].

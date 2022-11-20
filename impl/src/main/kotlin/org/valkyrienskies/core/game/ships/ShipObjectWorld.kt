@@ -4,23 +4,22 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.plus
 import org.joml.primitives.AABBdc
-import org.valkyrienskies.core.api.ShipCore
-import org.valkyrienskies.core.api.ships.Ship
-import org.valkyrienskies.core.game.DimensionId
-import org.valkyrienskies.core.game.VSBlockType
+import org.valkyrienskies.core.api.ShipInternal
+import org.valkyrienskies.core.api.ships.QueryableShipData
+import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.world.ShipWorld
+import org.valkyrienskies.core.api.world.properties.DimensionId
+import org.valkyrienskies.core.api.ships.properties.VSBlockType
 import org.valkyrienskies.core.util.coroutines.TickableCoroutineDispatcher
-import org.valkyrienskies.core.util.intersectsAABB
 import org.valkyrienskies.core.util.logger
 
 /**
  * Manages all the [ShipObject]s in a world.
  */
-abstract class ShipObjectWorld<ShipObjectType : ShipObject> {
+abstract class ShipObjectWorld<ShipObjectType : ShipObject> : ShipWorld {
 
-    abstract val queryableShipData: QueryableShipData<ShipCore>
-    // abstract val loadedShips: QueryableShipData<LoadedShip>
-
-    abstract val loadedShips: QueryableShipData<ShipObjectType>
+    abstract override val allShips: QueryableShipData<ShipInternal>
+    abstract override val loadedShips: QueryableShipData<ShipObjectType>
 
     @Deprecated(message = "use loadedShips", replaceWith = ReplaceWith("loadedShips"))
     val shipObjects: Map<ShipId, ShipObjectType> get() = loadedShips.idToShipData
@@ -32,7 +31,7 @@ abstract class ShipObjectWorld<ShipObjectType : ShipObject> {
     var tickNumber = 0
         private set
 
-    protected open fun preTick() {
+    open fun preTick() {
         try {
             _dispatcher.tick()
         } catch (ex: Exception) {
@@ -40,8 +39,6 @@ abstract class ShipObjectWorld<ShipObjectType : ShipObject> {
         }
         tickNumber++
     }
-
-    protected abstract fun postTick()
 
     open fun onSetBlock(
         posX: Int,
@@ -54,12 +51,13 @@ abstract class ShipObjectWorld<ShipObjectType : ShipObject> {
         newBlockMass: Double
     ) {
         // If there is a ShipData at this position and dimension, then tell it about the block update
-        queryableShipData.getShipDataFromChunkPos(posX shr 4, posZ shr 4, dimensionId)
+        allShips.getShipDataFromChunkPos(posX shr 4, posZ shr 4, dimensionId)
             ?.onSetBlock(posX, posY, posZ, oldBlockType, newBlockType, oldBlockMass, newBlockMass)
     }
 
-    open fun getShipObjectsIntersecting(aabb: AABBdc): List<ShipObjectType> =
-        shipObjects.values.filter { it.shipData.shipAABB.intersectsAABB(aabb) }.toCollection(ArrayList())
+    @Deprecated("redundant", ReplaceWith("loadedShips.getShipDataIntersecting(aabb)"))
+    override fun getShipObjectsIntersecting(aabb: AABBdc): List<ShipObjectType> =
+        loadedShips.getShipDataIntersecting(aabb).toList()
 
     abstract fun destroyWorld()
 

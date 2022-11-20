@@ -7,9 +7,12 @@ import it.unimi.dsi.fastutil.longs.LongSet
 import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBd
+import org.valkyrienskies.core.api.world.chunks.ChunkUnwatchTask
+import org.valkyrienskies.core.api.world.chunks.ChunkWatchTask
+import org.valkyrienskies.core.api.world.chunks.ChunkWatchTasks
 import org.valkyrienskies.core.config.VSCoreConfig
-import org.valkyrienskies.core.game.DimensionId
-import org.valkyrienskies.core.game.IPlayer
+import org.valkyrienskies.core.api.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.IPlayer
 import org.valkyrienskies.core.game.ships.ShipData
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
 import org.valkyrienskies.core.util.set

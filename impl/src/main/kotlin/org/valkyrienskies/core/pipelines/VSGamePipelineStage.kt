@@ -7,8 +7,11 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.Vector3i
 import org.joml.primitives.AABBi
-import org.valkyrienskies.core.api.Ticked
-import org.valkyrienskies.core.game.DimensionId
+import org.valkyrienskies.core.api.ships.attachments.Ticked
+import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.game.ships.*
 import org.valkyrienskies.core.util.logger
 import org.valkyrienskies.physics_api.PhysicsWorldReference

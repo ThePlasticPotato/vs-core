@@ -19,7 +19,7 @@ import java.util.Iterator;
 import javax.annotation.Nonnull;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
-import org.valkyrienskies.core.util.IntTernaryConsumer;
+import org.valkyrienskies.core.api.util.functions.IntTernaryConsumer;
 
 /**
  * An implementation of IBlockPosSet that stores block positions as 1 integer. This is accomplished by storing each

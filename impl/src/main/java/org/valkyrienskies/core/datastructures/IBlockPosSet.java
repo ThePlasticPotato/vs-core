@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import org.joml.Vector3ic;
-import org.valkyrienskies.core.util.IntTernaryConsumer;
+import org.valkyrienskies.core.api.util.functions.IntTernaryConsumer;
 
 /**
  * Acts just like a <code>Set&lt;Vector3ic&gt;</code>, but it can store the data however it wants to.

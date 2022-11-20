@@ -4,7 +4,9 @@ plugins {
 
 dependencies {
     api(project(":api"))
-    implementation(project(":impl"))
+
+    // TODO: this is really horrific. fix before releasing new api
+    api("org.valkyrienskies:physics_api:1.0.0+68940375dc")
 }
 
 publishing {

@@ -5,6 +5,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import io.netty.buffer.ByteBuf
 import kotlinx.coroutines.launch
+import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.game.ships.*
 import org.valkyrienskies.core.networking.Packet
 import org.valkyrienskies.core.networking.Packets
@@ -67,7 +68,7 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
 
     private fun onShipDataCreate(packet: PacketShipDataCreate) = worldScope.launch {
         for (ship in packet.toCreate) {
-            if (parent.queryableShipData.getById(ship.id) == null) {
+            if (parent.allShips.getById(ship.id) == null) {
                 parent.addShip(ship)
             } else {
                 // Update the next ship transform

@@ -4,7 +4,7 @@ import com.google.common.collect.HashBiMap
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap
-import org.valkyrienskies.core.game.IPlayer
+import org.valkyrienskies.core.api.world.IPlayer
 import org.valkyrienskies.core.networking.impl.PacketRequestUdp
 import org.valkyrienskies.core.util.logger
 import java.net.DatagramPacket

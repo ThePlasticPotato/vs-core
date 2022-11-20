@@ -18,7 +18,7 @@ import com.rubydesic.jacksonktdsl.obj
 import org.valkyrienskies.core.config.VSConfigClass.VSConfigClassSide.CLIENT
 import org.valkyrienskies.core.config.VSConfigClass.VSConfigClassSide.COMMON
 import org.valkyrienskies.core.config.VSConfigClass.VSConfigClassSide.SERVER
-import org.valkyrienskies.core.game.IPlayer
+import org.valkyrienskies.core.api.world.IPlayer
 import org.valkyrienskies.core.hooks.CoreHooks
 import org.valkyrienskies.core.hooks.PlayState.CLIENT_MULTIPLAYER
 import org.valkyrienskies.core.networking.impl.PacketCommonConfigUpdate

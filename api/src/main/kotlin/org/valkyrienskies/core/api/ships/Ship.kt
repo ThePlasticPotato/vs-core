@@ -5,10 +5,10 @@ import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
-import org.valkyrienskies.core.game.ChunkClaim
-import org.valkyrienskies.core.game.DimensionId
-import org.valkyrienskies.core.game.ships.ShipId
-import org.valkyrienskies.core.game.ships.ShipTransform
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
+import org.valkyrienskies.core.api.world.properties.DimensionId
+import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
 
 /**
  * Abstraction of a ship, there are many types such as offline ships

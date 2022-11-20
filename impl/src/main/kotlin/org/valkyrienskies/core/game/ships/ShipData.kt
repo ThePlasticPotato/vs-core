@@ -8,15 +8,17 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
-import org.valkyrienskies.core.api.ServerShipCore
+import org.valkyrienskies.core.api.ServerShipInternal
+import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.chunk_tracking.ShipActiveChunksSet
 import org.valkyrienskies.core.datastructures.IBlockPosSetAABB
 import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
-import org.valkyrienskies.core.game.ChunkClaim
-import org.valkyrienskies.core.game.ChunkClaimImpl
-import org.valkyrienskies.core.game.DimensionId
-import org.valkyrienskies.core.game.VSBlockType
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
+import org.valkyrienskies.core.api.world.properties.DimensionId
+import org.valkyrienskies.core.api.ships.properties.VSBlockType
+import org.valkyrienskies.core.game.VSBlockTypeImpl
 import org.valkyrienskies.core.util.serialization.PacketIgnore
 
 /**
@@ -41,7 +43,7 @@ class ShipData(
 ) : ShipDataCommon(
     id, name, chunkClaim, chunkClaimDimension, physicsData, shipTransform, prevTickShipTransform,
     shipAABB, shipVoxelAABB, shipActiveChunksSet
-), ServerShipCore {
+), ServerShipInternal {
     /**
      * The set of chunks that must be loaded before this ship is fully loaded.
      *
@@ -68,7 +70,7 @@ class ShipData(
 
     init {
         shipActiveChunksSet.iterateChunkPos { chunkX: Int, chunkZ: Int ->
-            missingLoadedChunks.addChunkPos(chunkX, chunkZ)
+            missingLoadedChunks.add(chunkX, chunkZ)
         }
     }
 
@@ -87,13 +89,13 @@ class ShipData(
         inertiaData.onSetBlock(posX, posY, posZ, oldBlockMass, newBlockMass)
 
         // Update [shipVoxelAABB]
-        updateShipAABBGenerator(posX, posY, posZ, newBlockType != VSBlockType.AIR)
+        updateShipAABBGenerator(posX, posY, posZ, newBlockType != VSBlockTypeImpl.AIR)
     }
 
     /**
      * Update the [shipVoxelAABB] to when a block is added/removed.
      */
-    fun updateShipAABBGenerator(posX: Int, posY: Int, posZ: Int, set: Boolean) {
+    private fun updateShipAABBGenerator(posX: Int, posY: Int, posZ: Int, set: Boolean) {
         if (set) {
             shipAABBGenerator.add(posX, posY, posZ)
         } else {
@@ -111,19 +113,19 @@ class ShipData(
 
     fun onLoadChunk(chunkX: Int, chunkZ: Int) {
         if (chunkClaim.contains(chunkX, chunkZ)) {
-            missingLoadedChunks.removeChunkPos(chunkX, chunkZ)
+            missingLoadedChunks.remove(chunkX, chunkZ)
         }
     }
 
     fun onUnloadChunk(chunkX: Int, chunkZ: Int) {
-        if (chunkClaim.contains(chunkX, chunkZ) && shipActiveChunksSet.containsChunkPos(chunkX, chunkZ)) {
-            missingLoadedChunks.addChunkPos(chunkX, chunkZ)
+        if (chunkClaim.contains(chunkX, chunkZ) && shipActiveChunksSet.contains(chunkX, chunkZ)) {
+            missingLoadedChunks.add(chunkX, chunkZ)
         }
     }
 
     fun areVoxelsFullyLoaded(): Boolean {
         // We are fully loaded if we have 0 missing chunks
-        return missingLoadedChunks.getTotalChunks() == 0
+        return missingLoadedChunks.size == 0
     }
 
     override fun <T> saveAttachment(clazz: Class<T>, value: T?) {

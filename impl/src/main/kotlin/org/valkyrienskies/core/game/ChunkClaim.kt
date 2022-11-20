@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIncludeProperties
 import org.joml.Vector3i
 import org.joml.primitives.AABBi
 import org.joml.primitives.AABBic
-import org.valkyrienskies.core.game.ChunkClaim.Companion.DIAMETER
-import org.valkyrienskies.core.game.ChunkClaim.Companion.claimToLong
-import java.lang.Math.floorDiv
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim.Companion.DIAMETER
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim.Companion.claimToLong
 
 /**
  * Each ChunkClaim claims all chunks between the coordinates

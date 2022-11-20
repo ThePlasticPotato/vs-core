@@ -8,6 +8,7 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBd
 import org.joml.primitives.AABBdc
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
 
 /**
  * The [ShipTransform] class is responsible for transforming position and direction vectors between ship coordinates and world coordinates.

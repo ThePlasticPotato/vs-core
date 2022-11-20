@@ -1,7 +1,9 @@
 package org.valkyrienskies.core.game.ships
 
 import org.joml.Vector3dc
-import org.valkyrienskies.core.api.ShipForcesInducer
+import org.valkyrienskies.core.api.ships.PhysShip
+import org.valkyrienskies.core.api.ships.attachments.ShipForcesInducer
+import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.util.assertions.assertIsPhysicsThread
 import org.valkyrienskies.core.util.assertions.requireIsFinite
 import org.valkyrienskies.physics_api.PoseVel

@@ -2,7 +2,7 @@ package org.valkyrienskies.core.pipelines
 
 import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
-import org.valkyrienskies.core.game.ships.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.physics_api.PoseVel
 import org.valkyrienskies.physics_api.RigidBodyInertiaData
 import org.valkyrienskies.physics_api.SegmentTracker

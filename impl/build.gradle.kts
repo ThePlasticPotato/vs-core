@@ -1,9 +1,11 @@
 plugins {
     id("vs-core.convention")
+    id("me.champeau.jmh") version "0.6.8"
 }
 
 dependencies {
     api(project(":api"))
+    api(project(":api-game"))
 
     // Kotlin
     api(kotlin("stdlib-jdk8"))

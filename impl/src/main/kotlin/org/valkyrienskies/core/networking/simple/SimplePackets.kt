@@ -4,7 +4,7 @@ package org.valkyrienskies.core.networking.simple
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
-import org.valkyrienskies.core.game.IPlayer
+import org.valkyrienskies.core.api.world.IPlayer
 import org.valkyrienskies.core.networking.NetworkChannel
 import org.valkyrienskies.core.networking.Packets
 import org.valkyrienskies.core.networking.RegisteredHandler

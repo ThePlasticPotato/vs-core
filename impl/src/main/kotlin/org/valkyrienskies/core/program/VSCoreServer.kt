@@ -8,4 +8,4 @@ import javax.inject.Inject
  */
 class VSCoreServer @Inject internal constructor(
     private val base: VSCoreImpl
-) : VSCore by base
+) : VSCoreInternal by base

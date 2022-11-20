@@ -4,12 +4,14 @@ import org.joml.Matrix3d
 import org.joml.Quaterniond
 import org.joml.Vector3d
 import org.joml.primitives.AABBd
-import org.valkyrienskies.core.api.saveAttachment
+import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
+import org.valkyrienskies.core.api.ships.saveAttachment
 import org.valkyrienskies.core.chunk_tracking.ShipActiveChunksSet
 import org.valkyrienskies.core.datastructures.IBlockPosSet
 import org.valkyrienskies.core.datastructures.SmallBlockPosSet
 import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
-import org.valkyrienskies.core.game.ChunkClaim
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.game.ChunkClaimImpl
 import org.valkyrienskies.core.game.ships.*
 import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShipDataV0
@@ -211,7 +213,7 @@ internal object VSRandomUtils {
     fun randomShipActiveChunkSet(random: Random = defaultRandom, size: Int): ShipActiveChunksSet {
         val shipActiveChunkSet = ShipActiveChunksSet.create()
         for (i in 1..size) {
-            shipActiveChunkSet.addChunkPos(randomIntegerNotCloseToLimit(random), randomIntegerNotCloseToLimit(random))
+            shipActiveChunkSet.add(randomIntegerNotCloseToLimit(random), randomIntegerNotCloseToLimit(random))
         }
         return shipActiveChunkSet
     }

@@ -8,7 +8,7 @@ import org.valkyrienskies.core.config.PhysicsConfig
 import org.valkyrienskies.core.config.VSCoreConfig
 import org.valkyrienskies.core.game.ships.PhysInertia
 import org.valkyrienskies.core.game.ships.PhysShipImpl
-import org.valkyrienskies.core.game.ships.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.util.logger
 import org.valkyrienskies.physics_api.PhysicsWorldReference
 import org.valkyrienskies.physics_api.PoseVel

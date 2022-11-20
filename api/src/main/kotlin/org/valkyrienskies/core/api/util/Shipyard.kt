@@ -5,7 +5,7 @@ import org.joml.Vector2i
 
 import org.joml.Vector3dc
 import org.joml.Vector3ic
-import org.valkyrienskies.core.game.ChunkClaim
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 
 const val X_INDEX_START = -7000 // Start at X=-28672000 block coordinates
 const val X_INDEX_END = 7000 // End at X=28672000 block coordinates

@@ -11,7 +11,7 @@ import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShi
 import org.valkyrienskies.core.game.ships.serialization.vspipeline.dto.VSPipelineData
 import org.valkyrienskies.core.game.ships.serialization.vspipeline.dto.VSPipelineDataV1
 import org.valkyrienskies.core.game.ships.serialization.vspipeline.dto.VSPipelineDataV3
-import org.valkyrienskies.core.pipelines.VSPipeline
+import org.valkyrienskies.core.pipelines.VSPipelineImpl
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
 import javax.inject.Inject
 import javax.inject.Named
@@ -34,8 +34,8 @@ internal class VSPipelineSerializer @Inject constructor(
         return pipelineDataConverter.convertToModel(updated)
     }
 
-    fun serialize(pipeline: VSPipeline): ByteArray {
-        val ships = pipeline.shipWorld.queryableShipData.map(shipDataMapper::convertToDto)
+    fun serialize(pipeline: VSPipelineImpl): ByteArray {
+        val ships = pipeline.shipWorld.allShips.map(shipDataMapper::convertToDto)
         val chunks = pipeline.shipWorld.chunkAllocator
 
         val pipelineData = VSPipelineDataV3(chunks, ships)

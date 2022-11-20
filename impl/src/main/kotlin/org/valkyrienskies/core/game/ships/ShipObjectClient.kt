@@ -3,10 +3,9 @@ package org.valkyrienskies.core.game.ships
 import com.fasterxml.jackson.databind.JsonNode
 import org.joml.primitives.AABBd
 import org.joml.primitives.AABBdc
-import org.valkyrienskies.core.api.ClientShipCore
-import org.valkyrienskies.core.api.ShipCore
-import org.valkyrienskies.core.api.ships.ClientShip
-import org.valkyrienskies.core.api.ships.Ship
+import org.valkyrienskies.core.api.ClientShipInternal
+import org.valkyrienskies.core.api.ShipInternal
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.networking.delta.DeltaEncodedChannelClientTCP
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
 import org.valkyrienskies.core.util.toAABBd
@@ -14,7 +13,7 @@ import org.valkyrienskies.core.util.toAABBd
 class ShipObjectClient(
     shipData: ShipDataCommon,
     shipDataJson: JsonNode = VSJacksonUtil.defaultMapper.valueToTree(shipData)
-) : ShipObject(shipData), ClientShipCore, ShipCore by shipData {
+) : ShipObject(shipData), ClientShipInternal, ShipInternal by shipData {
     // The last ship transform sent by the sever
     internal var nextShipTransform: ShipTransform
 

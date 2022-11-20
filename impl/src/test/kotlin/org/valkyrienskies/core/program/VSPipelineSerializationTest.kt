@@ -29,7 +29,7 @@ class VSPipelineSerializationTest : StringSpec({
         val serialized = core.serializePipeline(pipeline)
         val deserialized = core.newPipeline(serialized)
 
-        deserialized.shipWorld.queryableShipData shouldContainExactly pipeline.shipWorld.queryableShipData
+        deserialized.shipWorld.allShips shouldContainExactly pipeline.shipWorld.allShips
         deserialized.shipWorld.chunkAllocator shouldBe pipeline.shipWorld.chunkAllocator
 
         // do it again just to make sure
@@ -37,7 +37,7 @@ class VSPipelineSerializationTest : StringSpec({
         val serialized2 = core.serializePipeline(deserialized)
         val deserialized2 = core.newPipeline(serialized2)
 
-        deserialized2.shipWorld.queryableShipData shouldContainExactly pipeline.shipWorld.queryableShipData
+        deserialized2.shipWorld.allShips shouldContainExactly pipeline.shipWorld.allShips
         deserialized.shipWorld.chunkAllocator shouldBe pipeline.shipWorld.chunkAllocator
     }
 

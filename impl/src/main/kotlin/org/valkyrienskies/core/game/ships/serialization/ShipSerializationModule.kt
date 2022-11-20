@@ -6,6 +6,10 @@ import org.valkyrienskies.core.game.ships.serialization.vspipeline.VSPipelineCha
 import org.valkyrienskies.core.game.ships.serialization.vspipeline.VSPipelineDataUpdatersModule
 
 @Module(
-    includes = [VSPipelineDataUpdatersModule::class, VSPipelineChainUpdaterModule::class, ServerShipDataUpdatersModule::class]
+    includes = [
+        VSPipelineDataUpdatersModule::class,
+        VSPipelineChainUpdaterModule::class,
+        ServerShipDataUpdatersModule::class
+    ]
 )
 class ShipSerializationModule

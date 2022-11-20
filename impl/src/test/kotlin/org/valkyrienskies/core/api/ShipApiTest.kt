@@ -1,12 +1,12 @@
 package org.valkyrienskies.core.api
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.valkyrienskies.core.VSRandomUtils
-import org.valkyrienskies.core.game.ships.ShipData
+import org.valkyrienskies.core.api.ships.getAttachment
+import org.valkyrienskies.core.api.ships.saveAttachment
+import org.valkyrienskies.core.api.ships.setAttachment
 import org.valkyrienskies.core.game.ships.ShipObjectServer
-import org.valkyrienskies.core.util.serialization.VSJacksonUtil
 
 // Yes its a very simple test, but if somebody ever dares to break it we will know
 internal class ShipApiTest {
@@ -29,15 +29,15 @@ internal class ShipApiTest {
         abstractShipUser(shipObject, true)
     }
 
-    fun abstractShipSaver(ship: ServerShipCore) {
+    fun abstractShipSaver(ship: ServerShipInternal) {
         ship.saveAttachment(3f)
     }
 
-    fun abstractShipSaver2(ship: LoadedServerShipCore) {
+    fun abstractShipSaver2(ship: LoadedServerShipInternal) {
         ship.setAttachment(5)
     }
 
-    fun abstractShipUser(ship: ServerShipCore, checkInt: Boolean) {
+    fun abstractShipUser(ship: ServerShipInternal, checkInt: Boolean) {
         if (checkInt) Assertions.assertEquals(5, ship.getAttachment<Int>())
         Assertions.assertEquals(3f, ship.getAttachment<Float>())
     }

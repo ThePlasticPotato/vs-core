@@ -1,31 +1,16 @@
 package org.valkyrienskies.core.game.ships
 
 import org.joml.primitives.AABBdc
+import org.valkyrienskies.core.api.ships.MutableQueryableShipData
+import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.Ship
+import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.datastructures.ChunkClaimMap
-import org.valkyrienskies.core.game.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.util.intersectsAABB
 
 typealias QueryableShipDataServer = QueryableShipData<ShipData>
 typealias MutableQueryableShipDataServer = MutableQueryableShipData<ShipData>
-
-interface QueryableShipData<out ShipType : Ship> : Iterable<ShipType> {
-    @Deprecated(message = "Use the specific functions instead, such as #getById or #iterator")
-    val idToShipData: Map<ShipId, ShipType>
-
-    override fun iterator(): Iterator<ShipType>
-    fun getById(shipId: ShipId): ShipType?
-    fun getShipDataFromChunkPos(chunkX: Int, chunkZ: Int, dimensionId: DimensionId): ShipType?
-    fun getShipDataIntersecting(aabb: AABBdc): Iterable<ShipType>
-
-    fun contains(shipId: ShipId): Boolean = getById(shipId) != null
-}
-
-interface MutableQueryableShipData<ShipType : Ship> : QueryableShipData<ShipType>, MutableIterable<ShipType> {
-    fun addShipData(shipData: ShipType)
-    fun removeShipData(shipData: ShipType)
-    fun removeShipData(id: ShipId)
-}
 
 open class QueryableShipDataImpl<ShipType : Ship>(
     data: Iterable<ShipType> = emptyList()

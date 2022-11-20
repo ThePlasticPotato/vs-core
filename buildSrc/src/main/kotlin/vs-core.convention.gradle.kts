@@ -99,6 +99,16 @@ tasks {
     }
 }
 
+// region Automatically accept Gradle build scan TOS
+
+if (hasProperty("buildScan")) {
+    extensions.findByName("buildScan")?.withGroovyBuilder {
+        setProperty("termsOfServiceUrl", "https://gradle.com/terms-of-service")
+        setProperty("termsOfServiceAgree", "yes")
+    }
+}
+
+// endregion
 
 // region Util functions
 

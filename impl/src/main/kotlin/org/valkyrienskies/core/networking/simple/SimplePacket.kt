@@ -1,6 +1,6 @@
 package org.valkyrienskies.core.networking.simple
 
-import org.valkyrienskies.core.game.IPlayer
+import org.valkyrienskies.core.api.world.IPlayer
 
 interface SimplePacket {
     fun receivedByClient() {}
