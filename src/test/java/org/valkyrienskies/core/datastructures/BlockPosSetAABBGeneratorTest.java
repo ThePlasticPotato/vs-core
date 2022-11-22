@@ -63,6 +63,15 @@ public class BlockPosSetAABBGeneratorTest {
         assertEquals(toTest.add(pos8), aabbMaker.addVoxel(pos8));
         assertEquals(toTest.makeAABB(), aabbMaker.makeVoxelFieldAABB());
 
+        // Test negative positions
+        final Vector3ic pos9 = new Vector3i(-25, -2, -35);
+        assertEquals(toTest.add(pos8), aabbMaker.addVoxel(pos8));
+        assertEquals(toTest.makeAABB(), aabbMaker.makeVoxelFieldAABB());
+
+        final Vector3ic pos10 = new Vector3i(0, -50, 0);
+        assertEquals(toTest.add(pos8), aabbMaker.addVoxel(pos8));
+        assertEquals(toTest.makeAABB(), aabbMaker.makeVoxelFieldAABB());
+
         // Test clear
         toTest.clear();
         aabbMaker.clear();
