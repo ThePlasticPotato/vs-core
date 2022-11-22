@@ -12,8 +12,8 @@ import org.valkyrienskies.core.api.ServerShip
 import org.valkyrienskies.core.api.ServerShipUser
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.chunk_tracking.ShipActiveChunksSet
+import org.valkyrienskies.core.datastructures.BlockPosSetAABBGenerator
 import org.valkyrienskies.core.datastructures.IBlockPosSetAABB
-import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
 import org.valkyrienskies.core.game.ChunkClaim
 import org.valkyrienskies.core.game.DimensionId
 import org.valkyrienskies.core.game.VSBlockType
@@ -61,7 +61,8 @@ class ShipData(
      * This can also be used to quickly iterate over every block in this ship.
      */
     @JsonIgnore
-    private val shipAABBGenerator: IBlockPosSetAABB = SmallBlockPosSetAABB(chunkClaim)
+    private val shipAABBGenerator: IBlockPosSetAABB =
+        BlockPosSetAABBGenerator(chunkClaim)
 
     override val shipToWorld: Matrix4dc
         get() = shipTransform.shipToWorldMatrix

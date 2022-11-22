@@ -6,9 +6,9 @@ import org.joml.Vector3d
 import org.joml.primitives.AABBd
 import org.valkyrienskies.core.api.saveAttachment
 import org.valkyrienskies.core.chunk_tracking.ShipActiveChunksSet
+import org.valkyrienskies.core.datastructures.BlockPosSetAABBGenerator
 import org.valkyrienskies.core.datastructures.IBlockPosSet
 import org.valkyrienskies.core.datastructures.SmallBlockPosSet
-import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
 import org.valkyrienskies.core.game.ChunkClaim
 import org.valkyrienskies.core.game.ships.MutableQueryableShipDataServer
 import org.valkyrienskies.core.game.ships.QueryableShipDataImpl
@@ -149,11 +149,13 @@ internal object VSRandomUtils {
     }
 
     @Suppress("WeakerAccess")
-    fun randomBlockPosSetAABB(random: Random = defaultRandom, size: Int): SmallBlockPosSetAABB {
+    fun randomBlockPosSetAABB(random: Random = defaultRandom, size: Int): BlockPosSetAABBGenerator {
         val centerX = randomIntegerNotCloseToLimit(random)
         val centerY = randomIntegerNotCloseToLimit(random)
         val centerZ = randomIntegerNotCloseToLimit(random)
-        val blockPosSet = SmallBlockPosSetAABB(centerX, centerY, centerZ, 4096, 256, 4096)
+        val blockPosSet = BlockPosSetAABBGenerator(
+            centerX, centerY, centerZ, 4096, 256, 4096
+        )
         fillBlockPosSet(random, blockPosSet, centerX, centerY, centerZ, size)
         return blockPosSet
     }

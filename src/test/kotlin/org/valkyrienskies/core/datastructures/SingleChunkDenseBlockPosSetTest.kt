@@ -14,6 +14,35 @@ import org.joml.Vector3i
 
 class SingleChunkDenseBlockPosSetTest : StringSpec({
 
+    "add should return true if not already contained" {
+        val set = SingleChunkDenseBlockPosSet()
+
+        checkAll(Arb.int(0..15), Arb.int(0..15), Arb.int(0..15)) { x, y, z ->
+            set.add(x, y, z) shouldBe true
+            set.add(x, y, z) shouldBe false
+
+            set.remove(x, y, z)
+        }
+    }
+
+    "remove should return true if removed" {
+        val set = SingleChunkDenseBlockPosSet()
+
+        checkAll(Arb.int(0..15), Arb.int(0..15), Arb.int(0..15)) { x, y, z ->
+            set.add(x, y, z)
+            set.remove(x, y, z) shouldBe true
+            set.remove(x, y, z) shouldBe false
+        }
+    }
+
+    "remove should return false if not removed" {
+        val set = SingleChunkDenseBlockPosSet()
+
+        checkAll(Arb.int(0..15), Arb.int(0..15), Arb.int(0..15)) { x, y, z ->
+            set.remove(x, y, z) shouldBe false
+        }
+    }
+
     "errors if you try to store a block outside the bounds" {
         checkAll(Arb.int().filterNot { it in 0..15 },
             Arb.int().filterNot { it in 0..15 },

@@ -17,7 +17,7 @@ class DenseBlockPosSet : IBlockPosSet {
         val prev = chunks.getOrPut(x shr 4, y shr 4, z shr 4) { SingleChunkDenseBlockPosSet() }
             .add(x and 15, y and 15, z and 15)
 
-        if (!prev) {
+        if (prev) {
             size++
         }
 
@@ -26,6 +26,7 @@ class DenseBlockPosSet : IBlockPosSet {
 
     override fun clear() {
         chunks.clear()
+        size = 0
     }
 
     override fun iterator(): MutableIterator<Vector3ic> = throw UnsupportedOperationException()
