@@ -3,7 +3,17 @@ package org.valkyrienskies.core.api.ships
 import org.valkyrienskies.core.api.ships.properties.ShipId
 
 interface MutableQueryableShipData<ShipType : Ship> : QueryableShipData<ShipType>, MutableIterable<ShipType> {
-    fun addShipData(shipData: ShipType)
-    fun removeShipData(shipData: ShipType)
-    fun removeShipData(id: ShipId)
+
+    fun add(ship: ShipType)
+    fun remove(ship: ShipType)
+    fun remove(id: ShipId)
+
+    @Deprecated("renamed", ReplaceWith("add(ship)"))
+    fun addShipData(ship: ShipType) = add(ship)
+
+    @Deprecated("renamed", ReplaceWith("remove(ship)"))
+    fun removeShipData(ship: ShipType) = remove(ship)
+
+    @Deprecated("renamed", ReplaceWith("remove(id)"))
+    fun removeShipData(id: ShipId) = remove(id)
 }

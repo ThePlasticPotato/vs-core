@@ -72,14 +72,14 @@ publishing {
 tasks {
     compileKotlin {
         kotlinOptions {
-            freeCompilerArgs += listOf("-opt-in=org.valkyrienskies.core.util.PrivateApi", "-Xjvm-default=all")
+            freeCompilerArgs += listOf("-Xjvm-default=all")
         }
 
         kotlinOptions.jvmTarget = "1.8"
     }
     compileTestKotlin {
         kotlinOptions {
-            freeCompilerArgs += listOf("-opt-in=org.valkyrienskies.core.util.PrivateApi", "-Xjvm-default=all")
+            freeCompilerArgs += listOf("-Xjvm-default=all")
         }
         kotlinOptions.jvmTarget = "1.8"
     }
