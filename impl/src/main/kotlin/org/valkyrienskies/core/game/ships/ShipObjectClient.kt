@@ -23,27 +23,27 @@ class ShipObjectClient(
     override lateinit var renderAABB: AABBdc
         private set
 
-    internal var latestNetworkTransform: ShipTransform = shipData.shipTransform
+    internal var latestNetworkTransform: ShipTransform = shipData.transform
     internal var latestNetworkTTick = Int.MIN_VALUE
 
     internal val shipDataChannel = DeltaEncodedChannelClientTCP(jsonDiffDeltaAlgorithm, shipDataJson)
 
     init {
-        nextShipTransform = shipData.shipTransform
-        renderTransform = shipData.shipTransform
-        renderAABB = shipData.shipTransform.createEmptyAABB()
+        nextShipTransform = shipData.transform
+        renderTransform = shipData.transform
+        renderAABB = shipData.transform.createEmptyAABB()
     }
 
     fun tickUpdateShipTransform() {
         this.nextShipTransform = latestNetworkTransform
         shipData.updatePrevTickShipTransform()
-        shipData.shipTransform = ShipTransformImpl.createFromSlerp(shipData.shipTransform, nextShipTransform, EMA_ALPHA)
+        shipData.transform = ShipTransformImpl.createFromSlerp(shipData.transform, nextShipTransform, EMA_ALPHA)
     }
 
     fun updateRenderShipTransform(partialTicks: Double) {
         renderTransform =
-            ShipTransformImpl.createFromSlerp(shipData.prevTickShipTransform, shipData.shipTransform, partialTicks)
-        renderAABB = shipData.shipVoxelAABB?.toAABBd(AABBd())?.transform(renderTransform.shipToWorld, AABBd())
+            ShipTransformImpl.createFromSlerp(shipData.prevTickTransform, shipData.transform, partialTicks)
+        renderAABB = shipData.shipAABB?.toAABBd(AABBd())?.transform(renderTransform.shipToWorld, AABBd())
             ?: renderTransform.createEmptyAABB()
     }
 

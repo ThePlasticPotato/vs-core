@@ -91,7 +91,7 @@ open class QueryableShipDataImpl<ShipType : Ship>(
 
     override fun getIntersecting(aabb: AABBdc): Iterable<ShipType> {
         // TODO Use https://github.com/tzaeschke/phtree
-        return _idToShipData.values.filter { it.shipAABB.intersectsAABB(aabb) }
+        return _idToShipData.values.filter { it.worldAABB.intersectsAABB(aabb) }
     }
 
     override fun equals(other: Any?): Boolean {

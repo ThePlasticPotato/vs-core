@@ -71,17 +71,17 @@ data class ShipTransformImpl(
         val ZERO: Vector3dc = Vector3d()
 
         fun createEmpty(): ShipTransform {
-            return createFromCoordinates(ZERO, ZERO)
+            return create(ZERO, ZERO)
         }
 
-        fun createFromCoordinates(
+        fun create(
             centerCoordinateInWorld: Vector3dc,
             centerCoordinateInShip: Vector3dc
         ): ShipTransform {
-            return createFromCoordinatesAndRotation(centerCoordinateInWorld, centerCoordinateInShip, ZERO_ROTATION)
+            return create(centerCoordinateInWorld, centerCoordinateInShip, ZERO_ROTATION)
         }
 
-        fun createFromCoordinatesAndRotation(
+        fun create(
             centerCoordinateInWorld: Vector3dc,
             centerCoordinateInShip: Vector3dc,
             shipRotation: Quaterniondc
@@ -94,7 +94,7 @@ data class ShipTransformImpl(
             )
         }
 
-        fun createFromCoordinatesAndRotationAndScaling(
+        fun create(
             centerCoordinateInWorld: Vector3dc,
             centerCoordinateInShip: Vector3dc,
             shipRotation: Quaterniondc,
@@ -141,7 +141,7 @@ data class ShipTransformImpl(
                 Vector3d()
             )
 
-            return createFromCoordinatesAndRotationAndScaling(
+            return create(
                 newWorldCoords,
                 newCenterCoords,
                 newRotation,

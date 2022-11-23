@@ -6,16 +6,14 @@ import dagger.assisted.AssistedInject
 import io.netty.buffer.ByteBuf
 import kotlinx.coroutines.launch
 import org.valkyrienskies.core.api.ships.properties.ShipId
-import org.valkyrienskies.core.game.ships.*
-import org.valkyrienskies.core.networking.Packet
-import org.valkyrienskies.core.networking.Packets
-import org.valkyrienskies.core.networking.RegisteredHandler
-import org.valkyrienskies.core.networking.VSCryptUtils
-import org.valkyrienskies.core.networking.VSNetworking
+import org.valkyrienskies.core.game.ships.ShipDataCommon
+import org.valkyrienskies.core.game.ships.ShipObjectClient
+import org.valkyrienskies.core.game.ships.ShipObjectClientWorld
+import org.valkyrienskies.core.game.ships.ShipTransformImpl
+import org.valkyrienskies.core.networking.*
 import org.valkyrienskies.core.networking.impl.PacketShipDataCreate
 import org.valkyrienskies.core.networking.impl.PacketShipRemove
 import org.valkyrienskies.core.networking.simple.SimplePacketNetworking
-import org.valkyrienskies.core.networking.unregisterAll
 import org.valkyrienskies.core.pipelines.VSNetworkPipelineStage
 import org.valkyrienskies.core.util.logger
 import org.valkyrienskies.core.util.read3FAsNormQuatd
@@ -72,7 +70,7 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
                 parent.addShip(ship)
             } else {
                 // Update the next ship transform
-                parent.shipObjects[ship.id]?.nextShipTransform = ship.shipTransform
+                parent.shipObjects[ship.id]?.nextShipTransform = ship.transform
 
                 throw logger.throwing(
                     IllegalArgumentException("Received ship create packet for already loaded ship?!")
@@ -148,7 +146,7 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
                         val velocity = buf.readVec3fAsDouble()
                         val omega = buf.readVec3fAsDouble()
 
-                        ship.latestNetworkTransform = ShipTransformImpl.createFromCoordinatesAndRotationAndScaling(
+                        ship.latestNetworkTransform = ShipTransformImpl.create(
                             position, centerOfMass, rotation, scaling
                         )
                         ship.latestNetworkTTick = tickNum

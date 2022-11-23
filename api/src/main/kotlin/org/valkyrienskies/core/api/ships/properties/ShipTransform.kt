@@ -30,7 +30,7 @@ interface ShipTransform {
      * Create an empty [AABBdc] centered around [positionInWorld].
      */
     fun createEmptyAABB(): AABBdc
-    
+
     @Deprecated("renamed", ReplaceWith("positionInWorld"))
     val shipPositionInWorldCoordinates: Vector3dc get() = positionInWorld
 

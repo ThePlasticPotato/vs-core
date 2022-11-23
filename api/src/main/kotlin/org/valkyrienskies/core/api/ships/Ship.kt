@@ -18,18 +18,30 @@ interface Ship {
 
     val id: ShipId
 
-    val shipTransform: ShipTransform
-    val prevTickShipTransform: ShipTransform
+    val transform: ShipTransform
+    val prevTickTransform: ShipTransform
 
     val chunkClaim: ChunkClaim
     val chunkClaimDimension: DimensionId
-    val shipAABB: AABBdc
-    val shipVoxelAABB: AABBic?
+    val worldAABB: AABBdc
+    val shipAABB: AABBic?
     val velocity: Vector3dc
     val omega: Vector3dc
 
-    val shipActiveChunksSet: IShipActiveChunksSet
+    val activeChunksSet: IShipActiveChunksSet
 
-    val shipToWorld: Matrix4dc get() = shipTransform.shipToWorld
-    val worldToShip: Matrix4dc get() = shipTransform.worldToShip
+    val shipToWorld: Matrix4dc get() = transform.shipToWorld
+    val worldToShip: Matrix4dc get() = transform.worldToShip
+
+    @Deprecated("renamed", ReplaceWith("prevTickTransform"))
+    val prevTickShipTransform: ShipTransform get() = prevTickTransform
+
+    @Deprecated("renamed", ReplaceWith("transform"))
+    val shipTransform: ShipTransform get() = transform
+
+    @Deprecated("renamed", ReplaceWith("shipAABB"))
+    val shipVoxelAABB: AABBic? get() = shipAABB
+
+    @Deprecated("renamed", ReplaceWith("activeChunksSet"))
+    val shipActiveChunksSet: IShipActiveChunksSet get() = activeChunksSet
 }

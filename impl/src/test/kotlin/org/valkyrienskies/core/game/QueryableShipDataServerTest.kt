@@ -5,10 +5,7 @@ import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.int
 import io.kotest.property.checkAll
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.valkyrienskies.core.VSRandomUtils
 import org.valkyrienskies.core.game.ships.QueryableShipDataImpl
 import org.valkyrienskies.core.game.ships.QueryableShipDataServer
@@ -136,7 +133,7 @@ class QueryableShipDataServerTest : AnnotationSpec() {
         checkAll(Arb.shipData()) { shipData ->
             val queryableShipData = QueryableShipDataImpl<ShipData>()
             queryableShipData.addShipData(shipData)
-            val shipsIntersectingBB = queryableShipData.getShipDataIntersecting(shipData.shipAABB).iterator()
+            val shipsIntersectingBB = queryableShipData.getShipDataIntersecting(shipData.worldAABB).iterator()
             assertTrue(shipsIntersectingBB.hasNext())
             assertEquals(shipsIntersectingBB.next(), shipData)
             assertFalse(shipsIntersectingBB.hasNext())

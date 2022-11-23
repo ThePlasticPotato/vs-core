@@ -55,7 +55,7 @@ class ShipData(
     private val missingLoadedChunks: IShipActiveChunksSet = ShipActiveChunksSet.create()
 
     /**
-     * Generates the [shipVoxelAABB] in O(1) time. However, this object is too large for us to persistently store it,
+     * Generates the [shipAABB] in O(1) time. However, this object is too large for us to persistently store it,
      * so we make it transient.
      *
      * This can also be used to quickly iterate over every block in this ship.
@@ -64,9 +64,9 @@ class ShipData(
     private val shipAABBGenerator: IBlockPosSetAABB = SmallBlockPosSetAABB(chunkClaim)
 
     override val shipToWorld: Matrix4dc
-        get() = shipTransform.shipToWorld
+        get() = transform.shipToWorld
     override val worldToShip: Matrix4dc
-        get() = shipTransform.worldToShip
+        get() = transform.worldToShip
 
     init {
         shipActiveChunksSet.iterateChunkPos { chunkX: Int, chunkZ: Int ->
@@ -93,7 +93,7 @@ class ShipData(
     }
 
     /**
-     * Update the [shipVoxelAABB] to when a block is added/removed.
+     * Update the [shipAABB] to when a block is added/removed.
      */
     private fun updateShipAABBGenerator(posX: Int, posY: Int, posZ: Int, set: Boolean) {
         if (set) {
@@ -108,7 +108,7 @@ class ShipData(
             rawVoxelAABB.maxY += 1
             rawVoxelAABB.maxZ += 1
         }
-        shipVoxelAABB = rawVoxelAABB
+        shipAABB = rawVoxelAABB
     }
 
     fun onLoadChunk(chunkX: Int, chunkZ: Int) {
@@ -118,7 +118,7 @@ class ShipData(
     }
 
     fun onUnloadChunk(chunkX: Int, chunkZ: Int) {
-        if (chunkClaim.contains(chunkX, chunkZ) && shipActiveChunksSet.contains(chunkX, chunkZ)) {
+        if (chunkClaim.contains(chunkX, chunkZ) && activeChunksSet.contains(chunkX, chunkZ)) {
             missingLoadedChunks.add(chunkX, chunkZ)
         }
     }
@@ -154,7 +154,7 @@ class ShipData(
             scaling: Double = 1.0,
             isStatic: Boolean = false
         ): ShipData {
-            val shipTransform = ShipTransformImpl.createFromCoordinatesAndRotationAndScaling(
+            val shipTransform = ShipTransformImpl.create(
                 shipCenterInWorldCoordinates,
                 shipCenterInShipCoordinates,
                 Quaterniond().fromAxisAngleDeg(0.0, 1.0, 0.0, 0.0),

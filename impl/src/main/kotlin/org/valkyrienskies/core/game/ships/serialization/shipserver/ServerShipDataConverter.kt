@@ -28,11 +28,11 @@ internal class ServerShipDataConverterImpl @Inject constructor(
         velocity = model.physicsData.linearVelocity,
         omega = model.physicsData.angularVelocity,
         inertiaData = inertiaConverter.convertToDto(model.inertiaData),
-        transform = transformConverter.convertToDto(model.shipTransform),
-        prevTickTransform = transformConverter.convertToDto(model.prevTickShipTransform),
-        worldAABB = model.shipAABB,
-        shipAABB = model.shipVoxelAABB,
-        activeChunks = model.shipActiveChunksSet,
+        transform = transformConverter.convertToDto(model.transform),
+        prevTickTransform = transformConverter.convertToDto(model.prevTickTransform),
+        worldAABB = model.worldAABB,
+        shipAABB = model.shipAABB,
+        activeChunks = model.activeChunksSet,
         isStatic = model.isStatic,
         persistentAttachedData = model.persistentAttachedData
     )

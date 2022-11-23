@@ -13,7 +13,7 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
     "tracks single player" {
         val dimension = "fake_dimension"
         val ship = VSBlankUtils.blankShipData(chunkClaimDimension = dimension)
-        ship.shipActiveChunksSet.add(0, 0)
+        ship.activeChunksSet.add(0, 0)
         val ships = listOf(ship)
 
         val player = FakePlayer(dimension = dimension)
@@ -114,7 +114,7 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
     "tracks player leaving the dimension and returning" {
         val dimension = "fake_dimension"
         val ship = VSBlankUtils.blankShipData(chunkClaimDimension = dimension)
-        ship.shipActiveChunksSet.add(0, 0)
+        ship.activeChunksSet.add(0, 0)
         val ships = listOf(ship)
 
         val player = FakePlayer(dimension = dimension)
@@ -252,8 +252,8 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
     "tracks multiple players and multiple chunks" {
         val dimension = "fake_dimension"
         val ship = VSBlankUtils.blankShipData(chunkClaimDimension = dimension)
-        ship.shipActiveChunksSet.add(0, 0) // 0 to 16
-        ship.shipActiveChunksSet.add(4, 0) // 64 to 80
+        ship.activeChunksSet.add(0, 0) // 0 to 16
+        ship.activeChunksSet.add(4, 0) // 64 to 80
         val ships = listOf(ship)
 
         val player1 = FakePlayer(dimension = dimension)

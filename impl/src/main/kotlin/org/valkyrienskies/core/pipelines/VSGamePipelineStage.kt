@@ -79,7 +79,7 @@ internal class VSGamePipelineStage @Inject constructor(private val shipWorld: Sh
 
                     shipData.physicsData.linearVelocity = shipInPhysicsFrameData.poseVel.vel
                     shipData.physicsData.angularVelocity = shipInPhysicsFrameData.poseVel.omega
-                    shipData.shipTransform = newShipTransform
+                    shipData.transform = newShipTransform
                     shipObject.debugShipPhysicsAABB = shipInPhysicsFrameData.aabb
                 }
             } else {
@@ -152,17 +152,17 @@ internal class VSGamePipelineStage @Inject constructor(private val shipWorld: Sh
             val uuid = it.shipData.id
             val minDefined = Vector3i()
             val maxDefined = Vector3i()
-            it.shipData.shipActiveChunksSet.getMinMaxWorldPos(minDefined, maxDefined)
+            it.shipData.activeChunksSet.getMinMaxWorldPos(minDefined, maxDefined)
 
             val totalVoxelRegion = it.shipData.chunkClaim.getTotalVoxelRegion(AABBi())
 
             val krunchDimensionId = getKrunchDimensionId(it.shipData.chunkClaimDimension)
-            val scaling = it.shipData.shipTransform.shipToWorldScaling.x()
+            val scaling = it.shipData.transform.shipToWorldScaling.x()
 
             // TODO: Support more advanced segments than just basic scaling from origin
             val poseVel = PoseVel.createPoseVel(
-                it.shipData.shipTransform.positionInWorld.div(scaling, Vector3d()),
-                it.shipData.shipTransform.shipToWorldRotation
+                it.shipData.transform.positionInWorld.div(scaling, Vector3d()),
+                it.shipData.transform.shipToWorldRotation
             )
             val segments = SegmentUtils.createSegmentTrackerFromScaling(krunchDimensionId, scaling)
             val voxelOffset = getShipVoxelOffset(it.shipData.inertiaData)
@@ -240,7 +240,7 @@ internal class VSGamePipelineStage @Inject constructor(private val shipWorld: Sh
             val scaling = physicsFrameData.segments.segments.values.first().segmentDisplacement.scaling
             val shipPosAccountingForSegment = shipPosAccountingForVoxelOffsetDifference.mul(scaling, Vector3d())
 
-            return ShipTransformImpl.createFromCoordinatesAndRotationAndScaling(
+            return ShipTransformImpl.create(
                 shipPosAccountingForSegment,
                 shipData.inertiaData.centerOfMassInShip.add(.5, .5, .5, Vector3d()),
                 poseVelFromPhysics.rot,

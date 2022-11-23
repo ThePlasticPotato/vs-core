@@ -98,9 +98,9 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
         val tempAABB = AABBd()
 
         ships.forEach { shipData ->
-            val shipTransform = shipData.shipTransform
-            val voxelAABB = shipData.shipVoxelAABB
-            shipData.shipActiveChunksSet.iterateChunkPos { chunkX, chunkZ ->
+            val shipTransform = shipData.transform
+            val voxelAABB = shipData.shipAABB
+            shipData.activeChunksSet.iterateChunkPos { chunkX, chunkZ ->
                 val chunkAABBInWorld = tempAABB
                     .set(
                         (chunkX shl 4).toDouble(),
