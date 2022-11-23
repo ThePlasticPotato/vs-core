@@ -24,11 +24,11 @@ import org.valkyrienskies.core.api.util.functions.IntTernaryConsumer;
  * A wrapper around SmallBlockPosSet that can make create tight AxisAlignedBB containing all BlockPos in the Set. All
  * operations (except clear) run in O(1) average time.
  */
-@JsonDeserialize(using = SmallBlockPosSetAABB.SmallBlockPosSetAABBDeserializer.class)
-@JsonSerialize(using = SmallBlockPosSetAABB.SmallBlockPosSetAABBSerializer.class)
-public class SmallBlockPosSetAABB implements IBlockPosSetAABB {
+@JsonDeserialize(using = BlockPosSetAABBGenerator.SmallBlockPosSetAABBDeserializer.class)
+@JsonSerialize(using = BlockPosSetAABBGenerator.SmallBlockPosSetAABBSerializer.class)
+public class BlockPosSetAABBGenerator implements IBlockPosSetAABB {
 
-    private final SmallBlockPosSet blockPosSet;
+    private final IBlockPosSet blockPosSet;
     private final int centerX;
     private final int centerY;
     private final int centerZ;
@@ -39,11 +39,15 @@ public class SmallBlockPosSetAABB implements IBlockPosSetAABB {
     private final FastMinMaxMap yMap;
     private final FastMinMaxMap zMap; // Only non-final so we can clear() quickly.
 
-    public SmallBlockPosSetAABB(final ChunkClaim chunkClaim) {
+    public BlockPosSetAABBGenerator(final ChunkClaim chunkClaim) {
+        this(chunkClaim, new DenseBlockPosSet());
+    }
+
+    public BlockPosSetAABBGenerator(final ChunkClaim chunkClaim, final IBlockPosSet backingSet) {
         final Vector3ic centerCoordinates = chunkClaim.getCenterBlockCoordinates(new Vector3i());
         final Vector3ic claimSize = chunkClaim.getBlockSize(new Vector3i());
 
-        this.blockPosSet = new SmallBlockPosSet(centerCoordinates.x(), centerCoordinates.y(), centerCoordinates.z());
+        this.blockPosSet = backingSet;
         this.centerX = centerCoordinates.x();
         this.centerY = centerCoordinates.y();
         this.centerZ = centerCoordinates.z();
@@ -55,14 +59,13 @@ public class SmallBlockPosSetAABB implements IBlockPosSetAABB {
         this.zMap = new FastMinMaxMap(zSize);
     }
 
-    public SmallBlockPosSetAABB(final int centerX, final int centerY, final int centerZ, final int xSize,
+    public BlockPosSetAABBGenerator(final int centerX, final int centerY, final int centerZ, final int xSize,
         final int ySize, final int zSize) {
-        this(new SmallBlockPosSet(centerX, centerY, centerZ), centerX, centerY, centerZ, xSize, ySize, zSize);
+        this(new DenseBlockPosSet(), centerX, centerY, centerZ, xSize, ySize, zSize);
     }
 
-    private SmallBlockPosSetAABB(final SmallBlockPosSet blockPosSet, final int centerX, final int centerY,
-        final int centerZ, final int xSize,
-        final int ySize, final int zSize) {
+    private BlockPosSetAABBGenerator(final IBlockPosSet blockPosSet, final int centerX, final int centerY,
+        final int centerZ, final int xSize, final int ySize, final int zSize) {
         this.blockPosSet = blockPosSet;
         this.centerX = centerX;
         this.centerY = centerY;
@@ -87,12 +90,12 @@ public class SmallBlockPosSetAABB implements IBlockPosSetAABB {
             int maxY = yMap.getBack() - (ySize / 2);
             int minZ = zMap.getFront() - (zSize / 2);
             int maxZ = zMap.getBack() - (zSize / 2);
-            minX += blockPosSet.getCenterX();
-            maxX += blockPosSet.getCenterX();
-            minY += blockPosSet.getCenterY();
-            maxY += blockPosSet.getCenterY();
-            minZ += blockPosSet.getCenterZ();
-            maxZ += blockPosSet.getCenterZ();
+            minX += centerX;
+            maxX += centerX;
+            minY += centerY;
+            maxY += centerY;
+            minZ += centerZ;
+            maxZ += centerZ;
             return new AABBi(minX, minY, minZ, maxX, maxY, maxZ);
         }
     }
@@ -107,9 +110,9 @@ public class SmallBlockPosSetAABB implements IBlockPosSetAABB {
     }
 
     private void incrementAABBMaker(final int x, final int y, final int z) {
-        xMap.increment(x - blockPosSet.getCenterX() + (xSize / 2));
-        yMap.increment(y - blockPosSet.getCenterY() + (ySize / 2));
-        zMap.increment(z - blockPosSet.getCenterZ() + (zSize / 2));
+        xMap.increment(x - centerX + (xSize / 2));
+        yMap.increment(y - centerY + (ySize / 2));
+        zMap.increment(z - centerZ + (zSize / 2));
     }
 
     @Override
@@ -122,9 +125,9 @@ public class SmallBlockPosSetAABB implements IBlockPosSetAABB {
     }
 
     private void decrementAABBMaker(final int x, final int y, final int z) {
-        xMap.decrement(x - blockPosSet.getCenterX() + (xSize / 2));
-        yMap.decrement(y - blockPosSet.getCenterY() + (ySize / 2));
-        zMap.decrement(z - blockPosSet.getCenterZ() + (zSize / 2));
+        xMap.decrement(x - centerX + (xSize / 2));
+        yMap.decrement(y - centerY + (ySize / 2));
+        zMap.decrement(z - centerZ + (zSize / 2));
     }
 
     @Override
@@ -169,14 +172,14 @@ public class SmallBlockPosSetAABB implements IBlockPosSetAABB {
         return false;
     }
 
-    public static class SmallBlockPosSetAABBSerializer extends StdSerializer<SmallBlockPosSetAABB> {
+    public static class SmallBlockPosSetAABBSerializer extends StdSerializer<BlockPosSetAABBGenerator> {
 
         public SmallBlockPosSetAABBSerializer() {
-            super((Class<SmallBlockPosSetAABB>) null);
+            super((Class<BlockPosSetAABBGenerator>) null);
         }
 
         @Override
-        public void serialize(final SmallBlockPosSetAABB value, final JsonGenerator gen,
+        public void serialize(final BlockPosSetAABBGenerator value, final JsonGenerator gen,
             final SerializerProvider provider) throws IOException {
             gen.writeStartObject();
             gen.writeObjectField("blockPosSet", value.blockPosSet);
@@ -190,7 +193,7 @@ public class SmallBlockPosSetAABB implements IBlockPosSetAABB {
         }
     }
 
-    public static class SmallBlockPosSetAABBDeserializer extends StdDeserializer<SmallBlockPosSetAABB> {
+    public static class SmallBlockPosSetAABBDeserializer extends StdDeserializer<BlockPosSetAABBGenerator> {
 
         private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -199,7 +202,7 @@ public class SmallBlockPosSetAABB implements IBlockPosSetAABB {
         }
 
         @Override
-        public SmallBlockPosSetAABB deserialize(final JsonParser p, final DeserializationContext ctxt)
+        public BlockPosSetAABBGenerator deserialize(final JsonParser p, final DeserializationContext ctxt)
             throws IOException {
             final JsonNode node = p.getCodec().readTree(p);
             // The blockPosSet gets loaded
@@ -211,8 +214,8 @@ public class SmallBlockPosSetAABB implements IBlockPosSetAABB {
             final int xSize = node.get("xSize").asInt();
             final int ySize = node.get("ySize").asInt();
             final int zSize = node.get("zSize").asInt();
-            final SmallBlockPosSetAABB wrapper =
-                new SmallBlockPosSetAABB(blockPosSet, centerX, centerY, centerZ, xSize, ySize, zSize);
+            final BlockPosSetAABBGenerator wrapper =
+                new BlockPosSetAABBGenerator(blockPosSet, centerX, centerY, centerZ, xSize, ySize, zSize);
             // The AABB maker is a derivative of the blockPosSet.
             blockPosSet.forEach(wrapper::incrementAABBMaker);
             return wrapper;

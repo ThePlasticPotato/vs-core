@@ -69,6 +69,12 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-api:${properties["mc_log4j2_version"]}")
 }
 
+tasks.test {
+    useJUnitPlatform {
+        systemProperty("junit.jupiter.execution.parallel.enabled", "true")
+    }
+}
+
 // Publish javadoc and sources to maven
 java {
     withJavadocJar()

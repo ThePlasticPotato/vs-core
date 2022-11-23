@@ -7,18 +7,19 @@ import java.io.IOException;
 import kotlin.random.Random;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.valkyrienskies.core.VSRandomUtils;
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil;
 
-public class SmallBlockPosSetAABBTest {
+public class BlockPosSetAABBGeneratorTest {
 
     private static final ObjectMapper serializer = VSJacksonUtil.INSTANCE.getDefaultMapper();
 
     @Test
     public void testSmallBlockPosSetAABB() {
-        final SmallBlockPosSetAABB toTest = new SmallBlockPosSetAABB(0, 0, 0, 1024, 1024, 1024);
+        final BlockPosSetAABBGenerator toTest = new BlockPosSetAABBGenerator(0, 0, 0, 1024, 1024, 1024);
         final ExtremelyNaiveVoxelFieldAABBMaker aabbMaker = new ExtremelyNaiveVoxelFieldAABBMaker(0, 0);
 
         // Test adding new positions
@@ -62,6 +63,15 @@ public class SmallBlockPosSetAABBTest {
         assertEquals(toTest.add(pos8), aabbMaker.addVoxel(pos8));
         assertEquals(toTest.makeAABB(), aabbMaker.makeVoxelFieldAABB());
 
+        // Test negative positions
+        final Vector3ic pos9 = new Vector3i(-25, -2, -35);
+        assertEquals(toTest.add(pos8), aabbMaker.addVoxel(pos8));
+        assertEquals(toTest.makeAABB(), aabbMaker.makeVoxelFieldAABB());
+
+        final Vector3ic pos10 = new Vector3i(0, -50, 0);
+        assertEquals(toTest.add(pos8), aabbMaker.addVoxel(pos8));
+        assertEquals(toTest.makeAABB(), aabbMaker.makeVoxelFieldAABB());
+
         // Test clear
         toTest.clear();
         aabbMaker.clear();
@@ -71,17 +81,18 @@ public class SmallBlockPosSetAABBTest {
     /**
      * Tests the correctness of SmallBlockPosSetAABB serialization and deserialization.
      */
+    @Disabled("We don't currently need to serialize the AABB generator")
     @RepeatedTest(25)
     public void testSerializationAndDeSerialization() throws IOException {
         final Random random = VSRandomUtils.INSTANCE.getDefaultRandom();
 
-        final SmallBlockPosSetAABB blockPosSet =
+        final BlockPosSetAABBGenerator blockPosSet =
             VSRandomUtils.INSTANCE.randomBlockPosSetAABB(Random.Default, random.nextInt(500));
 
         // Now serialize and deserialize and verify that they are the same
         final byte[] blockPosSetSerialized = serializer.writeValueAsBytes(blockPosSet);
-        final SmallBlockPosSetAABB blockPosSetDeserialized =
-            serializer.readValue(blockPosSetSerialized, SmallBlockPosSetAABB.class);
+        final BlockPosSetAABBGenerator blockPosSetDeserialized =
+            serializer.readValue(blockPosSetSerialized, BlockPosSetAABBGenerator.class);
 
         // Verify both sets are equal
         assertEquals(blockPosSet, blockPosSetDeserialized);

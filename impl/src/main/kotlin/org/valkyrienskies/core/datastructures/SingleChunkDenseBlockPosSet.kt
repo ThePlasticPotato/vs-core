@@ -33,9 +33,7 @@ class SingleChunkDenseBlockPosSet {
     }
 
     fun remove(x: Int, y: Int, z: Int): Boolean {
-        require(x < dimensions.x() && x >= 0 && y < dimensions.y() && y >= 0 && z < dimensions.z() && z >= 0) {
-            "Block coordinates must be within the bounds of the chunk"
-        }
+        requireInBounds(x, y, z)
         val index = wrapIndex(x, y, z, dimensions)
         val realIndex = index / 8
         val offset = index % 8
@@ -46,9 +44,7 @@ class SingleChunkDenseBlockPosSet {
     }
 
     fun add(x: Int, y: Int, z: Int): Boolean {
-        require(x < dimensions.x() && x >= 0 && y < dimensions.y() && y >= 0 && z < dimensions.z() && z >= 0) {
-            "Block coordinates must be within the bounds of the chunk"
-        }
+        requireInBounds(x, y, z)
         val index = wrapIndex(x, y, z, dimensions)
         val realIndex = index / 8
         val offset = index % 8
@@ -56,15 +52,29 @@ class SingleChunkDenseBlockPosSet {
         val prev = data[realIndex]
         data[realIndex] = prev or ((1 shl offset).toByte())
 
-        return prev.isBitSet(offset)
+        return !prev.isBitSet(offset)
     }
 
     fun contains(x: Int, y: Int, z: Int): Boolean {
+        if (!isInBounds(x, y, z)) {
+            return false
+        }
+
         val index = wrapIndex(x, y, z, dimensions)
         val realIndex = index / 8
         val offset = index % 8
 
         return data[realIndex].isBitSet(offset)
+    }
+
+    private fun requireInBounds(x: Int, y: Int, z: Int) {
+        require(isInBounds(x, y, z)) {
+            "Block coordinates ($x, $y, $z) must be within the bounds of the chunk (0 <= x, y, z <= 15)"
+        }
+    }
+
+    private fun isInBounds(x: Int, y: Int, z: Int): Boolean {
+        return x < dimensions.x() && x >= 0 && y < dimensions.y() && y >= 0 && z < dimensions.z() && z >= 0
     }
 }
 
