@@ -1,9 +1,12 @@
 package org.valkyrienskies.core.api
 
+import org.valkyrienskies.core.api.hooks.CoreHooksIn
 import org.valkyrienskies.core.api.world.VSPipeline
 import org.valkyrienskies.core.api.world.chunks.TerrainUpdate
 
 interface VSCore {
+
+    val hooks: CoreHooksIn
 
     /**
      * Creates a new dense terrain update builder. A dense terrain update will

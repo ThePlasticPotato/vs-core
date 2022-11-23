@@ -9,7 +9,7 @@ import org.valkyrienskies.core.api.world.chunks.ChunkWatchTasks
 import org.valkyrienskies.core.api.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.api.world.properties.DimensionId
 
-interface ServerShipWorldGame : ShipWorld {
+interface ServerShipWorldGame : ServerShipWorld {
 
     /**
      * Add the update to [shipToVoxelUpdates].

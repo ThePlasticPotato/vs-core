@@ -1,8 +1,8 @@
 package org.valkyrienskies.core.api.ships
 
 import org.joml.primitives.AABBdc
-import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 
 interface QueryableShipData<out ShipType : Ship> : Collection<ShipType> {
 

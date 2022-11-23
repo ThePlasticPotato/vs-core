@@ -1,32 +1,28 @@
 package org.valkyrienskies.core.hooks
 
-import org.valkyrienskies.core.config.VSConfigClass
+import org.valkyrienskies.core.api.hooks.CoreHooksIn
+import org.valkyrienskies.core.api.hooks.CoreHooksOut
 import org.valkyrienskies.core.api.world.IPlayer
-import org.valkyrienskies.core.game.ships.ShipObjectClientWorld
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
-import java.nio.file.Path
+import org.valkyrienskies.core.config.VSConfigClass
+import javax.inject.Inject
 
-abstract class AbstractCoreHooks {
-    abstract val isPhysicalClient: Boolean
-    abstract val configDir: Path
-    abstract val playState: PlayState
-
-    abstract val currentShipServerWorld: ShipObjectServerWorld?
-    abstract val currentShipClientWorld: ShipObjectClientWorld
+class VSCoreHooks @Inject constructor(
+    hooksOut: CoreHooksOut
+) : CoreHooksOut by hooksOut, CoreHooksIn {
 
     /**
      * Called when client disconnects from a world
      */
-    fun afterDisconnect() {
+    override fun afterDisconnect() {
         VSConfigClass.afterDisconnect()
     }
 
     /**
      * Called when a client joins a server
      */
-    fun afterClientJoinServer(player: IPlayer) {
+    override fun afterClientJoinServer(player: IPlayer) {
         VSConfigClass.afterClientJoinServer(player)
     }
 }
 
-lateinit var CoreHooks: AbstractCoreHooks
+lateinit var CoreHooks: VSCoreHooks

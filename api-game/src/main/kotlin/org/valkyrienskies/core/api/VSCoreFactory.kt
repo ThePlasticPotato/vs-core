@@ -1,12 +1,13 @@
 package org.valkyrienskies.core.api
 
+import org.valkyrienskies.core.api.hooks.CoreHooksOut
 import java.util.*
 
 interface VSCoreFactory {
 
-    fun newVsCoreClient(): VSCoreClient
+    fun newVsCoreClient(hooks: CoreHooksOut): VSCoreClient
 
-    fun newVsCoreServer(): VSCoreServer
+    fun newVsCoreServer(hooks: CoreHooksOut): VSCoreServer
 
     companion object {
 

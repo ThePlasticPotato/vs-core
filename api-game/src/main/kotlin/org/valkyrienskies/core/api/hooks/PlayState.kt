@@ -1,4 +1,4 @@
-package org.valkyrienskies.core.hooks
+package org.valkyrienskies.core.api.hooks
 
 enum class PlayState {
     SERVERSIDE,

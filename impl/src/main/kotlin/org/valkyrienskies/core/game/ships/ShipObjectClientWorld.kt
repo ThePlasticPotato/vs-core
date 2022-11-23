@@ -4,12 +4,14 @@ import dagger.Subcomponent
 import org.valkyrienskies.core.api.ships.MutableQueryableShipData
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.world.ClientShipWorldGame
 import org.valkyrienskies.core.game.ChunkAllocatorProvider
 import org.valkyrienskies.core.game.ships.modules.ClientShipWorldModule
 import org.valkyrienskies.core.game.ships.networking.ShipObjectNetworkManagerClient
 import org.valkyrienskies.core.hooks.VSEvents
 import org.valkyrienskies.core.hooks.VSEvents.ShipLoadEventClient
 import org.valkyrienskies.core.util.WorldScoped
+import java.net.SocketAddress
 import javax.inject.Inject
 
 @WorldScoped
@@ -27,7 +29,7 @@ interface ShipObjectClientWorldComponent {
 class ShipObjectClientWorld @Inject constructor(
     networkManagerFactory: ShipObjectNetworkManagerClient.Factory,
     chunkAllocators: ChunkAllocatorProvider
-) : ShipObjectWorld<ShipObjectClient>(chunkAllocators) {
+) : ClientShipWorldGame, ShipObjectWorld<ShipObjectClient>(chunkAllocators) {
     override val allShips: QueryableShipData<ShipObjectClient> get() = loadedShips
 
     private val _loadedShips: MutableQueryableShipData<ShipObjectClient> = QueryableShipDataImpl()
@@ -35,7 +37,7 @@ class ShipObjectClientWorld @Inject constructor(
     override val loadedShips: QueryableShipData<ShipObjectClient>
         get() = _loadedShips
 
-    val networkManager: ShipObjectNetworkManagerClient = networkManagerFactory.make(this)
+    private val networkManager: ShipObjectNetworkManagerClient = networkManagerFactory.make(this)
 
     init {
         networkManager.registerPacketListeners()
@@ -51,12 +53,18 @@ class ShipObjectClientWorld @Inject constructor(
         _loadedShips.removeShipData(shipId)
     }
 
-    fun postTick() {
+    override fun tickNetworking(server: SocketAddress) {
+        networkManager.tick(server)
+    }
+
+    override fun postTick() {
         super.preTick()
 
-        shipObjects.forEach { (_, shipObjectClient) ->
-            shipObjectClient.tickUpdateShipTransform()
-        }
+        loadedShips.forEach { it.tickUpdateShipTransform() }
+    }
+
+    override fun updateRenderTransforms(partialTicks: Double) {
+        loadedShips.forEach { it.updateRenderShipTransform(partialTicks) }
     }
 
     override fun destroyWorld() {

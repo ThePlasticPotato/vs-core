@@ -1,4 +1,3 @@
 package org.valkyrienskies.core.api
 
-interface VSCoreServer {
-}
+interface VSCoreServer : VSCore

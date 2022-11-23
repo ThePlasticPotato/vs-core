@@ -1,5 +1,6 @@
 package org.valkyrienskies.core.program
 
+import org.valkyrienskies.core.api.VSCoreServer
 import javax.inject.Inject
 
 /**
@@ -8,4 +9,4 @@ import javax.inject.Inject
  */
 class VSCoreServerImpl @Inject internal constructor(
     private val base: VSCoreImpl
-) : VSCoreInternal by base
+) : VSCoreInternal by base, VSCoreServer

@@ -6,7 +6,7 @@ import org.valkyrienskies.core.game.ships.modules.ShipWorldModule
 import org.valkyrienskies.core.game.ships.serialization.vspipeline.VSPipelineSerializer
 import org.valkyrienskies.core.game.ships.types.DenseTerrainUpdateBuilderImpl
 import org.valkyrienskies.core.game.ships.types.SparseTerrainUpdateBuilderImpl
-import org.valkyrienskies.core.hooks.AbstractCoreHooks
+import org.valkyrienskies.core.hooks.VSCoreHooks
 import org.valkyrienskies.core.networking.NetworkChannel
 import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule.TCP
@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 internal class VSCoreImpl @Inject constructor(
     override val networking: VSNetworking,
-    override val hooks: AbstractCoreHooks,
+    override val hooks: VSCoreHooks,
     override val configurator: VSNetworkingConfigurator,
     @TCP tcp: NetworkChannel,
     override val pipelineComponentFactory: VSPipelineComponent.Factory,

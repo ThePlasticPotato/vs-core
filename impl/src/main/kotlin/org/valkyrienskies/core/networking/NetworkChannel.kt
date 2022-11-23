@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import org.valkyrienskies.core.api.world.IPlayer
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
 import org.valkyrienskies.core.hooks.CoreHooks
 import org.valkyrienskies.core.util.logger
 import java.util.function.IntFunction
@@ -117,7 +118,7 @@ class NetworkChannel {
     }
 
     fun sendToAllClients(packet: Packet) {
-        val shipWorld = requireNotNull(CoreHooks.currentShipServerWorld) {
+        val shipWorld = requireNotNull(CoreHooks.currentShipServerWorld as ShipObjectServerWorld?) {
             "Tried to send a packet of type ${packet.type} to all clients, but there is no server currently running!"
         }
 
