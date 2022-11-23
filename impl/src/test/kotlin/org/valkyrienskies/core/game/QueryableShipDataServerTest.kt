@@ -1,17 +1,13 @@
 package org.valkyrienskies.core.game
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.property.Arb
-import io.kotest.property.arbitrary.int
 import io.kotest.property.checkAll
 import org.junit.jupiter.api.Assertions.*
 import org.valkyrienskies.core.VSRandomUtils
 import org.valkyrienskies.core.game.ships.QueryableShipDataImpl
 import org.valkyrienskies.core.game.ships.QueryableShipDataServer
 import org.valkyrienskies.core.game.ships.ShipData
-import org.valkyrienskies.core.util.serialization.VSJacksonUtil
-import org.valkyrienskies.test_utils.generators.queryableShipData
 import org.valkyrienskies.test_utils.generators.shipData
 import kotlin.random.Random
 
@@ -140,18 +136,4 @@ class QueryableShipDataServerTest : AnnotationSpec() {
         }
     }
 
-    /**
-     * Tests the correctness of [QueryableShipDataServer] serialization and deserialization.
-     */
-    @Test
-    suspend fun testSerializationAndDeSerialization() {
-        checkAll(Arb.queryableShipData(Arb.int(0, 20))) { queryableShipData ->
-            // Now serialize and deserialize and verify that they are the same
-            val queryableShipDataSerialized = VSJacksonUtil.defaultMapper.writeValueAsBytes(queryableShipData.toList())
-            val queryableShipDataDeserialized =
-                QueryableShipDataImpl<ShipData>(VSJacksonUtil.defaultMapper.readValue(queryableShipDataSerialized))
-            // Verify that both are equal
-            assertEquals(queryableShipData, queryableShipDataDeserialized)
-        }
-    }
 }

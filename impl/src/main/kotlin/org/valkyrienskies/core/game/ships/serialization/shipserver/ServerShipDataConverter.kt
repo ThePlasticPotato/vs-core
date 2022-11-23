@@ -9,14 +9,14 @@ import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShi
 import org.valkyrienskies.core.game.ships.serialization.shiptransform.ShipTransformConverter
 import javax.inject.Inject
 
-internal interface ServerShipDataConverter {
+interface ServerShipDataConverter {
     fun convertToDto(model: ShipData): ServerShipDataV3
 
     fun convertToModel(dto: ServerShipDataV3): ShipData
 }
 
 @Reusable
-internal class ServerShipDataConverterImpl @Inject constructor(
+class ServerShipDataConverterImpl @Inject constructor(
     private val inertiaConverter: ShipInertiaConverter,
     private val transformConverter: ShipTransformConverter
 ) : ServerShipDataConverter {
