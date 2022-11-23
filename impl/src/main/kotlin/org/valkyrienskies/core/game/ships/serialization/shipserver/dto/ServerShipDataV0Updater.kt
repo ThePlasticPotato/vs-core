@@ -1,26 +1,14 @@
 package org.valkyrienskies.core.game.ships.serialization.shipserver.dto
 
 import dagger.Reusable
-import org.mapstruct.Mapper
-import org.valkyrienskies.core.game.ships.ShipTransformImpl
 import org.valkyrienskies.core.game.ships.serialization.DtoUpdater
-import org.valkyrienskies.core.game.ships.serialization.VSMapStructConfig
 import javax.inject.Inject
 
-
-@Mapper(config = VSMapStructConfig::class)
-interface ShipTransformConverter {
-    fun convertToModel(data: ShipTransformDataV0): ShipTransformImpl
-
-    fun convertToDto(model: ShipTransformImpl): ShipTransformDataV0
-}
 
 interface ServerShipDataV0Updater : DtoUpdater<ServerShipDataV0, ServerShipDataV1>
 
 @Reusable
-class ServerShipDataV0UpdaterImpl @Inject constructor(
-    private val transformConverter: ShipTransformConverterImpl
-) : ServerShipDataV0Updater {
+class ServerShipDataV0UpdaterImpl @Inject constructor() : ServerShipDataV0Updater {
     override fun update(data: ServerShipDataV0) = ServerShipDataV1(
         id = data.id,
         name = data.name,
@@ -28,8 +16,8 @@ class ServerShipDataV0UpdaterImpl @Inject constructor(
         chunkClaimDimension = data.chunkClaimDimension,
         physicsData = data.physicsData,
         inertiaData = data.inertiaData,
-        shipTransform = transformConverter.convertToModel(data.shipTransform),
-        prevTickShipTransform = transformConverter.convertToModel(data.shipTransform),
+        shipTransform = data.shipTransform,
+        prevTickShipTransform = data.shipTransform,
         shipAABB = data.shipAABB,
         shipVoxelAABB = data.shipVoxelAABB,
         shipActiveChunksSet = data.shipActiveChunksSet,

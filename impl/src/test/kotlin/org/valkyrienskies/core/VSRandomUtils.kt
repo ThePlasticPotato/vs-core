@@ -14,9 +14,10 @@ import org.valkyrienskies.core.datastructures.SmallBlockPosSet
 import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
 import org.valkyrienskies.core.game.ChunkClaimImpl
 import org.valkyrienskies.core.game.ships.*
+import org.valkyrienskies.core.game.ships.serialization.shipinertia.dto.ShipInertiaDataV0
 import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShipDataV0
 import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShipDataV3
-import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ShipTransformDataV0
+import org.valkyrienskies.core.game.ships.serialization.shiptransform.dto.ShipTransformDataV0
 import org.valkyrienskies.core.pipelines.ShipInPhysicsFrameData
 import org.valkyrienskies.physics_api.*
 import kotlin.math.sqrt
@@ -119,6 +120,10 @@ internal object VSRandomUtils {
     @Suppress("WeakerAccess")
     fun randomShipInertiaData(random: Random = defaultRandom): ShipInertiaDataImpl {
         return ShipInertiaDataImpl(randomVector3d(random), randomDoubleNotCloseToLimit(random), randomMatrix3d(random))
+    }
+
+    fun randomShipInertiaDataV0(random: Random = defaultRandom): ShipInertiaDataV0 {
+        return ShipInertiaDataV0(randomVector3d(random), randomDoubleNotCloseToLimit(random), randomMatrix3d(random))
     }
 
     @Suppress("WeakerAccess")
@@ -269,7 +274,7 @@ internal object VSRandomUtils {
             chunkClaim = randomChunkClaim(random),
             chunkClaimDimension = randomString(random, random.nextInt(10)),
             physicsData = randomShipPhysicsData(random),
-            inertiaData = randomShipInertiaData(random),
+            inertiaData = randomShipInertiaDataV0(random),
             shipTransform = randomShipTransformDataV0(random),
             prevTickShipTransform = randomShipTransformDataV0(random),
             shipAABB = randomAABBd(random),
@@ -286,9 +291,9 @@ internal object VSRandomUtils {
             chunkClaimDimension = randomString(random, random.nextInt(10)),
             velocity = randomVector3d(random),
             omega = randomVector3d(random),
-            inertiaData = randomShipInertiaData(random),
-            transform = randomShipTransform(random),
-            prevTickTransform = randomShipTransform(random),
+            inertiaData = randomShipInertiaDataV0(random),
+            transform = randomShipTransformDataV0(random),
+            prevTickTransform = randomShipTransformDataV0(random),
             worldAABB = randomAABBd(random),
             shipAABB = null,
             activeChunks = randomShipActiveChunkSet(random, random.nextInt(100)),

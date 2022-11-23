@@ -1,6 +1,5 @@
 package org.valkyrienskies.core.game.ships
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import org.joml.Matrix3d
 import org.joml.Matrix3dc
 import org.joml.Vector3d
@@ -12,20 +11,17 @@ import kotlin.math.abs
  * This class keeps track of a ships mass, center of mass, and moment of inertia given the block changes within the ship.
  */
 data class ShipInertiaDataImpl constructor(
-    @JsonProperty("centerOfMassInShipSpace") private val _centerOfMassInShipSpace: Vector3d,
-    @JsonProperty("shipMass") private var _shipMass: Double,
-    @JsonProperty("momentOfInertiaTensor") private val _momentOfInertiaTensor: Matrix3d
+    private val _centerOfMassInShip: Vector3d,
+    private var _mass: Double,
+    private val _momentOfInertiaTensor: Matrix3d
 ) : ShipInertiaData {
 
-    @get:JsonProperty("momentOfInertiaTensor")
     override val momentOfInertiaTensor: Matrix3dc
         get() = _momentOfInertiaTensor
 
-    @get:JsonProperty("centerOfMassInShipSpace")
-    override val centerOfMassInShip: Vector3dc get() = _centerOfMassInShipSpace
+    override val centerOfMassInShip: Vector3dc get() = _centerOfMassInShip
 
-    @get:JsonProperty("shipMass")
-    override val mass get() = _shipMass
+    override val mass get() = _mass
 
     internal fun onSetBlock(posX: Int, posY: Int, posZ: Int, oldBlockMass: Double, newBlockMass: Double) {
         val deltaBlockMass = newBlockMass - oldBlockMass
@@ -64,7 +60,7 @@ data class ShipInertiaDataImpl constructor(
             val newCenterOfMass: Vector3d = centerOfMassInShip.mul(gameTickMass, Vector3d())
             newCenterOfMass.add(x * addedMass, y * addedMass, z * addedMass)
             newCenterOfMass.mul(1.0 / (gameTickMass + addedMass))
-            _centerOfMassInShipSpace.set(newCenterOfMass)
+            _centerOfMassInShip.set(newCenterOfMass)
 
             // This code is pretty awful in hindsight, but it gets the job done.
             val cmShiftX: Double = prevCenterOfMass.x - centerOfMassInShip.x()
@@ -87,12 +83,12 @@ data class ShipInertiaDataImpl constructor(
                 (rx * rx + ry * ry) * addedMass
             _momentOfInertiaTensor.set(gameMoITensor).transpose()
 
-            _shipMass += addedMass
+            _mass += addedMass
         } else {
             // We have 0 mass, reset mass and moment of inertia to 0
-            _centerOfMassInShipSpace.set(x, y, z)
+            _centerOfMassInShip.set(x, y, z)
             _momentOfInertiaTensor.zero()
-            _shipMass = 0.0
+            _mass = 0.0
         }
     }
 
