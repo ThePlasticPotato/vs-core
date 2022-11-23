@@ -8,6 +8,7 @@ import org.joml.primitives.AABBdc
 
 
 interface ShipTransform {
+
     val shipPositionInWorldCoordinates: Vector3dc
     val shipPositionInShipCoordinates: Vector3dc
     val shipCoordinatesToWorldCoordinatesRotation: Quaterniondc

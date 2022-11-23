@@ -3,14 +3,15 @@ package org.valkyrienskies.core.game.ships.serialization.shipserver.dto
 import com.google.common.collect.MutableClassToInstanceMap
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
-import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
-import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.world.properties.DimensionId
-import org.valkyrienskies.core.game.ships.*
+import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
+import org.valkyrienskies.core.game.ships.ShipInertiaDataImpl
+import org.valkyrienskies.core.game.ships.ShipPhysicsData
 
-internal data class ServerShipDataV1(
+data class ServerShipDataV1(
     val id: ShipId,
     val name: String,
     val chunkClaim: ChunkClaim,

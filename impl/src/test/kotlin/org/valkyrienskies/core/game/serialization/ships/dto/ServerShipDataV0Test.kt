@@ -26,3 +26,8 @@ class ServerShipDataV0Test : StringSpec({
 
     }
 })
+
+fun main() {
+    val value = VSJacksonUtil.defaultMapper.readTree(Files.newInputStream(Paths.get("./impl/src/test/resources/shipdata_legacy_example1.dat")))
+    println(value.toPrettyString())
+}

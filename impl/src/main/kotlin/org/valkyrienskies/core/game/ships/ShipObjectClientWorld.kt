@@ -4,6 +4,8 @@ import dagger.Subcomponent
 import org.valkyrienskies.core.api.ships.MutableQueryableShipData
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.game.ChunkAllocatorProvider
+import org.valkyrienskies.core.game.ships.modules.ClientShipWorldModule
 import org.valkyrienskies.core.game.ships.networking.ShipObjectNetworkManagerClient
 import org.valkyrienskies.core.hooks.VSEvents
 import org.valkyrienskies.core.hooks.VSEvents.ShipLoadEventClient
@@ -11,7 +13,7 @@ import org.valkyrienskies.core.util.WorldScoped
 import javax.inject.Inject
 
 @WorldScoped
-@Subcomponent
+@Subcomponent(modules = [ClientShipWorldModule.Declarations::class])
 interface ShipObjectClientWorldComponent {
     fun newWorld(): ShipObjectClientWorld
 
@@ -23,8 +25,9 @@ interface ShipObjectClientWorldComponent {
 
 @WorldScoped
 class ShipObjectClientWorld @Inject constructor(
-    networkManagerFactory: ShipObjectNetworkManagerClient.Factory
-) : ShipObjectWorld<ShipObjectClient>() {
+    networkManagerFactory: ShipObjectNetworkManagerClient.Factory,
+    chunkAllocators: ChunkAllocatorProvider
+) : ShipObjectWorld<ShipObjectClient>(chunkAllocators) {
     override val allShips: QueryableShipData<ShipObjectClient> get() = loadedShips
 
     private val _loadedShips: MutableQueryableShipData<ShipObjectClient> = QueryableShipDataImpl()

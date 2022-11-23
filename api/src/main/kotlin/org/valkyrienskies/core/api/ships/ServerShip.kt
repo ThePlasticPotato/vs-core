@@ -1,6 +1,11 @@
 package org.valkyrienskies.core.api.ships
 
+import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
+
 interface ServerShip : Ship {
+
+    val inertiaData: ShipInertiaData
+
     /**
      * Sets data in the persistent storage
      *

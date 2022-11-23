@@ -1,9 +1,9 @@
 package org.valkyrienskies.core.chunk_tracking
 
-import org.valkyrienskies.core.api.world.chunks.ChunkWatchTask
+import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.world.IPlayer
+import org.valkyrienskies.core.api.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.api.world.properties.DimensionId
-import org.valkyrienskies.core.game.ships.ShipData
 
 
 fun ChunkWatchTask(
@@ -11,7 +11,7 @@ fun ChunkWatchTask(
     dimensionId: DimensionId,
     playersNeedWatching: Iterable<IPlayer>,
     distanceToClosestPlayer: Double,
-    ship: ShipData
+    ship: ServerShip
 ) = ChunkWatchTaskImpl(chunkPos, dimensionId, playersNeedWatching, distanceToClosestPlayer, ship)
 
 /**
@@ -22,7 +22,7 @@ class ChunkWatchTaskImpl(
     override val dimensionId: DimensionId,
     override val playersNeedWatching: Iterable<IPlayer>,
     private val distanceToClosestPlayer: Double,
-    override val ship: ShipData
+    override val ship: ServerShip
 ) : Comparable<ChunkWatchTask>, ChunkWatchTask {
 
     override val chunkX get() = IShipActiveChunksSet.longToChunkX(chunkPos)

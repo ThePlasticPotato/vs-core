@@ -1,24 +1,23 @@
 package org.valkyrienskies.core.game.ships.loading
 
-import org.valkyrienskies.core.api.util.isChunkInShipyard
+import org.valkyrienskies.core.api.world.IPlayer
 import org.valkyrienskies.core.api.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.api.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.api.world.chunks.ChunkWatchTasks
-import org.valkyrienskies.core.chunk_tracking.ShipObjectServerWorldChunkTracker
 import org.valkyrienskies.core.api.world.properties.DimensionId
-import org.valkyrienskies.core.api.world.IPlayer
+import org.valkyrienskies.core.chunk_tracking.ShipObjectServerWorldChunkTracker
+import org.valkyrienskies.core.game.ChunkAllocatorProvider
 import org.valkyrienskies.core.game.ships.ShipData
-import org.valkyrienskies.core.game.ships.loading.ShipLoadManagerServer.Stages.POST_TICK
-import org.valkyrienskies.core.game.ships.loading.ShipLoadManagerServer.Stages.PRE_TICK
-import org.valkyrienskies.core.game.ships.loading.ShipLoadManagerServer.Stages.SET_EXECUTED
+import org.valkyrienskies.core.game.ships.loading.ShipLoadManagerServer.Stages.*
 import org.valkyrienskies.core.game.ships.networking.ShipObjectNetworkManagerServer
 import org.valkyrienskies.core.util.assertions.stages.TickStageEnforcer
-import java.util.Collections
+import java.util.*
 import javax.inject.Inject
 
 internal class ShipLoadManagerServer @Inject internal constructor(
     private val networkManager: ShipObjectNetworkManagerServer,
-    private val tracker: ShipObjectServerWorldChunkTracker
+    private val tracker: ShipObjectServerWorldChunkTracker,
+    private val allocators: ChunkAllocatorProvider
 ) {
     private enum class Stages {
         PRE_TICK, SET_EXECUTED, POST_TICK
@@ -66,7 +65,7 @@ internal class ShipLoadManagerServer @Inject internal constructor(
 
     fun getIPlayersWatchingShipChunk(chunkX: Int, chunkZ: Int, dimensionId: DimensionId): Iterator<IPlayer> {
         // Check if this chunk potentially belongs to a ship
-        if (isChunkInShipyard(chunkX, chunkZ)) {
+        if (allocators.forDimension(dimensionId).isChunkInShipyard(chunkX, chunkZ)) {
             return tracker.getPlayersWatchingChunk(chunkX, chunkZ, dimensionId).iterator()
         }
         return Collections.emptyIterator()

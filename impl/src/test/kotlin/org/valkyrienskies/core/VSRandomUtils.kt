@@ -4,6 +4,7 @@ import org.joml.Matrix3d
 import org.joml.Quaterniond
 import org.joml.Vector3d
 import org.joml.primitives.AABBd
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.api.ships.saveAttachment
@@ -11,17 +12,13 @@ import org.valkyrienskies.core.chunk_tracking.ShipActiveChunksSet
 import org.valkyrienskies.core.datastructures.IBlockPosSet
 import org.valkyrienskies.core.datastructures.SmallBlockPosSet
 import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
-import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.game.ChunkClaimImpl
 import org.valkyrienskies.core.game.ships.*
 import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShipDataV0
 import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShipDataV3
+import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ShipTransformDataV0
 import org.valkyrienskies.core.pipelines.ShipInPhysicsFrameData
-import org.valkyrienskies.physics_api.PoseVel
-import org.valkyrienskies.physics_api.RigidBodyInertiaData
-import org.valkyrienskies.physics_api.Segment
-import org.valkyrienskies.physics_api.SegmentDisplacement
-import org.valkyrienskies.physics_api.SingleSegmentTracker
+import org.valkyrienskies.physics_api.*
 import kotlin.math.sqrt
 import kotlin.random.Random
 import kotlin.random.asJavaRandom
@@ -133,6 +130,17 @@ internal object VSRandomUtils {
             random.nextDouble(-scalingMaxMagnitude, scalingMaxMagnitude)
         )
         return ShipTransformImpl(randomVector3d(random), randomVector3d(random), randomQuaterniond(random), randomScaling)
+    }
+
+    @Suppress("WeakerAccess")
+    fun randomShipTransformDataV0(random: Random = defaultRandom): ShipTransformDataV0 {
+        val scalingMaxMagnitude = 10.0
+        val randomScaling = Vector3d(
+            random.nextDouble(-scalingMaxMagnitude, scalingMaxMagnitude),
+            random.nextDouble(-scalingMaxMagnitude, scalingMaxMagnitude),
+            random.nextDouble(-scalingMaxMagnitude, scalingMaxMagnitude)
+        )
+        return ShipTransformDataV0(randomVector3d(random), randomVector3d(random), randomQuaterniond(random), randomScaling)
     }
 
     @Suppress("WeakerAccess")
@@ -262,8 +270,8 @@ internal object VSRandomUtils {
             chunkClaimDimension = randomString(random, random.nextInt(10)),
             physicsData = randomShipPhysicsData(random),
             inertiaData = randomShipInertiaData(random),
-            shipTransform = randomShipTransform(random),
-            prevTickShipTransform = randomShipTransform(random),
+            shipTransform = randomShipTransformDataV0(random),
+            prevTickShipTransform = randomShipTransformDataV0(random),
             shipAABB = randomAABBd(random),
             shipVoxelAABB = null,
             shipActiveChunksSet = randomShipActiveChunkSet(random, random.nextInt(100))

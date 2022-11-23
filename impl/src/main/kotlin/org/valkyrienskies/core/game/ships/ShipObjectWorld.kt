@@ -7,16 +7,19 @@ import org.joml.primitives.AABBdc
 import org.valkyrienskies.core.api.ShipInternal
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.ships.properties.VSBlockType
 import org.valkyrienskies.core.api.world.ShipWorld
 import org.valkyrienskies.core.api.world.properties.DimensionId
-import org.valkyrienskies.core.api.ships.properties.VSBlockType
+import org.valkyrienskies.core.game.ChunkAllocatorProvider
 import org.valkyrienskies.core.util.coroutines.TickableCoroutineDispatcher
 import org.valkyrienskies.core.util.logger
 
 /**
  * Manages all the [ShipObject]s in a world.
  */
-abstract class ShipObjectWorld<ShipObjectType : ShipObject> : ShipWorld {
+abstract class ShipObjectWorld<ShipObjectType : ShipObject>(
+    private val chunkAllocators: ChunkAllocatorProvider
+) : ShipWorld {
 
     abstract override val allShips: QueryableShipData<ShipInternal>
     abstract override val loadedShips: QueryableShipData<ShipObjectType>
@@ -30,6 +33,13 @@ abstract class ShipObjectWorld<ShipObjectType : ShipObject> : ShipWorld {
 
     var tickNumber = 0
         private set
+
+
+    override fun isChunkInShipyard(chunkX: Int, chunkZ: Int, dimensionId: DimensionId) =
+        chunkAllocators.forDimension(dimensionId).isChunkInShipyard(chunkX, chunkZ)
+
+    override fun isBlockInShipyard(blockX: Int, blockY: Int, blockZ: Int, dimensionId: DimensionId): Boolean =
+        chunkAllocators.forDimension(dimensionId).isBlockInShipyard(blockX, blockY, blockZ)
 
     open fun preTick() {
         try {

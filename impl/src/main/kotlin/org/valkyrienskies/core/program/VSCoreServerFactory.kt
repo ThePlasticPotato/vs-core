@@ -8,5 +8,5 @@ import javax.inject.Singleton
 )
 @Singleton
 interface VSCoreServerFactory {
-    fun server(): VSCoreServer
+    fun server(): VSCoreServerImpl
 }

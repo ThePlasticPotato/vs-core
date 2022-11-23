@@ -2,17 +2,19 @@ package org.valkyrienskies.core.api
 
 import java.util.*
 
-interface VSCoreGameFactory {
+interface VSCoreFactory {
 
-    fun newVsCoreGame(): VSCoreGame
+    fun newVsCoreClient(): VSCoreClient
+
+    fun newVsCoreServer(): VSCoreServer
 
     companion object {
 
         @JvmStatic
-        val instance: VSCoreGameFactory = findInstance()
+        val instance: VSCoreFactory = findInstance()
 
-        private fun findInstance(): VSCoreGameFactory {
-            val instances = ServiceLoader.load(VSCoreGameFactory::class.java).toList()
+        private fun findInstance(): VSCoreFactory {
+            val instances = ServiceLoader.load(VSCoreFactory::class.java).toList()
             require(instances.size == 1) {
                 "Found ${instances.size} instances of VSCoreGameFactory, required exactly one!"
             }

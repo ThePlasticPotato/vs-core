@@ -9,15 +9,15 @@ import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.ServerShipInternal
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
+import org.valkyrienskies.core.api.ships.properties.VSBlockType
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.chunk_tracking.ShipActiveChunksSet
 import org.valkyrienskies.core.datastructures.IBlockPosSetAABB
 import org.valkyrienskies.core.datastructures.SmallBlockPosSetAABB
-import org.valkyrienskies.core.api.ships.properties.ChunkClaim
-import org.valkyrienskies.core.api.world.properties.DimensionId
-import org.valkyrienskies.core.api.ships.properties.VSBlockType
 import org.valkyrienskies.core.game.VSBlockTypeImpl
 import org.valkyrienskies.core.util.serialization.PacketIgnore
 
@@ -32,7 +32,7 @@ class ShipData(
     chunkClaim: ChunkClaim,
     chunkClaimDimension: DimensionId,
     physicsData: ShipPhysicsData,
-    @PacketIgnore val inertiaData: ShipInertiaDataImpl,
+    @PacketIgnore override val inertiaData: ShipInertiaDataImpl,
     shipTransform: ShipTransform,
     prevTickShipTransform: ShipTransform,
     shipAABB: AABBdc,
@@ -127,6 +127,8 @@ class ShipData(
         // We are fully loaded if we have 0 missing chunks
         return missingLoadedChunks.size == 0
     }
+
+    override fun asShipDataCommon(): ShipDataCommon = this
 
     override fun <T> saveAttachment(clazz: Class<T>, value: T?) {
         if (value == null)

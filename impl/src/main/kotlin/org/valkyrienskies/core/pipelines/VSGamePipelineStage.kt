@@ -1,12 +1,9 @@
 package org.valkyrienskies.core.pipelines
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
-import org.joml.Matrix3d
-import org.joml.Quaterniond
-import org.joml.Vector3d
-import org.joml.Vector3dc
-import org.joml.Vector3i
+import org.joml.*
 import org.joml.primitives.AABBi
+import org.valkyrienskies.core.api.ServerShipInternal
 import org.valkyrienskies.core.api.ships.attachments.Ticked
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
@@ -222,12 +219,12 @@ internal class VSGamePipelineStage @Inject constructor(private val shipWorld: Sh
         const val GAME_TPS = 20
 
         private fun getShipVoxelOffset(inertiaData: ShipInertiaData): Vector3dc {
-            val cm = inertiaData.centerOfMassInShipSpace
+            val cm = inertiaData.centerOfMassInShip
             return Vector3d(-cm.x(), -cm.y(), -cm.z())
         }
 
         fun generateTransformFromPhysicsFrameData(
-            physicsFrameData: ShipInPhysicsFrameData, shipData: ShipData
+            physicsFrameData: ShipInPhysicsFrameData, shipData: ServerShipInternal
         ): ShipTransform {
             val poseVelFromPhysics = physicsFrameData.poseVel
             val voxelOffsetFromPhysics = physicsFrameData.shipVoxelOffset
@@ -245,7 +242,7 @@ internal class VSGamePipelineStage @Inject constructor(private val shipWorld: Sh
 
             return ShipTransformImpl.createFromCoordinatesAndRotationAndScaling(
                 shipPosAccountingForSegment,
-                shipData.inertiaData.centerOfMassInShipSpace.add(.5, .5, .5, Vector3d()),
+                shipData.inertiaData.centerOfMassInShip.add(.5, .5, .5, Vector3d()),
                 poseVelFromPhysics.rot,
                 Vector3d(scaling)
             )

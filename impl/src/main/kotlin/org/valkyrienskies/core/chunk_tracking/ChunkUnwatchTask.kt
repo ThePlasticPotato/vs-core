@@ -1,9 +1,9 @@
 package org.valkyrienskies.core.chunk_tracking
 
-import org.valkyrienskies.core.api.world.chunks.ChunkUnwatchTask
+import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.world.IPlayer
+import org.valkyrienskies.core.api.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.api.world.properties.DimensionId
-import org.valkyrienskies.core.game.ships.ShipData
 
 fun ChunkUnwatchTask(
     chunkPos: Long,
@@ -11,7 +11,7 @@ fun ChunkUnwatchTask(
     playersNeedUnwatching: Iterable<IPlayer>,
     shouldUnload: Boolean,
     distanceToClosestPlayer: Double,
-    ship: ShipData
+    ship: ServerShip
 ): ChunkUnwatchTask = ChunkUnwatchTaskImpl(chunkPos, dimensionId, playersNeedUnwatching, shouldUnload, distanceToClosestPlayer, ship)
 
 /**
@@ -23,7 +23,7 @@ class ChunkUnwatchTaskImpl(
     override val playersNeedUnwatching: Iterable<IPlayer>,
     override val shouldUnload: Boolean,
     private val distanceToClosestPlayer: Double,
-    override val ship: ShipData
+    override val ship: ServerShip
 ) : Comparable<ChunkUnwatchTask>, ChunkUnwatchTask {
 
     override val chunkX: Int get() = IShipActiveChunksSet.longToChunkX(chunkPos)

@@ -5,8 +5,8 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.world.VSPipeline
 import org.valkyrienskies.core.config.VSCoreConfig
-import org.valkyrienskies.core.game.ships.SerializedShipDataModule
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
+import org.valkyrienskies.core.game.ships.modules.ShipWorldModule
 import org.valkyrienskies.core.hooks.AbstractCoreHooks
 import org.valkyrienskies.core.util.WorldScoped
 import javax.inject.Inject
@@ -14,13 +14,13 @@ import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
 
 @WorldScoped
-@Subcomponent(modules = [SerializedShipDataModule::class])
+@Subcomponent(modules = [ShipWorldModule::class, ShipWorldModule.Declarations::class])
 interface VSPipelineComponent {
     fun newPipeline(): VSPipelineImpl
 
     @Subcomponent.Factory
     interface Factory {
-        fun newPipelineComponent(module: SerializedShipDataModule): VSPipelineComponent
+        fun newPipelineComponent(module: ShipWorldModule): VSPipelineComponent
     }
 }
 

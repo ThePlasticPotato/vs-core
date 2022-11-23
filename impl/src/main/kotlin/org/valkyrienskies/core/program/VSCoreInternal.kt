@@ -1,10 +1,9 @@
 package org.valkyrienskies.core.program
 
-import org.valkyrienskies.core.api.VSCoreGame
+import org.valkyrienskies.core.api.VSCore
 import org.valkyrienskies.core.hooks.AbstractCoreHooks
 import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.networking.VSNetworkingConfigurator
-import org.valkyrienskies.core.pipelines.VSPipelineImpl
 import org.valkyrienskies.core.pipelines.VSPipelineComponent
 
 /**
@@ -16,7 +15,7 @@ import org.valkyrienskies.core.pipelines.VSPipelineComponent
  *
  * and the game also directly instantiates its own VSPipeline/ShipObjectClientWorld which is not great
  */
-interface VSCoreInternal : VSCoreGame {
+interface VSCoreInternal : VSCore {
     val networking: VSNetworking
     val hooks: AbstractCoreHooks
     val configurator: VSNetworkingConfigurator

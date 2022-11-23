@@ -13,27 +13,22 @@ import org.valkyrienskies.core.api.world.ServerShipWorldGame
 import org.valkyrienskies.core.api.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.api.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.api.world.chunks.ChunkWatchTasks
+import org.valkyrienskies.core.api.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.api.world.properties.DimensionId
-import org.valkyrienskies.core.game.*
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.CLEAR_FOR_RESET
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.GET_CURRENT_TICK_CHANGES
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.GET_LAST_TICK_CHANGES
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.POST_TICK_FINISH
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.POST_TICK_GENERATED
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.POST_TICK_START
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.PRE_TICK
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_BLOCKS
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_CHUNKS
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_DIMENSIONS
+import org.valkyrienskies.core.game.ChunkAllocatorProvider
+import org.valkyrienskies.core.game.DimensionInfo
+import org.valkyrienskies.core.game.VSBlockTypeImpl
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.*
 import org.valkyrienskies.core.game.ships.loading.ShipLoadManagerServer
+import org.valkyrienskies.core.game.ships.modules.AllShips
 import org.valkyrienskies.core.game.ships.types.MutableShipVoxelUpdates
 import org.valkyrienskies.core.game.ships.types.ShipVoxelUpdates
+import org.valkyrienskies.core.game.ships.types.TerrainUpdateImpl
 import org.valkyrienskies.core.hooks.VSEvents
 import org.valkyrienskies.core.hooks.VSEvents.ShipLoadEvent
 import org.valkyrienskies.core.hooks.VSEvents.TickEndEvent
 import org.valkyrienskies.core.networking.NetworkChannel.Companion.logger
 import org.valkyrienskies.core.networking.VSNetworking
-import org.valkyrienskies.core.util.InternalInject
 import org.valkyrienskies.core.util.WorldScoped
 import org.valkyrienskies.core.util.assertions.stages.TickStageEnforcer
 import org.valkyrienskies.core.util.names.NounListNameGenerator
@@ -47,10 +42,10 @@ import javax.inject.Inject
 @WorldScoped
 class ShipObjectServerWorld @Inject internal constructor(
     @AllShips override val allShips: MutableQueryableShipDataServer,
-    @InternalInject internal val chunkAllocator: ChunkAllocator,
+    val chunkAllocators: ChunkAllocatorProvider,
     private val loadManager: ShipLoadManagerServer,
     networking: VSNetworking
-) : ShipObjectWorld<ShipObjectServer>(), ServerShipWorldGame {
+) : ShipObjectWorld<ShipObjectServer>(chunkAllocators), ServerShipWorldGame {
 
     private enum class Stages {
         PRE_TICK,
@@ -111,7 +106,7 @@ class ShipObjectServerWorld @Inject internal constructor(
 
     private val dimensionsAddedThisTick = ArrayList<DimensionId>()
     private val dimensionsRemovedThisTick = ArrayList<DimensionId>()
-    private val voxelShapeUpdatesList = ArrayList<ServerShipWorldGame.LevelVoxelUpdates>()
+    private val voxelShapeUpdatesList = ArrayList<LevelVoxelUpdates>()
 
     // These fields are used to generate [VSGameFrame]
     private val newShipObjects: MutableList<ShipObjectServer> = ArrayList()
@@ -121,6 +116,8 @@ class ShipObjectServerWorld @Inject internal constructor(
         get() = enforcer.stage(GET_LAST_TICK_CHANGES).run { field }
 
     private val udpServer = networking.tryUdpServer()
+
+    private val dimensionInfo = mutableMapOf<DimensionId, DimensionInfo>()
 
     /**
      * A map of voxel updates pending to be applied to ships.
@@ -140,7 +137,7 @@ class ShipObjectServerWorld @Inject internal constructor(
      * A class containing the result of the current tick. **This object is only valid for the tick it was produced in!**
      * Many of the maps/sets will be reused for efficiency's sake.
      */
-    internal inner class CurrentTickChanges(
+    inner class CurrentTickChanges(
         val newShipObjects: Collection<ShipObjectServer>,
         val updatedShipObjects: Collection<ShipObjectServer>,
         val deletedShipObjects: Collection<ShipData>,
@@ -211,13 +208,15 @@ class ShipObjectServerWorld @Inject internal constructor(
         }
     }
 
-    override fun addVoxelShapeUpdates(dimensionId: DimensionId, voxelShapeUpdates: List<IVoxelShapeUpdate>) {
+    override fun addTerrainUpdates(dimensionId: DimensionId, terrainUpdates: List<TerrainUpdate>) {
         enforcer.stage(UPDATE_CHUNKS)
-        voxelShapeUpdatesList.add(ServerShipWorldGame.LevelVoxelUpdates(dimensionId, voxelShapeUpdates))
+
+        val voxelShapeUpdates = terrainUpdates.map { (it as TerrainUpdateImpl).update }
+        voxelShapeUpdatesList.add(LevelVoxelUpdates(dimensionId, voxelShapeUpdates))
     }
 
     fun getShipObject(ship: ServerShipInternal): ShipObjectServer? {
-        return shipObjects[ship.id]
+        return loadedShips.getById(ship.id)
     }
 
     override fun preTick() {
@@ -234,7 +233,7 @@ class ShipObjectServerWorld @Inject internal constructor(
         val it = _loadedShips.iterator()
         while (it.hasNext()) {
             val shipObjectServer = it.next()
-            if (shipObjectServer.shipData.inertiaData.shipMass < 1e-8) {
+            if (shipObjectServer.shipData.inertiaData.mass < 1e-8) {
                 // Delete this ship
                 deletedShipObjects.add(shipObjectServer.shipData)
                 allShips.removeShipData(shipObjectServer.shipData)
@@ -253,7 +252,7 @@ class ShipObjectServerWorld @Inject internal constructor(
             val shipID = shipData.id
 
             // save us from the invMass is not finite! error
-            if (shipData.inertiaData.shipMass == 0.0) {
+            if (shipData.inertiaData.mass == 0.0) {
                 logger.warn("Ship with ID $shipID has a mass of 0.0, not creating a ShipObject")
                 continue
             }
@@ -344,6 +343,7 @@ class ShipObjectServerWorld @Inject internal constructor(
         blockPosInWorldCoordinates: Vector3ic, createShipObjectImmediately: Boolean, scaling: Double,
         dimensionId: DimensionId
     ): ShipData {
+        val chunkAllocator = chunkAllocators.forDimension(dimensionId)
         val chunkClaim = chunkAllocator.allocateNewChunkClaim()
         val shipName = NounListNameGenerator.generateName()
 
@@ -396,27 +396,36 @@ class ShipObjectServerWorld @Inject internal constructor(
         dimensionsAddedThisTick.clear()
         dimensionsRemovedThisTick.forEach { dimensionRemovedThisTick: DimensionId ->
             val removedSuccessfully = dimensionToGroundBodyId.remove(dimensionRemovedThisTick) != null
-            assert(removedSuccessfully)
+            check(removedSuccessfully)
         }
         dimensionsRemovedThisTick.clear()
     }
 
-    override fun addDimension(dimensionId: DimensionId) {
+    override fun addDimension(dimensionId: DimensionId, yRange: IntRange) {
         enforcer.stage(UPDATE_DIMENSIONS)
-        assert(!dimensionToGroundBodyId.contains(dimensionId))
+        require(!dimensionInfo.contains(dimensionId))
+        require(!dimensionToGroundBodyId.contains(dimensionId))
 
         dimensionsAddedThisTick.add(dimensionId)
-        dimensionToGroundBodyId[dimensionId] = chunkAllocator.allocateShipId()
+        dimensionToGroundBodyId[dimensionId] = chunkAllocators.forDimension(dimensionId).allocateShipId()
+        dimensionInfo[dimensionId] = DimensionInfo(dimensionId, yRange)
     }
 
     override fun removeDimension(dimensionId: DimensionId) {
         enforcer.stage(UPDATE_DIMENSIONS)
-        assert(dimensionToGroundBodyId.contains(dimensionId))
+        require(dimensionInfo.contains(dimensionId))
+        require(dimensionToGroundBodyId.contains(dimensionId))
 
         dimensionsRemovedThisTick.add(dimensionId)
+        dimensionInfo.remove(dimensionId)
     }
 
     override fun onDisconnect(player: IPlayer) {
         udpServer?.disconnect(player)
     }
+
+    data class LevelVoxelUpdates(
+        val dimensionId: DimensionId,
+        val updates: List<IVoxelShapeUpdate>
+    )
 }

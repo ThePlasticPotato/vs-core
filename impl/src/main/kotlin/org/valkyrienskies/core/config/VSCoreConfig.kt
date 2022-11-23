@@ -59,8 +59,3 @@ object VSCoreConfig {
         var physics = PhysicsConfig()
     }
 }
-
-fun main() {
-    val config = VSConfigClass.registerConfig("vs_core", VSCoreConfig::class.java)
-    println(config.client!!.schemaJson.toPrettyString())
-}

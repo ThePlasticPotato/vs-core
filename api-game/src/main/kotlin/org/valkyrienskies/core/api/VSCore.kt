@@ -3,7 +3,7 @@ package org.valkyrienskies.core.api
 import org.valkyrienskies.core.api.world.VSPipeline
 import org.valkyrienskies.core.api.world.chunks.TerrainUpdate
 
-interface VSCoreGame {
+interface VSCore {
 
     /**
      * Creates a new dense terrain update builder. A dense terrain update will

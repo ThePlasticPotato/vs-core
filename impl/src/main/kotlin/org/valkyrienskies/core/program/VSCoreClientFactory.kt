@@ -6,5 +6,5 @@ import javax.inject.Singleton
 @Singleton
 @Component(modules = [VSCoreClientModule::class])
 interface VSCoreClientFactory {
-    fun client(): VSCoreClient
+    fun client(): VSCoreClientImpl
 }

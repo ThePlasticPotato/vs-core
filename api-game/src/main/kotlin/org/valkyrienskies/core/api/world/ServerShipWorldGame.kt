@@ -2,18 +2,14 @@ package org.valkyrienskies.core.api.world
 
 import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ships.ServerShip
-import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.api.ships.properties.VSBlockType
 import org.valkyrienskies.core.api.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.api.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.api.world.chunks.ChunkWatchTasks
-import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
+import org.valkyrienskies.core.api.world.chunks.TerrainUpdate
+import org.valkyrienskies.core.api.world.properties.DimensionId
 
-interface ServerShipWorldGame {
-    data class LevelVoxelUpdates(
-        val dimensionId: DimensionId,
-        val updates: List<IVoxelShapeUpdate>
-    )
+interface ServerShipWorldGame : ShipWorld {
 
     /**
      * Add the update to [shipToVoxelUpdates].
@@ -29,7 +25,7 @@ interface ServerShipWorldGame {
         newBlockMass: Double
     )
 
-    fun addVoxelShapeUpdates(dimensionId: DimensionId, voxelShapeUpdates: List<IVoxelShapeUpdate>)
+    fun addTerrainUpdates(dimensionId: DimensionId, terrainUpdates: List<TerrainUpdate>)
 
     /**
      * If the chunk at [chunkX], [chunkZ] is a ship chunk, then this returns the [IPlayer]s that are watching that ship chunk.
@@ -57,7 +53,11 @@ interface ServerShipWorldGame {
         dimensionId: DimensionId
     ): ServerShip
 
-    fun addDimension(dimensionId: DimensionId)
+    /**
+     * Adds a newly loaded dimension with [dimensionId]. [yRange] specifies the range of valid y values for this dimension.
+     * In older versions of Minecraft, this should be `[0, 255]`
+     */
+    fun addDimension(dimensionId: DimensionId, yRange: IntRange)
     fun removeDimension(dimensionId: DimensionId)
     fun onDisconnect(player: IPlayer)
 }

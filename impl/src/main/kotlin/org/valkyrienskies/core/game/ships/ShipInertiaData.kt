@@ -17,11 +17,15 @@ data class ShipInertiaDataImpl constructor(
     @JsonProperty("momentOfInertiaTensor") private val _momentOfInertiaTensor: Matrix3d
 ) : ShipInertiaData {
 
+    @get:JsonProperty("momentOfInertiaTensor")
     override val momentOfInertiaTensor: Matrix3dc
         get() = _momentOfInertiaTensor
 
-    override val centerOfMassInShipSpace: Vector3dc get() = _centerOfMassInShipSpace
-    override val shipMass get() = _shipMass
+    @get:JsonProperty("centerOfMassInShipSpace")
+    override val centerOfMassInShip: Vector3dc get() = _centerOfMassInShipSpace
+
+    @get:JsonProperty("shipMass")
+    override val mass get() = _shipMass
 
     internal fun onSetBlock(posX: Int, posY: Int, posZ: Int, oldBlockMass: Double, newBlockMass: Double) {
         val deltaBlockMass = newBlockMass - oldBlockMass
@@ -54,21 +58,21 @@ data class ShipInertiaDataImpl constructor(
         val transposed: Matrix3d = _momentOfInertiaTensor.transpose(Matrix3d())
         transposed.get(gameMoITensor)
 
-        val gameTickMass: Double = shipMass
-        val prevCenterOfMass = Vector3d(centerOfMassInShipSpace)
+        val gameTickMass: Double = mass
+        val prevCenterOfMass = Vector3d(centerOfMassInShip)
         if (gameTickMass + addedMass > EPSILON) {
-            val newCenterOfMass: Vector3d = centerOfMassInShipSpace.mul(gameTickMass, Vector3d())
+            val newCenterOfMass: Vector3d = centerOfMassInShip.mul(gameTickMass, Vector3d())
             newCenterOfMass.add(x * addedMass, y * addedMass, z * addedMass)
             newCenterOfMass.mul(1.0 / (gameTickMass + addedMass))
             _centerOfMassInShipSpace.set(newCenterOfMass)
 
             // This code is pretty awful in hindsight, but it gets the job done.
-            val cmShiftX: Double = prevCenterOfMass.x - centerOfMassInShipSpace.x()
-            val cmShiftY: Double = prevCenterOfMass.y - centerOfMassInShipSpace.y()
-            val cmShiftZ: Double = prevCenterOfMass.z - centerOfMassInShipSpace.z()
-            val rx: Double = x - centerOfMassInShipSpace.x()
-            val ry: Double = y - centerOfMassInShipSpace.y()
-            val rz: Double = z - centerOfMassInShipSpace.z()
+            val cmShiftX: Double = prevCenterOfMass.x - centerOfMassInShip.x()
+            val cmShiftY: Double = prevCenterOfMass.y - centerOfMassInShip.y()
+            val cmShiftZ: Double = prevCenterOfMass.z - centerOfMassInShip.z()
+            val rx: Double = x - centerOfMassInShip.x()
+            val ry: Double = y - centerOfMassInShip.y()
+            val rz: Double = z - centerOfMassInShip.z()
             gameMoITensor[0] = gameMoITensor[0] + (cmShiftY * cmShiftY + cmShiftZ * cmShiftZ) * gameTickMass +
                 (ry * ry + rz * rz) * addedMass
             gameMoITensor[1] = gameMoITensor[1] - cmShiftX * cmShiftY * gameTickMass - rx * ry * addedMass
@@ -93,7 +97,7 @@ data class ShipInertiaDataImpl constructor(
     }
 
     fun copyToPhyInertia(): PhysInertia {
-        return PhysInertia(shipMass, Matrix3d(_momentOfInertiaTensor))
+        return PhysInertia(mass, Matrix3d(_momentOfInertiaTensor))
     }
     // endregion
 

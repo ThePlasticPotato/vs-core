@@ -2,7 +2,7 @@ package org.valkyrienskies.core.program
 
 import org.valkyrienskies.core.api.world.VSPipeline
 import org.valkyrienskies.core.api.world.chunks.TerrainUpdate
-import org.valkyrienskies.core.game.ships.SerializedShipDataModule
+import org.valkyrienskies.core.game.ships.modules.ShipWorldModule
 import org.valkyrienskies.core.game.ships.serialization.vspipeline.VSPipelineSerializer
 import org.valkyrienskies.core.game.ships.types.DenseTerrainUpdateBuilderImpl
 import org.valkyrienskies.core.game.ships.types.SparseTerrainUpdateBuilderImpl
@@ -11,8 +11,8 @@ import org.valkyrienskies.core.networking.NetworkChannel
 import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule.TCP
 import org.valkyrienskies.core.networking.VSNetworkingConfigurator
-import org.valkyrienskies.core.pipelines.VSPipelineImpl
 import org.valkyrienskies.core.pipelines.VSPipelineComponent
+import org.valkyrienskies.core.pipelines.VSPipelineImpl
 import javax.inject.Inject
 
 internal class VSCoreImpl @Inject constructor(
@@ -41,7 +41,7 @@ internal class VSCoreImpl @Inject constructor(
     }
 
     override fun newPipeline(): VSPipelineImpl {
-        return fromModule(SerializedShipDataModule.createEmpty())
+        return fromModule(ShipWorldModule.createEmpty())
     }
 
     override fun newPipeline(data: ByteArray): VSPipelineImpl {
@@ -52,7 +52,7 @@ internal class VSCoreImpl @Inject constructor(
         return pipelineSerializer.serialize(pipeline as VSPipelineImpl)
     }
 
-    private fun fromModule(module: SerializedShipDataModule): VSPipelineImpl {
+    private fun fromModule(module: ShipWorldModule): VSPipelineImpl {
         return pipelineComponentFactory.newPipelineComponent(module).newPipeline()
     }
 }

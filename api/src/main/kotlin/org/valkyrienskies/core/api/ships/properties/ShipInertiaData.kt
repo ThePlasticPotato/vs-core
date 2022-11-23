@@ -5,6 +5,13 @@ import org.joml.Vector3dc
 
 interface ShipInertiaData {
     val momentOfInertiaTensor: Matrix3dc
-    val centerOfMassInShipSpace: Vector3dc
-    val shipMass: Double
+
+    val centerOfMassInShip: Vector3dc
+    val mass: Double
+
+    @Deprecated("renamed", ReplaceWith("mass"))
+    val shipMass: Double get() = mass
+
+    @Deprecated("renamed", ReplaceWith("centerOfMassInShip"))
+    val centerOfMassInShipSpace: Vector3dc get() = centerOfMassInShip
 }

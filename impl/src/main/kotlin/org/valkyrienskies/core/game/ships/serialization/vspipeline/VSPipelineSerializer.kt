@@ -3,7 +3,8 @@ package org.valkyrienskies.core.game.ships.serialization.vspipeline
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.valkyrienskies.core.game.ChunkAllocator
-import org.valkyrienskies.core.game.ships.SerializedShipDataModule
+import org.valkyrienskies.core.game.SingletonChunkAllocatorProviderImpl
+import org.valkyrienskies.core.game.ships.modules.ShipWorldModule
 import org.valkyrienskies.core.game.ships.serialization.ChainUpdater
 import org.valkyrienskies.core.game.ships.serialization.shipserver.ServerShipDataConverter
 import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShipDataV0
@@ -24,11 +25,11 @@ internal class VSPipelineSerializer @Inject constructor(
     private val pipelineDataConverter: VSPipelineDataConverter
 ) {
 
-    fun deserializeLegacy(queryableShipDataBytes: ByteArray, chunkAllocatorBytes: ByteArray): SerializedShipDataModule {
+    fun deserializeLegacy(queryableShipDataBytes: ByteArray, chunkAllocatorBytes: ByteArray): ShipWorldModule {
         return asVsPipelineModule(deserializeLegacyAsV1(queryableShipDataBytes, chunkAllocatorBytes))
     }
 
-    fun deserialize(bytes: ByteArray): SerializedShipDataModule {
+    fun deserialize(bytes: ByteArray): ShipWorldModule {
         val data = objectMapper.readValue<VSPipelineData>(bytes)
         val updated = updater.updateToLatest(data)
         return pipelineDataConverter.convertToModel(updated)
@@ -36,14 +37,15 @@ internal class VSPipelineSerializer @Inject constructor(
 
     fun serialize(pipeline: VSPipelineImpl): ByteArray {
         val ships = pipeline.shipWorld.allShips.map(shipDataMapper::convertToDto)
-        val chunks = pipeline.shipWorld.chunkAllocator
+        // eventually we will want to have different chunk allocators per dimension, but for now we have only one.
+        val chunks = (pipeline.shipWorld.chunkAllocators as SingletonChunkAllocatorProviderImpl).allocator
 
         val pipelineData = VSPipelineDataV3(chunks, ships)
 
         return objectMapper.writeValueAsBytes(pipelineData)
     }
 
-    private fun asVsPipelineModule(pipelineData: VSPipelineData): SerializedShipDataModule {
+    private fun asVsPipelineModule(pipelineData: VSPipelineData): ShipWorldModule {
         return pipelineDataConverter.convertToModel(updater.updateToLatest(pipelineData))
     }
 

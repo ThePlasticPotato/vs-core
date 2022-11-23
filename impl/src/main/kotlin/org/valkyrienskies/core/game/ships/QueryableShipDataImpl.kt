@@ -5,8 +5,8 @@ import org.valkyrienskies.core.api.ships.MutableQueryableShipData
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.Ship
 import org.valkyrienskies.core.api.ships.properties.ShipId
-import org.valkyrienskies.core.datastructures.ChunkClaimMap
 import org.valkyrienskies.core.api.world.properties.DimensionId
+import org.valkyrienskies.core.datastructures.ChunkClaimMap
 import org.valkyrienskies.core.util.intersectsAABB
 
 typealias QueryableShipDataServer = QueryableShipData<ShipData>
@@ -54,7 +54,7 @@ open class QueryableShipDataImpl<ShipType : Ship>(
 
     override fun add(ship: ShipType) {
         if (getById(ship.id) != null) {
-            throw IllegalArgumentException("Adding ship $ship failed because of duplicated ID.")
+            throw IllegalArgumentException("Adding ship id:${ship.id} failed because of duplicated ID.")
         }
         _idToShipData[ship.id] = ship
         chunkClaimToShipData[ship.chunkClaim] = ship
@@ -81,7 +81,7 @@ open class QueryableShipDataImpl<ShipType : Ship>(
 
     override fun remove(id: ShipId) {
         val shipData = getById(id)
-            ?: throw IllegalArgumentException("Removing ship id:$id failed because it wasn't in the UUID map.")
+            ?: throw IllegalArgumentException("Removing ship id:$id failed because it couldn't be found.")
         _idToShipData.remove(shipData.id)
         chunkClaimToShipData.remove(shipData.chunkClaim)
     }

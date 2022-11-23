@@ -1,10 +1,8 @@
 plugins {
     id("vs-core.convention")
-    id("me.champeau.jmh") version "0.6.8"
 }
 
 dependencies {
-    api(project(":api"))
     api(project(":api-game"))
 
     // Kotlin
@@ -69,7 +67,6 @@ dependencies {
 
     // Log4j2 for Logging
     implementation("org.apache.logging.log4j:log4j-api:${properties["mc_log4j2_version"]}")
-
 }
 
 // Publish javadoc and sources to maven

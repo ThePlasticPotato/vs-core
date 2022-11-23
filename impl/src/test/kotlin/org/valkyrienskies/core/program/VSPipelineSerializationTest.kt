@@ -5,6 +5,9 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.valkyrienskies.core.api.world.ServerShipWorldGame
+import org.valkyrienskies.core.game.SingletonChunkAllocatorProviderImpl
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
 import org.valkyrienskies.test_utils.fakes.FakeVSCoreFactory
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -14,6 +17,7 @@ class VSPipelineSerializationTest : StringSpec({
     val core = FakeVSCoreFactory.fakeVsCoreServer()
 
     "serialize and deserialize a pipeline from legacy data and the current serialization format" {
+
         val shipDataBytes = withContext(Dispatchers.IO) {
             Files.readAllBytes(Paths.get("src/test/resources/queryable_ship_data_legacy.dat"))
         }
@@ -42,3 +46,7 @@ class VSPipelineSerializationTest : StringSpec({
     }
 
 })
+
+// yikes! but this will do for now
+private val ServerShipWorldGame.chunkAllocator get() =
+    ((this as ShipObjectServerWorld).chunkAllocators as SingletonChunkAllocatorProviderImpl).allocator

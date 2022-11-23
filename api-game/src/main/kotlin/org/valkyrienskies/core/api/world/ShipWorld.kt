@@ -4,11 +4,16 @@ import org.joml.primitives.AABBdc
 import org.valkyrienskies.core.api.ships.LoadedShip
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.Ship
+import org.valkyrienskies.core.api.world.properties.DimensionId
 
 interface ShipWorld {
 
     val allShips: QueryableShipData<Ship>
     val loadedShips: QueryableShipData<LoadedShip>
+
+    fun isChunkInShipyard(chunkX: Int, chunkZ: Int, dimensionId: DimensionId): Boolean
+
+    fun isBlockInShipyard(blockX: Int, blockY: Int, blockZ: Int, dimensionId: DimensionId): Boolean
 
     @Deprecated("redundant", ReplaceWith("loadedShips.getShipDataIntersecting(aabb)"))
     fun getShipObjectsIntersecting(aabb: AABBdc): List<LoadedShip>
