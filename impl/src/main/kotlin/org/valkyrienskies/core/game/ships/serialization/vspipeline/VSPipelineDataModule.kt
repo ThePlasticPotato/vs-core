@@ -8,7 +8,7 @@ import org.valkyrienskies.core.game.ships.serialization.vspipeline.dto.VSPipelin
 import org.valkyrienskies.core.game.ships.serialization.vspipeline.dto.VSPipelineDataV2UpdaterImpl
 
 @Module
-internal interface VSPipelineDataModule {
+interface VSPipelineDataModule {
 
     @Binds
     fun converter(converter: VSPipelineDataConverterImpl): VSPipelineDataConverter

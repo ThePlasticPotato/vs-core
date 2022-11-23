@@ -13,8 +13,7 @@ class SingleChunkDenseBlockPosSet {
     val data: ByteArray = ByteArray(512)
 
     companion object {
-        @PublishedApi
-        internal val dimensions: Vector3ic = Vector3i(16, 16, 16)
+        val dimensions: Vector3ic = Vector3i(16, 16, 16)
 
         private fun Byte.isBitSet(bitIndex: Int): Boolean {
             return this and (1 shl bitIndex).toByte() != 0.toByte()

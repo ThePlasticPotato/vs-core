@@ -40,7 +40,7 @@ import java.util.concurrent.CompletableFuture
 import javax.inject.Inject
 
 @WorldScoped
-class ShipObjectServerWorld @Inject internal constructor(
+class ShipObjectServerWorld @Inject constructor(
     @AllShips override val allShips: MutableQueryableShipDataServer,
     val chunkAllocators: ChunkAllocatorProvider,
     private val loadManager: ShipLoadManagerServer,
@@ -372,7 +372,7 @@ class ShipObjectServerWorld @Inject internal constructor(
     override fun destroyWorld() {
     }
 
-    internal fun getCurrentTickChanges(): CurrentTickChanges {
+    fun getCurrentTickChanges(): CurrentTickChanges {
         enforcer.stage(GET_CURRENT_TICK_CHANGES)
 
         return CurrentTickChanges(

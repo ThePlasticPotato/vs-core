@@ -68,7 +68,7 @@ data class VSConfigClass(
     }
 
     companion object {
-        internal val mapper = VSJacksonUtil.configMapper
+        val mapper = VSJacksonUtil.configMapper
 
         private val registeredConfigMap = HashMap<Class<*>, VSConfigClass>()
 

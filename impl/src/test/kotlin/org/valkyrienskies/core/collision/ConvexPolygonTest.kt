@@ -6,7 +6,7 @@ import org.joml.primitives.AABBd
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class ConvexPolygonTest {
+class ConvexPolygonTest {
 
     @Test
     fun getProjectionAlongAxis() {

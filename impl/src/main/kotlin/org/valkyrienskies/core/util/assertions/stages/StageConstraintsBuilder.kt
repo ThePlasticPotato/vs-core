@@ -7,7 +7,7 @@ import org.valkyrienskies.core.util.assertions.stages.constraints.StageConstrain
 import org.valkyrienskies.core.util.assertions.stages.predicates.StagePredicate
 import java.util.function.Predicate
 
-internal open class StageConstraintsBuilder<S> {
+open class StageConstraintsBuilder<S> {
     private val constraints = ArrayList<StageConstraint<S>>()
 
     fun constraint(constraint: StageConstraint<S>) {
@@ -85,7 +85,7 @@ internal open class StageConstraintsBuilder<S> {
         constraints.add(StageConstraint.requireThread(thread, *stages))
     }
 
-    internal fun buildConstraints(): List<StageConstraint<S>> {
+    fun buildConstraints(): List<StageConstraint<S>> {
         return constraints
     }
 }

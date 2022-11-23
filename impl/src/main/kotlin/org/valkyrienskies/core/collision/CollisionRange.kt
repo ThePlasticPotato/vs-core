@@ -3,7 +3,7 @@ package org.valkyrienskies.core.collision
 /**
  * A 1-D range used in collision code.
  */
-internal data class CollisionRange internal constructor(var _min: Double, var _max: Double) : CollisionRangec {
+data class CollisionRange constructor(var _min: Double, var _max: Double) : CollisionRangec {
     override val min: Double get() = _min
     override val max: Double get() = _max
 

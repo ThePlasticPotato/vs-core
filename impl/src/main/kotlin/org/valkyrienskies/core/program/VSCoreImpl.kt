@@ -15,7 +15,7 @@ import org.valkyrienskies.core.pipelines.VSPipelineComponent
 import org.valkyrienskies.core.pipelines.VSPipelineImpl
 import javax.inject.Inject
 
-internal class VSCoreImpl @Inject constructor(
+class VSCoreImpl @Inject constructor(
     override val networking: VSNetworking,
     override val hooks: VSCoreHooks,
     override val configurator: VSNetworkingConfigurator,

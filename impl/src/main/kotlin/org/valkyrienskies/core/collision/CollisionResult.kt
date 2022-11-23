@@ -6,7 +6,7 @@ import org.joml.Vector3dc
 /**
  * A [CollisionResult] is used to describe the collision between two polygons. See [CollisionResultc] for more information.
  */
-internal data class CollisionResult internal constructor(
+data class CollisionResult constructor(
     var _colliding: Boolean,
     val _collisionAxis: Vector3d,
     var _penetrationOffset: Double

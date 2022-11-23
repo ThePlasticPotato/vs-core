@@ -6,7 +6,7 @@ import java.util.stream.Collectors
 /**
  * Generates names from a noun list
  */
-internal object NounListNameGenerator : NameGenerator {
+object NounListNameGenerator : NameGenerator {
     private const val NOUN_LIST_LENGTH = 6801
     private const val DEFAULT_NOUNS_PER_NAME = 3
 

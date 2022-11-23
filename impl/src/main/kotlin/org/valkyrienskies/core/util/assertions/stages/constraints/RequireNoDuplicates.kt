@@ -1,6 +1,6 @@
 package org.valkyrienskies.core.util.assertions.stages.constraints
 
-internal class RequireNoDuplicates<S>(vararg stages: S) : StageConstraint<S> {
+class RequireNoDuplicates<S>(vararg stages: S) : StageConstraint<S> {
 
     private val stages: List<S> = stages.asList()
 

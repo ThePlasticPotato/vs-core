@@ -2,7 +2,7 @@ package org.valkyrienskies.core.util.assertions.stages.constraints
 
 import java.util.function.Predicate
 
-internal class RequireThread<S>(
+class RequireThread<S>(
     private val checkThread: Predicate<Thread>,
     private vararg val stages: S
 ) : StageConstraint<S> {

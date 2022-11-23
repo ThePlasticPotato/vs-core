@@ -7,7 +7,7 @@ import com.flipkart.zjsonpatch.JsonPatch
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufInputStream
 
-internal class JsonDiffDeltaAlgorithm(private val mapper: ObjectMapper) : DeltaAlgorithm<JsonNode> {
+class JsonDiffDeltaAlgorithm(private val mapper: ObjectMapper) : DeltaAlgorithm<JsonNode> {
 
     override fun encode(old: JsonNode, new: JsonNode, dest: ByteBuf): ByteBuf {
         // Compute json-patch diff

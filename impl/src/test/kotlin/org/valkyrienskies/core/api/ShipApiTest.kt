@@ -9,7 +9,7 @@ import org.valkyrienskies.core.api.ships.setAttachment
 import org.valkyrienskies.core.game.ships.ShipObjectServer
 
 // Yes its a very simple test, but if somebody ever dares to break it we will know
-internal class ShipApiTest {
+class ShipApiTest {
 
     @Test
     fun testShipDataAbstraction() {

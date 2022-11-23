@@ -17,7 +17,7 @@ import org.valkyrienskies.core.util.serialization.VSJacksonUtil
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class VSPipelineSerializer @Inject constructor(
+class VSPipelineSerializer @Inject constructor(
     @Named("dto") private val objectMapper: ObjectMapper,
     private val shipDataMapper: ServerShipDataConverter,
     private val updater: ChainUpdater<VSPipelineDataV3>,

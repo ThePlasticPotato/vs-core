@@ -22,7 +22,7 @@ import java.util.function.LongFunction
 import javax.inject.Inject
 import kotlin.math.min
 
-internal class ShipObjectServerWorldChunkTracker @Inject constructor(
+class ShipObjectServerWorldChunkTracker @Inject constructor(
     val config: VSCoreConfig.Server
 ) {
 
@@ -180,7 +180,7 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
     }
 
     /**
-     * Updates the chunk trackers internal state and generates [ChunkTrackingInfo].
+     * Updates the chunk trackers state and generates [ChunkTrackingInfo].
      *
      * [ChunkTrackingInfo] is only safe to be used for this tick
      */

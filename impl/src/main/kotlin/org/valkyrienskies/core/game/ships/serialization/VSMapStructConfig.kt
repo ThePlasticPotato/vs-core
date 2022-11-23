@@ -11,4 +11,4 @@ import org.mapstruct.MappingConstants.ComponentModel
     componentModel = ComponentModel.DAGGER2,
     injectionStrategy = CONSTRUCTOR
 )
-internal class VSMapStructConfig
+class VSMapStructConfig

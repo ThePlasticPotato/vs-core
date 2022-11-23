@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.valkyrienskies.core.VSRandomUtils
 
-internal class ChunkClaimMapTest {
+class ChunkClaimMapTest {
 
     @Test
     fun addChunkClaim() {

@@ -1,6 +1,6 @@
 package org.valkyrienskies.core.util.assertions.stages.constraints
 
-internal class Compose<S>(private vararg val constraints: StageConstraint<S>) : StageConstraint<S> {
+class Compose<S>(private vararg val constraints: StageConstraint<S>) : StageConstraint<S> {
     override fun check(stagesSinceReset: List<S>, isReset: Boolean): String? {
         val checks = constraints.mapNotNull { it.check(stagesSinceReset, isReset) }
 

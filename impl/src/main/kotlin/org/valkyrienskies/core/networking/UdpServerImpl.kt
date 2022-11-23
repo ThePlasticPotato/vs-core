@@ -14,7 +14,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import kotlin.random.Random
 
-internal class UdpServerImpl(
+class UdpServerImpl(
     val socket: DatagramSocket,
     val channel: NetworkChannel,
     val fallback: PacketType,

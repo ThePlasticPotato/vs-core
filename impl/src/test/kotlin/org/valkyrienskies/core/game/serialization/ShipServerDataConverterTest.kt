@@ -32,7 +32,7 @@ class ServerShipDataConverterTest : StringSpec({
 
 @Singleton
 @Component(modules = [VSCoreModule::class])
-internal interface ServerShipDataConverterComponent {
+interface ServerShipDataConverterComponent {
     fun converter(): ServerShipDataConverter
     fun updater(): ServerShipDataV0Updater
 

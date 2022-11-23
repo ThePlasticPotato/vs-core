@@ -9,7 +9,7 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.SocketAddress
 
-internal class UdpClientImpl(
+class UdpClientImpl(
     val socket: DatagramSocket,
     val channel: NetworkChannel,
     val server: SocketAddress, id: Long,

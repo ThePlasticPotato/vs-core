@@ -34,7 +34,7 @@ interface VSPipelineComponent {
  * Game <--> Physics --> Network
  */
 @WorldScoped
-class VSPipelineImpl @Inject internal constructor(
+class VSPipelineImpl @Inject constructor(
     override val shipWorld: ShipObjectServerWorld,
     private val gameStage: VSGamePipelineStage,
     private val physicsStage: VSPhysicsPipelineStage,

@@ -12,13 +12,13 @@ import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
  * A [VSPhysicsFrame] represents the state of all the bodies in the physics engine. It also has [voxelUpdatesMap] which
  * describes any changes the physics engine made to the voxels.
  */
-internal data class VSPhysicsFrame(
+data class VSPhysicsFrame(
     val shipDataMap: Map<ShipId, ShipInPhysicsFrameData>,
     val voxelUpdatesMap: Map<ShipId, List<IVoxelShapeUpdate>>,
     val physTickNumber: Int
 )
 
-internal data class ShipInPhysicsFrameData(
+data class ShipInPhysicsFrameData(
     val uuid: ShipId,
     val inertiaData: RigidBodyInertiaData,
     val poseVel: PoseVel,

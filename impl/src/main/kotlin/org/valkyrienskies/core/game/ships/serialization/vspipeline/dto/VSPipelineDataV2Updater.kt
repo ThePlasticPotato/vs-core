@@ -9,4 +9,4 @@ import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShi
     uses = [ServerShipDataV2Updater::class],
     config = VSMapStructConfig::class
 )
-internal interface VSPipelineDataV2Updater : DtoUpdater<VSPipelineDataV2, VSPipelineDataV3>
+interface VSPipelineDataV2Updater : DtoUpdater<VSPipelineDataV2, VSPipelineDataV3>

@@ -29,7 +29,7 @@ import org.joml.primitives.AABBfc
 import org.joml.primitives.AABBi
 import org.joml.primitives.AABBic
 
-internal class JOMLSerializationModule : SimpleModule() {
+class JOMLSerializationModule : SimpleModule() {
 
     @JsonAutoDetect(fieldVisibility = ANY, setterVisibility = NONE, getterVisibility = NONE, isGetterVisibility = NONE)
     private object JOMLMixin

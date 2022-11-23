@@ -126,7 +126,7 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
         private val logger by logger()
 
         // Reads all ship transforms in a buffer and places them in the latestReceived map.
-        internal fun readShipTransform(buf: ByteBuf, shipObjects: Map<ShipId, ShipObjectClient>) {
+        fun readShipTransform(buf: ByteBuf, shipObjects: Map<ShipId, ShipObjectClient>) {
             val tickNum = buf.readInt()
             try {
                 while (buf.isReadable) {

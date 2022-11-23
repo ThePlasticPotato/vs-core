@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 /**
  * Running `./gradlew test` doesn't work if this class doesn't exist. So, just keep it for now.
  */
-internal class TestStuff {
+class TestStuff {
 
     @Test
     fun testStuff() {

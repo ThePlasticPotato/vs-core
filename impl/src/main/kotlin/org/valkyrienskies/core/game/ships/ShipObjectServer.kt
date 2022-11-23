@@ -13,15 +13,15 @@ class ShipObjectServer(
     override val shipData: ShipData
 ) : ShipObject(shipData), LoadedServerShipInternal, ServerShipInternal by shipData {
 
-    internal val shipDataChannel = DeltaEncodedChannelServerTCP(
+    val shipDataChannel = DeltaEncodedChannelServerTCP(
         jsonDiffDeltaAlgorithm,
         VSJacksonUtil.deltaMapper.valueToTree(shipData)
     )
 
     // runtime attached data only server-side, cus syncing to clients would be pain
-    internal val attachedData = MutableClassToInstanceMap.create<Any>()
-    internal val forceInducers = mutableListOf<ShipForcesInducer>()
-    internal val toBeTicked = mutableListOf<Ticked>()
+    val attachedData = MutableClassToInstanceMap.create<Any>()
+    val forceInducers = mutableListOf<ShipForcesInducer>()
+    val toBeTicked = mutableListOf<Ticked>()
 
     init {
         for (data in shipData.persistentAttachedData) {

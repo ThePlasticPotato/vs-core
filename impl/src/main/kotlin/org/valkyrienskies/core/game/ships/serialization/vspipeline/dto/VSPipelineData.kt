@@ -9,4 +9,4 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(VSPipelineDataV3::class)
 )
 @JsonTypeInfo(use = JsonTypeInfo.Id.MINIMAL_CLASS)
-internal sealed interface VSPipelineData
+sealed interface VSPipelineData

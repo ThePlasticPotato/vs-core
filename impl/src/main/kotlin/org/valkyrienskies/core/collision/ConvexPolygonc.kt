@@ -8,7 +8,7 @@ import org.valkyrienskies.core.api.ships.properties.ShipId
 import kotlin.math.max
 import kotlin.math.min
 
-internal fun ConvexPolygonc.getProjectionAlongAxis(normalAxis: Vector3dc, output: CollisionRange): CollisionRange {
+fun ConvexPolygonc.getProjectionAlongAxis(normalAxis: Vector3dc, output: CollisionRange): CollisionRange {
     var minProjection = Double.POSITIVE_INFINITY
     var maxProjection = Double.NEGATIVE_INFINITY
 

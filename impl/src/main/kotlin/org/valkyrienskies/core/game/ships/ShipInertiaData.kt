@@ -23,7 +23,7 @@ data class ShipInertiaDataImpl constructor(
 
     override val mass get() = _mass
 
-    internal fun onSetBlock(posX: Int, posY: Int, posZ: Int, oldBlockMass: Double, newBlockMass: Double) {
+    fun onSetBlock(posX: Int, posY: Int, posZ: Int, oldBlockMass: Double, newBlockMass: Double) {
         val deltaBlockMass = newBlockMass - oldBlockMass
         if (abs(deltaBlockMass) < EPSILON) {
             return // No change in mass
@@ -98,7 +98,7 @@ data class ShipInertiaDataImpl constructor(
     // endregion
 
     companion object {
-        internal fun newEmptyShipInertiaData(): ShipInertiaDataImpl {
+        fun newEmptyShipInertiaData(): ShipInertiaDataImpl {
             return ShipInertiaDataImpl(Vector3d(), 0.0, Matrix3d())
         }
 

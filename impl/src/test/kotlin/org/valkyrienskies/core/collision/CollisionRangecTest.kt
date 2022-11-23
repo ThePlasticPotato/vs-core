@@ -3,7 +3,7 @@ package org.valkyrienskies.core.collision
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class CollisionRangecTest {
+class CollisionRangecTest {
 
     @Test
     fun testComputeCollisionTime1() {

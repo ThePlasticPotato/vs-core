@@ -27,7 +27,7 @@ import kotlin.random.asJavaRandom
 /**
  * This singleton generates random objects for unit tests.
  */
-internal object VSRandomUtils {
+object VSRandomUtils {
 
     /**
      * Seeded random for tests

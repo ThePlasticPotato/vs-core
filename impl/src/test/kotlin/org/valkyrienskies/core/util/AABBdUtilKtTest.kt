@@ -5,7 +5,7 @@ import org.joml.primitives.AABBd
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class AABBdUtilKtTest {
+class AABBdUtilKtTest {
 
     @Test
     fun testSignedDistanceTo() {

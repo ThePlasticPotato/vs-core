@@ -3,10 +3,10 @@ package org.valkyrienskies.core.collision
 import org.joml.Vector3d
 import org.joml.Vector3dc
 
-internal data class CollisionResultTimeToCollision internal constructor(
-    internal var _initiallyColliding: Boolean,
-    internal var _collisionAxis: Vector3d,
-    internal var _timeToCollision: Double
+data class CollisionResultTimeToCollision constructor(
+    var _initiallyColliding: Boolean,
+    var _collisionAxis: Vector3d,
+    var _timeToCollision: Double
 ) : CollisionResultTimeToCollisionc {
     override val initiallyColliding: Boolean get() = _initiallyColliding
     override val collisionAxis: Vector3dc
@@ -24,7 +24,7 @@ internal data class CollisionResultTimeToCollision internal constructor(
         }
 
     companion object {
-        internal fun createEmptyCollisionResultTimeToCollision(): CollisionResultTimeToCollision {
+        fun createEmptyCollisionResultTimeToCollision(): CollisionResultTimeToCollision {
             return CollisionResultTimeToCollision(false, Vector3d(), Double.POSITIVE_INFINITY)
         }
     }

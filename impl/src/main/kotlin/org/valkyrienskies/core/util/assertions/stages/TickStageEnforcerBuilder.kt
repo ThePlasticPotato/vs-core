@@ -1,6 +1,6 @@
 package org.valkyrienskies.core.util.assertions.stages
 
-internal class TickStageEnforcerBuilder<S>(private val resetStage: S) : StageConstraintsBuilder<S>() {
+class TickStageEnforcerBuilder<S>(private val resetStage: S) : StageConstraintsBuilder<S>() {
 
     private var ignoreUntilFirstReset = false
     private var ignoreRepeatFailures = true
@@ -16,7 +16,7 @@ internal class TickStageEnforcerBuilder<S>(private val resetStage: S) : StageCon
         ignoreUntilFirstReset = true
     }
 
-    internal fun buildEnforcer(): TickStageEnforcer<S> {
+    fun buildEnforcer(): TickStageEnforcer<S> {
         return TickStageEnforcerImpl(resetStage, buildConstraints(), ignoreUntilFirstReset, ignoreRepeatFailures)
     }
 }

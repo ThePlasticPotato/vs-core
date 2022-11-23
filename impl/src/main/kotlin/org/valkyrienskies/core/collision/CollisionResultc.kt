@@ -6,7 +6,7 @@ import org.joml.Vector3dc
 /**
  * Interface to view the result of a collision test on two [ConvexPolygonc].
  */
-internal interface CollisionResultc {
+interface CollisionResultc {
     /**
      * @return whether the polygons are colliding or not
      */

@@ -5,7 +5,7 @@ import kotlin.math.abs
 /**
  * An immutable view of [CollisionRange].
  */
-internal interface CollisionRangec {
+interface CollisionRangec {
     val min: Double
     val max: Double
 

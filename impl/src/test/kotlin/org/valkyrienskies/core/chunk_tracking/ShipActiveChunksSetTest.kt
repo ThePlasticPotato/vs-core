@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import org.valkyrienskies.core.VSRandomUtils
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
 
-internal class ShipActiveChunksSetTest {
+class ShipActiveChunksSetTest {
 
     @Test
     fun addChunkPos() {

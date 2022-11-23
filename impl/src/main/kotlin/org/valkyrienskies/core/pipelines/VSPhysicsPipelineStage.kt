@@ -24,7 +24,7 @@ import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
 
-internal class VSPhysicsPipelineStage @Inject constructor() {
+class VSPhysicsPipelineStage @Inject constructor() {
     private val gameFramesQueue: ConcurrentLinkedQueue<VSGameFrame> = ConcurrentLinkedQueue()
     private val physicsEngine: PhysicsWorldReference
 

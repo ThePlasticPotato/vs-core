@@ -14,7 +14,7 @@ import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
 /**
  * A [VSGameFrame] represents the change of state of the game that occurred over 1 tick
  */
-internal data class VSGameFrame(
+data class VSGameFrame(
     val newShips: List<NewShipInGameFrameData>, // Ships to be added to the Physics simulation
     val deletedShips: List<ShipId>, // Ships to be deleted from the Physics simulation
     val updatedShips: Map<ShipId, UpdateShipInGameFrameData>, // Map of ship updates
@@ -24,7 +24,7 @@ internal data class VSGameFrame(
 /**
  * The data used to add a new ship to the physics engine
  */
-internal data class NewShipInGameFrameData(
+data class NewShipInGameFrameData(
     val uuid: ShipId,
     val dimension: Int,
     val minDefined: Vector3ic,
@@ -40,7 +40,7 @@ internal data class NewShipInGameFrameData(
     val forcesInducers: List<ShipForcesInducer>
 )
 
-internal data class UpdateShipInGameFrameData(
+data class UpdateShipInGameFrameData(
     val uuid: ShipId,
     val newVoxelOffset: Vector3dc,
     val inertiaData: PhysInertia,

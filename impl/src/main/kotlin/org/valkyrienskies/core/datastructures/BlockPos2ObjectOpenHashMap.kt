@@ -9,24 +9,22 @@ import org.valkyrienskies.core.datastructures.MurmurHash3.mix32
 class BlockPos2ObjectOpenHashMap<T>(expected: Int = 10, loadFactor: Float = 0.75f) {
 
     companion object {
-        @PublishedApi
-        internal const val NUM_KEYS = 3
+        const val NUM_KEYS = 3
     }
 
-    @PublishedApi
-    internal var n: Int = 0 // table capacity
+    var n: Int = 0 // table capacity
         private set
     private var size: Int = 0
 
-    @PublishedApi
-    internal var keys: IntArray
-
-    @PublishedApi
-    internal var values: Array<T?>
-
-    @PublishedApi
-    internal var containsNullKey = false
+    var keys: IntArray
         private set
+
+    var values: Array<T?>
+        private set
+
+    var containsNullKey = false
+        private set
+
     private var maxFill: Int
 
     var defRetValue: T? = null

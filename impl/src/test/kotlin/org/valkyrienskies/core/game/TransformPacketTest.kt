@@ -8,7 +8,7 @@ import org.valkyrienskies.core.pipelines.VSNetworkPipelineStage
 import org.valkyrienskies.core.pipelines.VSPhysicsFrame
 import kotlin.random.Random
 
-internal class TransformPacketTest {
+class TransformPacketTest {
 
     // @RepeatedTest(25) TODO fix this test
     fun testSerializationAndDeSerialization() {

@@ -11,7 +11,7 @@ import kotlin.math.min
 /**
  * A [TransformedCuboidPolygon] is a polygon whose shape is a cuboid that been transformed by a 4x4 transform matrix. It is guaranteed to have 8 [points] and 3 [normals].
  */
-internal class TransformedCuboidPolygon private constructor(
+class TransformedCuboidPolygon private constructor(
     private val _points: List<Vector3d>, private val _normals: List<Vector3d>, _shipFrom: ShipId? = null,
     private val _aabb: AABBd
 ) : ConvexPolygon(_points, _normals, _shipFrom, _aabb) {

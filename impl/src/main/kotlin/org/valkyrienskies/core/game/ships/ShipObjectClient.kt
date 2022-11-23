@@ -15,7 +15,7 @@ class ShipObjectClient(
     shipDataJson: JsonNode = VSJacksonUtil.defaultMapper.valueToTree(shipData)
 ) : ShipObject(shipData), ClientShipInternal, ShipInternal by shipData {
     // The last ship transform sent by the sever
-    internal var nextShipTransform: ShipTransform
+    var nextShipTransform: ShipTransform
 
     override lateinit var renderTransform: ShipTransform
         private set
@@ -23,10 +23,10 @@ class ShipObjectClient(
     override lateinit var renderAABB: AABBdc
         private set
 
-    internal var latestNetworkTransform: ShipTransform = shipData.transform
-    internal var latestNetworkTTick = Int.MIN_VALUE
+    var latestNetworkTransform: ShipTransform = shipData.transform
+    var latestNetworkTTick = Int.MIN_VALUE
 
-    internal val shipDataChannel = DeltaEncodedChannelClientTCP(jsonDiffDeltaAlgorithm, shipDataJson)
+    val shipDataChannel = DeltaEncodedChannelClientTCP(jsonDiffDeltaAlgorithm, shipDataJson)
 
     init {
         nextShipTransform = shipData.transform

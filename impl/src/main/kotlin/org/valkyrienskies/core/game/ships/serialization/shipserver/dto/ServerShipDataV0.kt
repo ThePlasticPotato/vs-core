@@ -41,7 +41,7 @@ class ServerShipDataV0(
     shipAABB, shipVoxelAABB, shipActiveChunksSet
 ) {
 
-    internal val persistentAttachedData = MutableClassToInstanceMap.create<Any>() // TODO a serializable class
+    val persistentAttachedData = MutableClassToInstanceMap.create<Any>() // TODO a serializable class
 }
 
 open class ShipDataCommon(

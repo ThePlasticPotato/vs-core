@@ -11,7 +11,7 @@ import org.valkyrienskies.core.game.ships.serialization.vspipeline.dto.VSPipelin
 import org.valkyrienskies.core.game.ships.serialization.vspipeline.dto.VSPipelineDataV3
 
 @Module
-internal class VSPipelineChainUpdaterModule {
+class VSPipelineChainUpdaterModule {
 
     @Provides
     fun updater(v1: VSPipelineDataV1Updater, v2: VSPipelineDataV2Updater): ChainUpdater<VSPipelineDataV3> =

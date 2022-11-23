@@ -1,6 +1,6 @@
 package org.valkyrienskies.core.util.assertions.stages.constraints
 
-internal class RequireStages<S>(vararg stages: S) : StageConstraint<S> {
+class RequireStages<S>(vararg stages: S) : StageConstraint<S> {
     init {
         require(stages.isNotEmpty())
     }

@@ -1,6 +1,6 @@
 package org.valkyrienskies.core.game.ships.serialization
 
-internal class ChainUpdaterImpl<T>(
+class ChainUpdaterImpl<T>(
     val updateTo: Class<T>,
     vararg mappings: Pair<Class<*>, DtoUpdater<*, *>>
 ) : ChainUpdater<T> {

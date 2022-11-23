@@ -11,7 +11,7 @@ data class ShipPhysicsData(
     var angularVelocity: Vector3dc
 ) {
     companion object {
-        internal fun createEmpty(): ShipPhysicsData {
+        fun createEmpty(): ShipPhysicsData {
             return ShipPhysicsData(Vector3d(), Vector3d())
         }
     }

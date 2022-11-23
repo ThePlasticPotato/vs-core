@@ -9,7 +9,7 @@ import org.valkyrienskies.core.api.world.IPlayer
  * A class containing the result of the chunk tracking. **This object is only valid for the tick it was produced in!**
  * Many of the maps/sets will be reused for efficiency's sake.
  */
-internal data class ChunkTrackingInfo(
+data class ChunkTrackingInfo(
     val playersToShipsWatchingMap: Map<IPlayer, Map<ServerShipInternal, LongSet>>,
     val shipsToPlayersWatchingMap: Long2ObjectMap<MutableSet<IPlayer>>,
     val playersToShipsNewlyWatchingMap: Map<IPlayer, Set<ServerShipInternal>>,

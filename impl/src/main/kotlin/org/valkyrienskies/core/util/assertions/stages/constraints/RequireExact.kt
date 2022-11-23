@@ -2,7 +2,7 @@ package org.valkyrienskies.core.util.assertions.stages.constraints
 
 import org.apache.commons.collections4.CollectionUtils
 
-internal class RequireExact<S> constructor(vararg stages: S) : StageConstraint<S> {
+class RequireExact<S> constructor(vararg stages: S) : StageConstraint<S> {
     init {
         require(stages.isNotEmpty())
     }

@@ -10,7 +10,7 @@ import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.ServerShi
 import org.valkyrienskies.core.game.ships.serialization.vspipeline.dto.VSPipelineDataV3
 
 @Mapper(config = VSMapStructConfig::class, uses = [ServerShipDataConverter::class])
-internal interface VSPipelineDataConverter {
+interface VSPipelineDataConverter {
 
     fun convertToModel(data: VSPipelineDataV3): ShipWorldModule {
         return ShipWorldModule(QueryableShipDataImpl(convertShipData(data.ships)), data.chunkAllocator)

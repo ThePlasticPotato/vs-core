@@ -79,7 +79,7 @@ data class ChunkAllocator(
         return isBlockInShipyard(pos.x(), pos.y(), pos.z())
     }
 
-    internal fun allocateShipId(): Long {
+    fun allocateShipId(): Long {
         return nextShipId++
     }
 
@@ -87,7 +87,7 @@ data class ChunkAllocator(
      * This finds the next empty chunkSet for use, currently only increases the xPos to get new
      * positions
      */
-    internal fun allocateNewChunkClaim(): ChunkClaim {
+    fun allocateNewChunkClaim(): ChunkClaim {
         val nextClaim = ChunkClaimImpl(nextClaimX, nextClaimZ)
         // Setup coordinates for the next claim
         nextClaimX++

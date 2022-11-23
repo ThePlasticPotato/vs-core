@@ -39,7 +39,7 @@ class ShipData(
     shipVoxelAABB: AABBic?,
     shipActiveChunksSet: IShipActiveChunksSet,
     var isStatic: Boolean = false,
-    internal val persistentAttachedData: MutableClassToInstanceMap<Any> = MutableClassToInstanceMap.create()
+    val persistentAttachedData: MutableClassToInstanceMap<Any> = MutableClassToInstanceMap.create()
 ) : ShipDataCommon(
     id, name, chunkClaim, chunkClaimDimension, physicsData, shipTransform, prevTickShipTransform,
     shipAABB, shipVoxelAABB, shipActiveChunksSet
@@ -144,7 +144,7 @@ class ShipData(
          * Creates a new [ShipData] from the given name and coordinates. The resulting [ShipData] is completely empty,
          * so it must be filled with blocks by other code.
          */
-        internal fun createEmpty(
+        fun createEmpty(
             name: String,
             shipId: ShipId,
             chunkClaim: ChunkClaim,

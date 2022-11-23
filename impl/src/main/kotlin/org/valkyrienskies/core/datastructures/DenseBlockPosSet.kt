@@ -4,8 +4,7 @@ import org.joml.Vector3ic
 
 class DenseBlockPosSet : IBlockPosSet {
 
-    @PublishedApi
-    internal val chunks = BlockPos2ObjectOpenHashMap<SingleChunkDenseBlockPosSet>()
+    val chunks = BlockPos2ObjectOpenHashMap<SingleChunkDenseBlockPosSet>()
     override var size = 0
         private set
 

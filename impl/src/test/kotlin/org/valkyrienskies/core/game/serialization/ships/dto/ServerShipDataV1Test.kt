@@ -54,12 +54,12 @@ class ServerShipDataV1Test : StringSpec({
 
 @Singleton
 @Component(modules = [VSCoreModule::class])
-internal interface ServerShipDataV1TestComponent {
+interface ServerShipDataV1TestComponent {
     fun v1Updater(): ServerShipDataV1Updater
 }
 
 @Singleton
 @Component(modules = [VSCoreModule::class])
-internal interface VSPipelineSerializerComponent {
+interface VSPipelineSerializerComponent {
     fun newPipelineSerializer(): VSPipelineSerializer
 }

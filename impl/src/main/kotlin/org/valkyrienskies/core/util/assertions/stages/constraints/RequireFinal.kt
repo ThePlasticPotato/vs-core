@@ -1,6 +1,6 @@
 package org.valkyrienskies.core.util.assertions.stages.constraints
 
-internal class RequireFinal<S>(private val stages: List<S>) : StageConstraint<S> {
+class RequireFinal<S>(private val stages: List<S>) : StageConstraint<S> {
     init {
         require(stages.isNotEmpty())
     }

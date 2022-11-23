@@ -10,7 +10,7 @@ import org.valkyrienskies.core.game.ships.ShipPhysicsData
 import org.valkyrienskies.core.game.ships.serialization.shipinertia.dto.ShipInertiaDataV0
 import org.valkyrienskies.core.game.ships.serialization.shiptransform.dto.ShipTransformDataV0
 
-internal class ServerShipDataV2(
+class ServerShipDataV2(
     val id: ShipId,
     val name: String,
     val chunkClaim: ChunkClaim,

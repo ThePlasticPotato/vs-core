@@ -10,12 +10,12 @@ import org.valkyrienskies.physics_api.PoseVel
 import org.valkyrienskies.physics_api.RigidBodyReference
 import org.valkyrienskies.physics_api.SegmentTracker
 
-data class PhysShipImpl internal constructor(
+data class PhysShipImpl constructor(
     override val id: ShipId,
     // Don't use these outside of vs-core, I beg of thee
-    internal val rigidBodyReference: RigidBodyReference,
-    internal var forceInducers: List<ShipForcesInducer>,
-    internal var _inertia: PhysInertia,
+    val rigidBodyReference: RigidBodyReference,
+    var forceInducers: List<ShipForcesInducer>,
+    var _inertia: PhysInertia,
 
     // TODO transformation matrix
     var poseVel: PoseVel,

@@ -5,4 +5,4 @@ import org.valkyrienskies.core.game.ships.serialization.DtoUpdater
 import org.valkyrienskies.core.game.ships.serialization.VSMapStructConfig
 
 @Mapper(config = VSMapStructConfig::class)
-internal interface ServerShipDataV1Updater : DtoUpdater<ServerShipDataV1, ServerShipDataV2>
+interface ServerShipDataV1Updater : DtoUpdater<ServerShipDataV1, ServerShipDataV2>

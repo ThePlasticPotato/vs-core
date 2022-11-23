@@ -5,7 +5,7 @@ import dagger.Module
 import org.valkyrienskies.core.game.ships.serialization.shipserver.dto.*
 
 @Module
-internal interface ServerShipDataModule {
+interface ServerShipDataModule {
 
     @Binds
     fun converter(impl: ServerShipDataConverterImpl): ServerShipDataConverter

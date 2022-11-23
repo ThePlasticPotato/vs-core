@@ -9,7 +9,7 @@ import javax.inject.Inject
  * An object that lives the entirety of the program.
  * Intended to be bound to MinecraftClient
  */
-class VSCoreClientImpl @Inject internal constructor(
+class VSCoreClientImpl @Inject constructor(
     private val base: VSCoreImpl,
     private val shipWorldComponentFactory: ShipObjectClientWorldComponent.Factory
 ) : VSCoreInternal by base, VSCoreClient {

@@ -12,7 +12,7 @@ import org.valkyrienskies.core.game.ChunkClaimImpl
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.game.ships.ShipTransformImpl
 
-internal class VSSerializationModule : SimpleModule() {
+class VSSerializationModule : SimpleModule() {
     init {
         addAbstractTypeMapping<IBlockPosSet, SmallBlockPosSet>()
         addAbstractTypeMapping<IBlockPosSetAABB, SmallBlockPosSetAABB>()

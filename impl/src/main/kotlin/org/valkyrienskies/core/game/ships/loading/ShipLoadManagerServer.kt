@@ -14,7 +14,7 @@ import org.valkyrienskies.core.util.assertions.stages.TickStageEnforcer
 import java.util.*
 import javax.inject.Inject
 
-internal class ShipLoadManagerServer @Inject internal constructor(
+class ShipLoadManagerServer @Inject constructor(
     private val networkManager: ShipObjectNetworkManagerServer,
     private val tracker: ShipObjectServerWorldChunkTracker,
     private val allocators: ChunkAllocatorProvider

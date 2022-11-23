@@ -12,7 +12,7 @@ import kotlin.concurrent.withLock
 import kotlin.math.min
 import kotlin.system.measureNanoTime
 
-internal class VSPhysicsPipelineBackgroundTask(
+class VSPhysicsPipelineBackgroundTask(
     private val vsPipeline: VSPipelineImpl, private var idealPhysicsTps: Int = 60
 ) :
     Runnable {

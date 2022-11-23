@@ -2,7 +2,7 @@ package org.valkyrienskies.core.util.assertions.stages.constraints
 
 import org.valkyrienskies.core.util.assertions.stages.predicates.StagePredicate
 
-internal class RequireOrderPredicate<S>(val stages: List<StagePredicate<S>>) : StageConstraint<S> {
+class RequireOrderPredicate<S>(val stages: List<StagePredicate<S>>) : StageConstraint<S> {
     init {
         require(stages.isNotEmpty())
     }

@@ -33,7 +33,7 @@ import org.valkyrienskies.core.util.assertions.stages.constraints.StageConstrain
  *
  * @param S The stage type. Must be immutable and implement equals/hashcode. Often an [Enum] or a [String]
  */
-internal interface TickStageEnforcer<S> {
+interface TickStageEnforcer<S> {
     /**
      * Execute a new stage. Will throw a [ConstraintFailedException] if this stage doesn't pass any of this
      * enforcer's constraints (e.g. it is out of order)
@@ -46,8 +46,8 @@ internal interface TickStageEnforcer<S> {
 /**
  * @see TickStageEnforcer
  */
-internal fun <S> TickStageEnforcer(resetStage: S, vararg constraints: StageConstraint<S>): TickStageEnforcer<S> =
+fun <S> TickStageEnforcer(resetStage: S, vararg constraints: StageConstraint<S>): TickStageEnforcer<S> =
     TickStageEnforcerImpl(resetStage, constraints.asList(), false)
 
-internal fun <S> TickStageEnforcer(resetStage: S, block: TickStageEnforcerBuilder<S>.() -> Unit): TickStageEnforcer<S> =
+fun <S> TickStageEnforcer(resetStage: S, block: TickStageEnforcerBuilder<S>.() -> Unit): TickStageEnforcer<S> =
     TickStageEnforcerBuilder(resetStage).apply(block).buildEnforcer()

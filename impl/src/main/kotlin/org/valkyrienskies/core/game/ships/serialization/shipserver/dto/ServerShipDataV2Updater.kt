@@ -4,10 +4,10 @@ import dagger.Reusable
 import org.valkyrienskies.core.game.ships.serialization.DtoUpdater
 import javax.inject.Inject
 
-internal interface ServerShipDataV2Updater : DtoUpdater<ServerShipDataV2, ServerShipDataV3>
+interface ServerShipDataV2Updater : DtoUpdater<ServerShipDataV2, ServerShipDataV3>
 
 @Reusable
-internal class ServerShipDataV2UpdaterImpl @Inject constructor() : ServerShipDataV2Updater {
+class ServerShipDataV2UpdaterImpl @Inject constructor() : ServerShipDataV2Updater {
     override fun update(data: ServerShipDataV2): ServerShipDataV3 {
         return ServerShipDataV3(
             id = data.id,
