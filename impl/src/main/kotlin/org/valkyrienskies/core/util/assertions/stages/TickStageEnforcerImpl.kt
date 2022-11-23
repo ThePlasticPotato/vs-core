@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet
 import it.unimi.dsi.fastutil.ints.IntSet
 import org.valkyrienskies.core.util.assertions.stages.constraints.StageConstraint
 
-internal class TickStageEnforcerImpl<S>(
+class TickStageEnforcerImpl<S>(
     private val resetStage: S,
     private val constraints: List<StageConstraint<S>>,
     private val ignoreUntilFirstReset: Boolean = false,

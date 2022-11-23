@@ -1,6 +1,6 @@
 package org.valkyrienskies.core.util.assertions.stages.predicates
 
-internal fun interface StagePredicate<S> {
+fun interface StagePredicate<S> {
     fun test(stage: S): Boolean
 
     companion object {

@@ -29,7 +29,7 @@ import java.util.function.Predicate
  * You can easily implement your own StageConstraint and pass it to the [TickStageEnforcer] if the built-in
  * constraints don't satisfy your needs.
  */
-internal fun interface StageConstraint<S> {
+fun interface StageConstraint<S> {
 
     /**
      * This will be called whenever a new stage is executed. When a reset stage is executed, this function will be
