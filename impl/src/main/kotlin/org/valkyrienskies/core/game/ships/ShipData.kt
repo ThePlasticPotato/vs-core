@@ -64,9 +64,9 @@ class ShipData(
     private val shipAABBGenerator: IBlockPosSetAABB = SmallBlockPosSetAABB(chunkClaim)
 
     override val shipToWorld: Matrix4dc
-        get() = shipTransform.shipToWorldMatrix
+        get() = shipTransform.shipToWorld
     override val worldToShip: Matrix4dc
-        get() = shipTransform.worldToShipMatrix
+        get() = shipTransform.worldToShip
 
     init {
         shipActiveChunksSet.iterateChunkPos { chunkX: Int, chunkZ: Int ->

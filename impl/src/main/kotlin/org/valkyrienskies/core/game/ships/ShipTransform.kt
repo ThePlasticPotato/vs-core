@@ -1,11 +1,6 @@
 package org.valkyrienskies.core.game.ships
 
-import org.joml.Matrix4d
-import org.joml.Matrix4dc
-import org.joml.Quaterniond
-import org.joml.Quaterniondc
-import org.joml.Vector3d
-import org.joml.Vector3dc
+import org.joml.*
 import org.joml.primitives.AABBd
 import org.joml.primitives.AABBdc
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
@@ -15,54 +10,54 @@ import org.valkyrienskies.core.api.ships.properties.ShipTransform
  *
  * The process of transforming a position transformation from ship coordinates to world coordinates is defined as the following:
  *
- * First it is translated by -[shipPositionInShipCoordinates],
- * then it is scaled by [shipCoordinatesToWorldCoordinatesScaling],
- * after that it is rotated by [shipCoordinatesToWorldCoordinatesRotation],
- * finally it is translated by [shipPositionInWorldCoordinates].
+ * First it is translated by -[positionInShip],
+ * then it is scaled by [shipToWorldScaling],
+ * after that it is rotated by [shipToWorldRotation],
+ * finally it is translated by [positionInWorld].
  */
 data class ShipTransformImpl(
-    override val shipPositionInWorldCoordinates: Vector3dc,
-    override val shipPositionInShipCoordinates: Vector3dc,
-    override val shipCoordinatesToWorldCoordinatesRotation: Quaterniondc,
-    override val shipCoordinatesToWorldCoordinatesScaling: Vector3dc,
+    override val positionInWorld: Vector3dc,
+    override val positionInShip: Vector3dc,
+    override val shipToWorldRotation: Quaterniondc,
+    override val shipToWorldScaling: Vector3dc,
 ) : ShipTransform {
 
     /**
      * Transforms positions and directions from ship coordinates to world coordinates
      */
-    override val shipToWorldMatrix: Matrix4dc
+    override val shipToWorld: Matrix4dc
 
     /**
      * Transforms positions and directions from world coordinates to ships coordinates
      */
-    override val worldToShipMatrix: Matrix4dc
+    override val worldToShip: Matrix4dc
 
     init {
-        shipToWorldMatrix = Matrix4d()
-            .translate(shipPositionInWorldCoordinates)
-            .rotate(shipCoordinatesToWorldCoordinatesRotation)
-            .scale(shipCoordinatesToWorldCoordinatesScaling)
+        shipToWorld = Matrix4d()
+            .translate(positionInWorld)
+            .rotate(shipToWorldRotation)
+            .scale(shipToWorldScaling)
             .translate(
-                -shipPositionInShipCoordinates.x(),
-                -shipPositionInShipCoordinates.y(),
-                -shipPositionInShipCoordinates.z()
+                -positionInShip.x(),
+                -positionInShip.y(),
+                -positionInShip.z()
             )
-        worldToShipMatrix = shipToWorldMatrix.invert(Matrix4d())
+        worldToShip = shipToWorld.invert(Matrix4d())
     }
 
     override fun transformDirectionNoScalingFromShipToWorld(directionInShip: Vector3dc, dest: Vector3d): Vector3d {
-        return shipCoordinatesToWorldCoordinatesRotation.transform(directionInShip, dest)
+        return shipToWorldRotation.transform(directionInShip, dest)
     }
 
     override fun transformDirectionNoScalingFromWorldToShip(directionInWorld: Vector3dc, dest: Vector3d): Vector3d {
-        return shipCoordinatesToWorldCoordinatesRotation.transformInverse(directionInWorld, dest)
+        return shipToWorldRotation.transformInverse(directionInWorld, dest)
     }
 
     /**
-     * Create an empty [AABBdc] centered around [shipPositionInWorldCoordinates].
+     * Create an empty [AABBdc] centered around [positionInWorld].
      */
     override fun createEmptyAABB(): AABBdc {
-        return AABBd(shipPositionInWorldCoordinates, shipPositionInWorldCoordinates)
+        return AABBd(positionInWorld, positionInWorld)
     }
 
     companion object {
@@ -119,29 +114,29 @@ data class ShipTransformImpl(
          */
         fun createFromSlerp(prevTransform: ShipTransform, curTransform: ShipTransform, alpha: Double): ShipTransform {
             // Always use the center coord from the new transform
-            val newCenterCoords = curTransform.shipPositionInShipCoordinates
+            val newCenterCoords = curTransform.positionInShip
 
             val centerCoordDif =
-                curTransform.shipPositionInShipCoordinates.sub(prevTransform.shipPositionInShipCoordinates, Vector3d())
+                curTransform.positionInShip.sub(prevTransform.positionInShip, Vector3d())
 
-            val oldWorldPosWithRespectToNewCenter = prevTransform.shipToWorldMatrix.transformDirection(
+            val oldWorldPosWithRespectToNewCenter = prevTransform.shipToWorld.transformDirection(
                 centerCoordDif, Vector3d()
-            ).add(prevTransform.shipPositionInWorldCoordinates)
+            ).add(prevTransform.positionInWorld)
 
             val newWorldCoords = oldWorldPosWithRespectToNewCenter.lerp(
-                curTransform.shipPositionInWorldCoordinates,
+                curTransform.positionInWorld,
                 alpha,
                 Vector3d()
             )
 
-            val newRotation = prevTransform.shipCoordinatesToWorldCoordinatesRotation.slerp(
-                curTransform.shipCoordinatesToWorldCoordinatesRotation,
+            val newRotation = prevTransform.shipToWorldRotation.slerp(
+                curTransform.shipToWorldRotation,
                 alpha,
                 Quaterniond()
             ).normalize()
 
-            val newScaling = prevTransform.shipCoordinatesToWorldCoordinatesScaling.lerp(
-                curTransform.shipCoordinatesToWorldCoordinatesScaling,
+            val newScaling = prevTransform.shipToWorldScaling.lerp(
+                curTransform.shipToWorldScaling,
                 alpha,
                 Vector3d()
             )

@@ -110,7 +110,7 @@ internal class ShipObjectServerWorldChunkTracker @Inject constructor(
                         (voxelAABB?.maxY()?.toDouble() ?: 255.0) + 1.0, // end at the maxY of the ship if available
                         (chunkZ shl 4).toDouble() + 16.0
                     )
-                    .transform(shipTransform.shipToWorldMatrix)
+                    .transform(shipTransform.shipToWorld)
 
                 val newPlayersWatching: MutableList<IPlayer> = ArrayList()
                 val newPlayersUnwatching: MutableList<IPlayer> = ArrayList()

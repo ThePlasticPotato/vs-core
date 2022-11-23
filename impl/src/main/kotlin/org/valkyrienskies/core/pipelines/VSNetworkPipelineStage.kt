@@ -61,10 +61,10 @@ internal class VSNetworkPipelineStage @Inject constructor(
                     VSGamePipelineStage.generateTransformFromPhysicsFrameData(physicsFrameData, shipData)
 
                 buf.writeLong(shipData.id) // 8
-                buf.writeVec3d(transform.shipPositionInShipCoordinates) // 8 * 3 = 24
-                buf.writeVec3AsFloat(transform.shipCoordinatesToWorldCoordinatesScaling) // 4 * 3 = 12
-                buf.writeNormQuatdAs3F(transform.shipCoordinatesToWorldCoordinatesRotation) // 4 * 3 = 12
-                buf.writeVec3d(transform.shipPositionInWorldCoordinates) // 8 * 3 = 24
+                buf.writeVec3d(transform.positionInShip) // 8 * 3 = 24
+                buf.writeVec3AsFloat(transform.shipToWorldScaling) // 4 * 3 = 12
+                buf.writeNormQuatdAs3F(transform.shipToWorldRotation) // 4 * 3 = 12
+                buf.writeVec3d(transform.positionInWorld) // 8 * 3 = 24
                 // 8 + 24 + 12 + 12 + 24 = 80
 
                 // TODO remove, this is wasted bytes

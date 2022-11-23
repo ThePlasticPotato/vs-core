@@ -6,13 +6,13 @@ import org.joml.primitives.AABBd
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.ShipInternal
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
+import org.valkyrienskies.core.api.ships.properties.VSBlockType
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.datastructures.IBlockPosSet
-import org.valkyrienskies.core.api.ships.properties.ChunkClaim
-import org.valkyrienskies.core.api.world.properties.DimensionId
-import org.valkyrienskies.core.api.ships.properties.VSBlockType
 import org.valkyrienskies.core.util.serialization.DeltaIgnore
 import org.valkyrienskies.core.util.serialization.PacketIgnore
 import org.valkyrienskies.core.util.toAABBd
@@ -42,7 +42,7 @@ open class ShipDataCommon(
         set(shipTransform) {
             field = shipTransform
             // Update the [shipAABB]
-            shipAABB = shipVoxelAABB?.toAABBd(AABBd())?.transform(shipTransform.shipToWorldMatrix, AABBd())
+            shipAABB = shipVoxelAABB?.toAABBd(AABBd())?.transform(shipTransform.shipToWorld, AABBd())
                 ?: shipTransform.createEmptyAABB()
         }
 
@@ -89,9 +89,9 @@ open class ShipDataCommon(
     }
 
     override val shipToWorld: Matrix4dc
-        get() = shipTransform.shipToWorldMatrix
+        get() = shipTransform.shipToWorld
     override val worldToShip: Matrix4dc
-        get() = shipTransform.worldToShipMatrix
+        get() = shipTransform.worldToShip
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

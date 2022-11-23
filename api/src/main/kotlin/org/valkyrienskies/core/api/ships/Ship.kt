@@ -4,11 +4,11 @@ import org.joml.Matrix4dc
 import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
-import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
-import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
+import org.valkyrienskies.core.api.world.properties.DimensionId
+import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 
 /**
  * Abstraction of a ship, there are many types such as offline ships
@@ -30,6 +30,6 @@ interface Ship {
 
     val shipActiveChunksSet: IShipActiveChunksSet
 
-    val shipToWorld: Matrix4dc get() = shipTransform.shipToWorldMatrix
-    val worldToShip: Matrix4dc get() = shipTransform.worldToShipMatrix
+    val shipToWorld: Matrix4dc get() = shipTransform.shipToWorld
+    val worldToShip: Matrix4dc get() = shipTransform.worldToShip
 }

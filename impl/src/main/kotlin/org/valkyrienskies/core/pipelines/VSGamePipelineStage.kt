@@ -157,12 +157,12 @@ internal class VSGamePipelineStage @Inject constructor(private val shipWorld: Sh
             val totalVoxelRegion = it.shipData.chunkClaim.getTotalVoxelRegion(AABBi())
 
             val krunchDimensionId = getKrunchDimensionId(it.shipData.chunkClaimDimension)
-            val scaling = it.shipData.shipTransform.shipCoordinatesToWorldCoordinatesScaling.x()
+            val scaling = it.shipData.shipTransform.shipToWorldScaling.x()
 
             // TODO: Support more advanced segments than just basic scaling from origin
             val poseVel = PoseVel.createPoseVel(
-                it.shipData.shipTransform.shipPositionInWorldCoordinates.div(scaling, Vector3d()),
-                it.shipData.shipTransform.shipCoordinatesToWorldCoordinatesRotation
+                it.shipData.shipTransform.positionInWorld.div(scaling, Vector3d()),
+                it.shipData.shipTransform.shipToWorldRotation
             )
             val segments = SegmentUtils.createSegmentTrackerFromScaling(krunchDimensionId, scaling)
             val voxelOffset = getShipVoxelOffset(it.shipData.inertiaData)
