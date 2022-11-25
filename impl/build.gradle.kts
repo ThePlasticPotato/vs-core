@@ -84,9 +84,6 @@ java {
 publishing {
     publications {
         create<MavenPublication>("impl") {
-            groupId = "org.valkyrienskies.core"
-            artifactId = "vs-core-impl"
-
             from(components["java"])
         }
     }

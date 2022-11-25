@@ -15,7 +15,7 @@ interface ShipWorld {
 
     fun isBlockInShipyard(blockX: Int, blockY: Int, blockZ: Int, dimensionId: DimensionId): Boolean
 
-    @Deprecated("redundant", ReplaceWith("loadedShips.getShipDataIntersecting(aabb)"))
+    @Deprecated("redundant", ReplaceWith("loadedShips.getIntersecting(aabb)"))
     fun getShipObjectsIntersecting(aabb: AABBdc): List<LoadedShip>
 
     @Deprecated("renamed", ReplaceWith("allShips"))

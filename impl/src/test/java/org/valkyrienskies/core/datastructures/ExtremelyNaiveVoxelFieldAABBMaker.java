@@ -76,9 +76,10 @@ public class ExtremelyNaiveVoxelFieldAABBMaker implements IVoxelFieldAABBMaker {
     }
 
     private void assertValidInputs(final int x, final int y, final int z) throws IllegalArgumentException {
-        if (x < MIN_X || x > MAX_X || y < MIN_Y || y > MAX_Y || z < MIN_Z || z > MAX_Z) {
-            throw new IllegalArgumentException(
-                x + ":" + y + ":" + z + " is out of range from " + getFieldCenter());
-        }
+//
+//        if (x < MIN_X || x > MAX_X || y < MIN_Y || y > MAX_Y || z < MIN_Z || z > MAX_Z) {
+//            throw new IllegalArgumentException(
+//                x + ":" + y + ":" + z + " is out of range from " + getFieldCenter());
+//        }
     }
 }

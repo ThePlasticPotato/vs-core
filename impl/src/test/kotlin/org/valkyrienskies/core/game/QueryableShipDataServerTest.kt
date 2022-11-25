@@ -135,5 +135,4 @@ class QueryableShipDataServerTest : AnnotationSpec() {
             assertFalse(shipsIntersectingBB.hasNext())
         }
     }
-
 }

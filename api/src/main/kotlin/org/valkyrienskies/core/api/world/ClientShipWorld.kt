@@ -14,5 +14,4 @@ interface ClientShipWorld : ShipWorld {
 
     @Deprecated("renamed", ReplaceWith("allShips"))
     override val queryableShipData: QueryableShipData<ClientShip> get() = allShips
-
 }

@@ -24,22 +24,10 @@ fun AABBd.expand(expansion: Double): AABBd {
 }
 
 fun AABBd.getSize(): Double {
-    val d: Double = getXsize()
-    val e: Double = getYsize()
-    val f: Double = getZsize()
+    val d: Double = lengthX()
+    val e: Double = lengthY()
+    val f: Double = lengthZ()
     return (d + e + f) / 3.0
-}
-
-fun AABBd.getXsize(): Double {
-    return maxX - minX
-}
-
-fun AABBd.getYsize(): Double {
-    return maxY - minY
-}
-
-fun AABBd.getZsize(): Double {
-    return maxZ - minZ
 }
 
 fun AABBd.extend(extension: Vector3dc): AABBd {

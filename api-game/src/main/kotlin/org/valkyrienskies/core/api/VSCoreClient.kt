@@ -1,7 +1,7 @@
 package org.valkyrienskies.core.api
 
-import org.valkyrienskies.core.api.world.ShipWorld
+import org.valkyrienskies.core.api.world.ClientShipWorldCore
 
 interface VSCoreClient : VSCore {
-    fun newShipWorldClient(): ShipWorld
+    fun newShipWorldClient(): ClientShipWorldCore
 }

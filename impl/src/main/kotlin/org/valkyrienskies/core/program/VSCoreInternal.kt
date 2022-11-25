@@ -1,7 +1,7 @@
 package org.valkyrienskies.core.program
 
 import org.valkyrienskies.core.api.VSCore
-import org.valkyrienskies.core.hooks.VSCoreHooks
+import org.valkyrienskies.core.hooks.CoreHooksImpl
 import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.networking.VSNetworkingConfigurator
 import org.valkyrienskies.core.pipelines.VSPipelineComponent
@@ -17,7 +17,7 @@ import org.valkyrienskies.core.pipelines.VSPipelineComponent
  */
 interface VSCoreInternal : VSCore {
     val networking: VSNetworking
-    override val hooks: VSCoreHooks
+    override val hooks: CoreHooksImpl
     val configurator: VSNetworkingConfigurator
     val pipelineComponentFactory: VSPipelineComponent.Factory
 }

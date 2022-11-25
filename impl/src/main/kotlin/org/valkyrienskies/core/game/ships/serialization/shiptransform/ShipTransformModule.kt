@@ -8,6 +8,5 @@ interface ShipTransformModule {
 
     @Binds
     fun converter(impl: ShipTransformConverterImpl): ShipTransformConverter
-
 }
 

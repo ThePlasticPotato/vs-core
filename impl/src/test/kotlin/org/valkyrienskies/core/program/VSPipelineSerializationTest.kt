@@ -5,7 +5,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.valkyrienskies.core.api.world.ServerShipWorldGame
+import org.valkyrienskies.core.api.world.ServerShipWorldCore
 import org.valkyrienskies.core.game.SingletonChunkAllocatorProviderImpl
 import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
 import org.valkyrienskies.test_utils.fakes.FakeVSCoreFactory
@@ -48,5 +48,6 @@ class VSPipelineSerializationTest : StringSpec({
 })
 
 // yikes! but this will do for now
-private val ServerShipWorldGame.chunkAllocator get() =
-    ((this as ShipObjectServerWorld).chunkAllocators as SingletonChunkAllocatorProviderImpl).allocator
+private val ServerShipWorldCore.chunkAllocator
+    get() =
+        ((this as ShipObjectServerWorld).chunkAllocators as SingletonChunkAllocatorProviderImpl).allocator

@@ -2,28 +2,15 @@ package org.valkyrienskies.core.api.world
 
 import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ships.ServerShip
-import org.valkyrienskies.core.api.ships.properties.VSBlockType
 import org.valkyrienskies.core.api.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.api.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.api.world.chunks.ChunkWatchTasks
 import org.valkyrienskies.core.api.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.api.world.properties.DimensionId
 
-interface ServerShipWorldGame : ServerShipWorld {
+interface ServerShipWorldCore : ShipWorldCore, ServerShipWorld {
 
-    /**
-     * Add the update to [shipToVoxelUpdates].
-     */
-    fun onSetBlock(
-        posX: Int,
-        posY: Int,
-        posZ: Int,
-        dimensionId: DimensionId,
-        oldBlockType: VSBlockType,
-        newBlockType: VSBlockType,
-        oldBlockMass: Double,
-        newBlockMass: Double
-    )
+    var players: Set<IPlayer>
 
     fun addTerrainUpdates(dimensionId: DimensionId, terrainUpdates: List<TerrainUpdate>)
 

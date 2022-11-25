@@ -5,7 +5,7 @@ interface VSPipeline {
     var arePhysicsRunning: Boolean
     var deleteResources: Boolean
     val isUsingDummyPhysics: Boolean
-    val shipWorld: ServerShipWorldGame
+    val shipWorld: ServerShipWorldCore
     fun preTickGame()
     fun postTickGame()
     fun computePhysTps(): Double

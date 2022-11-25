@@ -10,7 +10,6 @@ interface ServerShipWorld : ShipWorld {
     override val allShips: QueryableShipData<ServerShip>
     override val loadedShips: QueryableShipData<LoadedServerShip>
 
-
     @Deprecated("redundant", ReplaceWith("loadedShips.getShipDataIntersecting(aabb)"))
     override fun getShipObjectsIntersecting(aabb: AABBdc): List<LoadedServerShip>
 

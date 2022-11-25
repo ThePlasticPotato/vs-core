@@ -7,18 +7,28 @@ import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ServerShipInternal
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.properties.ShipId
-import org.valkyrienskies.core.api.ships.properties.VSBlockType
 import org.valkyrienskies.core.api.world.IPlayer
-import org.valkyrienskies.core.api.world.ServerShipWorldGame
+import org.valkyrienskies.core.api.world.ServerShipWorldCore
+import org.valkyrienskies.core.api.world.chunks.BlockType
+import org.valkyrienskies.core.api.world.chunks.BlockTypes
 import org.valkyrienskies.core.api.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.api.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.api.world.chunks.ChunkWatchTasks
 import org.valkyrienskies.core.api.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.api.world.properties.DimensionId
+import org.valkyrienskies.core.game.BlockTypeImpl
 import org.valkyrienskies.core.game.ChunkAllocatorProvider
 import org.valkyrienskies.core.game.DimensionInfo
-import org.valkyrienskies.core.game.VSBlockTypeImpl
-import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.*
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.CLEAR_FOR_RESET
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.GET_CURRENT_TICK_CHANGES
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.GET_LAST_TICK_CHANGES
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.POST_TICK_FINISH
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.POST_TICK_GENERATED
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.POST_TICK_START
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.PRE_TICK
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_BLOCKS
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_CHUNKS
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld.Stages.UPDATE_DIMENSIONS
 import org.valkyrienskies.core.game.ships.loading.ShipLoadManagerServer
 import org.valkyrienskies.core.game.ships.modules.AllShips
 import org.valkyrienskies.core.game.ships.types.MutableShipVoxelUpdates
@@ -32,6 +42,7 @@ import org.valkyrienskies.core.networking.VSNetworking
 import org.valkyrienskies.core.util.WorldScoped
 import org.valkyrienskies.core.util.assertions.stages.TickStageEnforcer
 import org.valkyrienskies.core.util.names.NounListNameGenerator
+import org.valkyrienskies.physics_api.voxel_updates.DeleteVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.DenseVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.EmptyVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
@@ -44,8 +55,9 @@ class ShipObjectServerWorld @Inject constructor(
     @AllShips override val allShips: MutableQueryableShipDataServer,
     val chunkAllocators: ChunkAllocatorProvider,
     private val loadManager: ShipLoadManagerServer,
-    networking: VSNetworking
-) : ShipObjectWorld<ShipObjectServer>(chunkAllocators), ServerShipWorldGame {
+    networking: VSNetworking,
+    private val blockTypes: BlockTypes
+) : ShipObjectWorld<ShipObjectServer>(chunkAllocators), ServerShipWorldCore {
 
     private enum class Stages {
         PRE_TICK,
@@ -85,7 +97,7 @@ class ShipObjectServerWorld @Inject constructor(
     var lastTickPlayers: Set<IPlayer> = setOf()
         private set
 
-    var players: Set<IPlayer> = setOf()
+    override var players: Set<IPlayer> = setOf()
         set(value) {
             lastTickPlayers = field
             field = value
@@ -167,8 +179,8 @@ class ShipObjectServerWorld @Inject constructor(
         posY: Int,
         posZ: Int,
         dimensionId: DimensionId,
-        oldBlockType: VSBlockType,
-        newBlockType: VSBlockType,
+        oldBlockType: BlockType,
+        newBlockType: BlockType,
         oldBlockMass: Double,
         newBlockMass: Double
     ) {
@@ -193,7 +205,7 @@ class ShipObjectServerWorld @Inject constructor(
             val voxelShapeUpdate =
                 voxelUpdates.getOrPut(chunkPos) { SparseVoxelShapeUpdate.createSparseVoxelShapeUpdate(chunkPos) }
 
-            val voxelType: Byte = (newBlockType as VSBlockTypeImpl).state
+            val voxelType: Byte = (newBlockType as BlockTypeImpl).state
 
             when (voxelShapeUpdate) {
                 is SparseVoxelShapeUpdate -> {
@@ -221,6 +233,23 @@ class ShipObjectServerWorld @Inject constructor(
 
         val voxelShapeUpdates = terrainUpdates.map { (it as TerrainUpdateImpl).update }
         voxelShapeUpdatesList.add(LevelVoxelUpdates(dimensionId, voxelShapeUpdates))
+
+        voxelShapeUpdates.forEach {
+            val ship = allShips.getByChunkPos(it.regionX, it.regionZ, dimensionId) ?: return@forEach
+
+            // TODO: Can we be a bit more explicit about how this works? Maybe revamp addTerrainUpdates
+            when (it) {
+                is DenseVoxelShapeUpdate, is EmptyVoxelShapeUpdate -> ship.onLoadChunk(it.regionX, it.regionZ)
+                is DeleteVoxelShapeUpdate -> ship.onUnloadChunk(it.regionX, it.regionZ)
+            }
+
+            if (it is DenseVoxelShapeUpdate) {
+                it.forEachVoxel { x, y, z, voxelState ->
+                    ship.updateShipAABBGenerator(x, y, z, voxelState != blockTypes.air.toByte())
+                }
+            }
+
+        }
     }
 
     fun getShipObject(ship: ServerShipInternal): ShipObjectServer? {
@@ -319,7 +348,9 @@ class ShipObjectServerWorld @Inject constructor(
         return loadManager.chunkWatchTasks
     }
 
-    override fun setExecutedChunkWatchTasks(watchTasks: Iterable<ChunkWatchTask>, unwatchTasks: Iterable<ChunkUnwatchTask>) {
+    override fun setExecutedChunkWatchTasks(
+        watchTasks: Iterable<ChunkWatchTask>, unwatchTasks: Iterable<ChunkUnwatchTask>
+    ) {
         loadManager.setExecutedChunkWatchTasks(watchTasks, unwatchTasks)
     }
 
@@ -356,7 +387,7 @@ class ShipObjectServerWorld @Inject constructor(
         val shipName = NounListNameGenerator.generateName()
 
         val shipCenterInWorldCoordinates: Vector3dc = Vector3d(blockPosInWorldCoordinates).add(0.5, 0.5, 0.5)
-        val blockPosInShipCoordinates: Vector3ic = chunkClaim.getCenterBlockCoordinates(Vector3i())
+        val blockPosInShipCoordinates: Vector3ic = chunkClaim.getCenterBlockCoordinates(getYRange(dimensionId))
         val shipCenterInShipCoordinates: Vector3dc = Vector3d(blockPosInShipCoordinates).add(0.5, 0.5, 0.5)
         val newShipData = ShipData.createEmpty(
             name = shipName,
@@ -368,7 +399,7 @@ class ShipObjectServerWorld @Inject constructor(
             scaling = scaling
         )
 
-        allShips.addShipData(newShipData)
+        allShips.add(newShipData)
 
         if (createShipObjectImmediately) {
             TODO("Not implemented")
@@ -376,6 +407,8 @@ class ShipObjectServerWorld @Inject constructor(
 
         return newShipData
     }
+
+    fun getYRange(dimensionId: DimensionId) = dimensionInfo.getValue(dimensionId).yRange
 
     override fun destroyWorld() {
     }

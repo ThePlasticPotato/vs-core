@@ -1,7 +1,7 @@
 package org.valkyrienskies.core.program
 
 import org.valkyrienskies.core.api.VSCoreClient
-import org.valkyrienskies.core.api.world.ShipWorld
+import org.valkyrienskies.core.api.world.ClientShipWorldCore
 import org.valkyrienskies.core.game.ships.ShipObjectClientWorldComponent
 import javax.inject.Inject
 
@@ -13,7 +13,7 @@ class VSCoreClientImpl @Inject constructor(
     private val base: VSCoreImpl,
     private val shipWorldComponentFactory: ShipObjectClientWorldComponent.Factory
 ) : VSCoreInternal by base, VSCoreClient {
-    override fun newShipWorldClient(): ShipWorld {
+    override fun newShipWorldClient(): ClientShipWorldCore {
         return shipWorldComponentFactory.newShipObjectClientWorldComponent().newWorld()
     }
 }

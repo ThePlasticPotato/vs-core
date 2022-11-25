@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIncludeProperties
 import org.joml.Vector3i
 import org.joml.primitives.AABBi
-import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim.Companion.DIAMETER
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim.Companion.claimToLong
@@ -64,21 +63,21 @@ data class ChunkClaimImpl(override val xIndex: Int, override val zIndex: Int) : 
     override fun contains(x: Int, z: Int) =
         (x in xStart..xEnd) and (z in zStart..zEnd)
 
-    override fun getCenterBlockCoordinates(destination: Vector3i): Vector3i {
+    override fun getCenterBlockCoordinates(yRange: IntRange, destination: Vector3i): Vector3i {
         val minBlockX = xStart shl 4
         val maxBlockX = (xEnd shl 4) + 15
         val minBlockZ = zStart shl 4
         val maxBlockZ = (zEnd shl 4) + 15
 
         val centerX = (minBlockX + maxBlockX) / 2
-        val centerY = 128
+        val centerY = yRange.center
         val centerZ = (minBlockZ + maxBlockZ) / 2
         return destination.set(centerX, centerY, centerZ)
     }
 
-    override fun getBlockSize(destination: Vector3i): Vector3i {
+    override fun getBlockSize(yRange: IntRange, destination: Vector3i): Vector3i {
         val xSize = (xEnd - xStart + 1) * 16
-        val ySize = 256
+        val ySize = yRange.size
         val zSize = (zEnd - zStart + 1) * 16
         return destination.set(xSize, ySize, zSize)
     }
@@ -86,13 +85,16 @@ data class ChunkClaimImpl(override val xIndex: Int, override val zIndex: Int) : 
     /**
      * The region of all blocks contained in this [ChunkClaim].
      */
-    override fun getTotalVoxelRegion(destination: AABBi): AABBic {
+    override fun getTotalVoxelRegion(yRange: IntRange, destination: AABBi): AABBi {
         destination.minX = xStart shl 4
-        destination.minY = 0
+        destination.minY = yRange.first
         destination.minZ = zStart shl 4
         destination.maxX = (xEnd shl 4) + 15
-        destination.maxY = 255
+        destination.maxY = yRange.last
         destination.maxZ = (zEnd shl 4) + 15
         return destination
     }
 }
+
+private val IntRange.size get() = last - first + 1
+private val IntRange.center get() = (last + first + 1) / 2

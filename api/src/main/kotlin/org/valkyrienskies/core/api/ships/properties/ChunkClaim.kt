@@ -2,7 +2,6 @@ package org.valkyrienskies.core.api.ships.properties
 
 import org.joml.Vector3i
 import org.joml.primitives.AABBi
-import org.joml.primitives.AABBic
 
 interface ChunkClaim {
     val xIndex: Int
@@ -36,13 +35,14 @@ interface ChunkClaim {
     val size: Int
     fun toLong(): Long
     fun contains(x: Int, z: Int): Boolean
-    fun getCenterBlockCoordinates(destination: Vector3i): Vector3i
-    fun getBlockSize(destination: Vector3i): Vector3i
+    fun getCenterBlockCoordinates(yRange: IntRange, destination: Vector3i = Vector3i()): Vector3i
+
+    fun getBlockSize(yRange: IntRange, destination: Vector3i = Vector3i()): Vector3i
 
     /**
      * The region of all blocks contained in this [ChunkClaim].
      */
-    fun getTotalVoxelRegion(destination: AABBi): AABBic
+    fun getTotalVoxelRegion(yRange: IntRange, destination: AABBi = AABBi()): AABBi
 
     companion object {
         /**

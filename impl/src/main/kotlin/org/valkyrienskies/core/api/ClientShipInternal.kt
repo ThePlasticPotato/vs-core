@@ -1,5 +1,5 @@
 package org.valkyrienskies.core.api
 
-import org.valkyrienskies.core.api.ships.ClientShip
+import org.valkyrienskies.core.api.ships.ClientShipCore
 
-interface ClientShipInternal : ClientShip, LoadedShipInternal
+interface ClientShipInternal : ClientShipCore, LoadedShipInternal

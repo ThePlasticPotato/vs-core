@@ -10,9 +10,6 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("api") {
-            groupId = "org.valkyrienskies.core"
-            artifactId = "vs-core-api-game"
-
             from(components["java"])
         }
     }

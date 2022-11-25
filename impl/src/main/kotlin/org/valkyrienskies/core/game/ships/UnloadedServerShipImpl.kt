@@ -17,25 +17,18 @@ import org.valkyrienskies.core.util.serialization.DeltaIgnore
 import org.valkyrienskies.core.util.serialization.PacketIgnore
 import org.valkyrienskies.core.util.toAABBd
 
-open class ShipDataCommon(
-    override val id: ShipId,
-    var name: String,
-    override val chunkClaim: ChunkClaim,
-    override val chunkClaimDimension: DimensionId,
-    @DeltaIgnore
-    val physicsData: ShipPhysicsData,
-    shipTransform: ShipTransform,
-    prevTickShipTransform: ShipTransform = shipTransform,
-    worldAABB: AABBdc = shipTransform.createEmptyAABB(),
-    override var shipAABB: AABBic?,
-    override val activeChunksSet: IShipActiveChunksSet
-) : ShipInternal {
+class AbstractUnloadedShip(private val data: ShipDataCommon) : ShipInternal {
 
     override val velocity: Vector3dc
-        get() = physicsData.linearVelocity
+        get() = data.physicsData.linearVelocity
 
     override val omega: Vector3dc
-        get() = physicsData.angularVelocity
+        get() = data.physicsData.angularVelocity
+    override val activeChunksSet: IShipActiveChunksSet
+        get() = data.activeChunksSet
+
+    override val id: ShipId
+        get() = data.id
 
     @DeltaIgnore
     override var transform: ShipTransform = shipTransform
@@ -47,12 +40,18 @@ open class ShipDataCommon(
         }
 
     @PacketIgnore
-    final override var prevTickTransform: ShipTransform = prevTickShipTransform
+    override var prevTickTransform: ShipTransform = data.prevTickTransform
         private set
+    override val chunkClaim: ChunkClaim
+        get() = data.chunkClaim
+    override val chunkClaimDimension: DimensionId
+        get() = data.chunkClaimDimension
 
     @DeltaIgnore
-    final override var worldAABB: AABBdc = worldAABB
+    override var worldAABB: AABBdc = data.worldAABB
         private set
+    override val shipAABB: AABBic?
+        get() = data.shipAABB
 
     fun updatePrevTickShipTransform() {
         prevTickTransform = transform

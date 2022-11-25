@@ -1,12 +1,23 @@
 package org.valkyrienskies.core.api
 
-import org.valkyrienskies.core.api.hooks.CoreHooksIn
+import org.valkyrienskies.core.api.hooks.CoreHooks
+import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.world.VSPipeline
+import org.valkyrienskies.core.api.world.chunks.BlockTypes
 import org.valkyrienskies.core.api.world.chunks.TerrainUpdate
 
 interface VSCore {
 
-    val hooks: CoreHooksIn
+    val hooks: CoreHooks
+
+    val blockTypes: BlockTypes
+
+    fun newEmptyVoxelShapeUpdate(chunkX: Int, chunkY: Int, chunkZ: Int, overwrite: Boolean): TerrainUpdate
+
+    /**
+     * Creates a new terrain update that deletes the specified chunk
+     */
+    fun newDeleteTerrainUpdate(chunkX: Int, chunkY: Int, chunkZ: Int): TerrainUpdate
 
     /**
      * Creates a new dense terrain update builder. A dense terrain update will
@@ -40,4 +51,9 @@ interface VSCore {
      * Serializes a pipeline to be deserialized by `newPipeline(data)`
      */
     fun serializePipeline(pipeline: VSPipeline): ByteArray
+
+    fun newChunkClaim(claimX: Int, claimZ: Int): ChunkClaim
+
+    @Deprecated("Surely we can do better than this")
+    var clientUsesUDP: Boolean
 }

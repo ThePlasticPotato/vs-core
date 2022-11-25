@@ -7,8 +7,8 @@ import org.joml.primitives.AABBdc
 import org.valkyrienskies.core.api.ShipInternal
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.properties.ShipId
-import org.valkyrienskies.core.api.ships.properties.VSBlockType
 import org.valkyrienskies.core.api.world.ShipWorld
+import org.valkyrienskies.core.api.world.chunks.BlockType
 import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.game.ChunkAllocatorProvider
 import org.valkyrienskies.core.util.coroutines.TickableCoroutineDispatcher
@@ -34,7 +34,6 @@ abstract class ShipObjectWorld<ShipObjectType : ShipObject>(
     var tickNumber = 0
         private set
 
-
     override fun isChunkInShipyard(chunkX: Int, chunkZ: Int, dimensionId: DimensionId) =
         chunkAllocators.forDimension(dimensionId).isChunkInShipyard(chunkX, chunkZ)
 
@@ -55,8 +54,8 @@ abstract class ShipObjectWorld<ShipObjectType : ShipObject>(
         posY: Int,
         posZ: Int,
         dimensionId: DimensionId,
-        oldBlockType: VSBlockType,
-        newBlockType: VSBlockType,
+        oldBlockType: BlockType,
+        newBlockType: BlockType,
         oldBlockMass: Double,
         newBlockMass: Double
     ) {

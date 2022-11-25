@@ -20,6 +20,15 @@ public class BlockPosSetAABBGeneratorTest {
     @Test
     public void testSmallBlockPosSetAABB() {
         final BlockPosSetAABBGenerator toTest = new BlockPosSetAABBGenerator(0, 0, 0, 1024, 1024, 1024);
+        testBlockPosSetAABB(toTest);
+    }
+
+    @Test
+    public void testDynamicBlockPosSetAABB() {
+        testBlockPosSetAABB(new DynamicBlockPosSetAABB());
+    }
+
+    private void testBlockPosSetAABB(final IBlockPosSetAABB toTest) {
         final ExtremelyNaiveVoxelFieldAABBMaker aabbMaker = new ExtremelyNaiveVoxelFieldAABBMaker(0, 0);
 
         // Test adding new positions

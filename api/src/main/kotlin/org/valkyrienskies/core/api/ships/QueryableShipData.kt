@@ -43,10 +43,10 @@ interface QueryableShipData<out ShipType : Ship> : Collection<ShipType> {
     fun getShipDataIntersecting(aabb: AABBdc): Iterable<ShipType> = getIntersecting(aabb)
 
     @Deprecated("renamed", ReplaceWith("getByChunkPos(chunkX, chunkZ, dimensionId)"))
-    fun getShipDataFromChunkPos(chunkX: Int, chunkZ: Int, dimensionId: DimensionId): ShipType? = getByChunkPos(chunkX, chunkZ, dimensionId)
+    fun getShipDataFromChunkPos(chunkX: Int, chunkZ: Int, dimensionId: DimensionId): ShipType? =
+        getByChunkPos(chunkX, chunkZ, dimensionId)
 
     @Deprecated(message = "Use the specific functions instead, such as #getById or #iterator")
     val idToShipData: Map<ShipId, ShipType>
-
 }
 

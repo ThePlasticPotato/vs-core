@@ -1,9 +1,8 @@
 package org.valkyrienskies.core.game.ships.types
 
-import org.valkyrienskies.core.api.ships.properties.VSBlockType
+import org.valkyrienskies.core.api.world.chunks.BlockType
 import org.valkyrienskies.core.api.world.chunks.TerrainUpdate
-import org.valkyrienskies.core.game.VSBlockTypeImpl
-import org.valkyrienskies.physics_api.voxel_updates.DenseVoxelShapeUpdate
+import org.valkyrienskies.core.game.BlockTypeImpl
 import org.valkyrienskies.physics_api.voxel_updates.SparseVoxelShapeUpdate
 
 class SparseTerrainUpdateBuilderImpl(
@@ -15,8 +14,8 @@ class SparseTerrainUpdateBuilderImpl(
 
     private var isBuilt = false
 
-    override fun addBlock(x: Int, y: Int, z: Int, block: VSBlockType) {
-        block as VSBlockTypeImpl
+    override fun addBlock(x: Int, y: Int, z: Int, block: BlockType) {
+        block as BlockTypeImpl
 
         update.addUpdate(x, y, z, block.state)
     }

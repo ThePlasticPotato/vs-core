@@ -12,13 +12,13 @@ import org.valkyrienskies.core.api.ServerShipInternal
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
-import org.valkyrienskies.core.api.ships.properties.VSBlockType
+import org.valkyrienskies.core.api.world.chunks.BlockType
 import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.chunk_tracking.IShipActiveChunksSet
 import org.valkyrienskies.core.chunk_tracking.ShipActiveChunksSet
-import org.valkyrienskies.core.datastructures.BlockPosSetAABBGenerator
+import org.valkyrienskies.core.datastructures.DynamicBlockPosSetAABB
 import org.valkyrienskies.core.datastructures.IBlockPosSetAABB
-import org.valkyrienskies.core.game.VSBlockTypeImpl
+import org.valkyrienskies.core.game.BlockTypeImpl
 import org.valkyrienskies.core.util.serialization.PacketIgnore
 
 /**
@@ -39,7 +39,7 @@ class ShipData(
     shipVoxelAABB: AABBic?,
     shipActiveChunksSet: IShipActiveChunksSet,
     var isStatic: Boolean = false,
-    val persistentAttachedData: MutableClassToInstanceMap<Any> = MutableClassToInstanceMap.create()
+    val persistentAttachedData: MutableClassToInstanceMap<Any> = MutableClassToInstanceMap.create(),
 ) : ShipDataCommon(
     id, name, chunkClaim, chunkClaimDimension, physicsData, shipTransform, prevTickShipTransform,
     shipAABB, shipVoxelAABB, shipActiveChunksSet
@@ -61,8 +61,7 @@ class ShipData(
      * This can also be used to quickly iterate over every block in this ship.
      */
     @JsonIgnore
-    private val shipAABBGenerator: IBlockPosSetAABB =
-        BlockPosSetAABBGenerator(chunkClaim)
+    private val shipAABBGenerator: IBlockPosSetAABB = DynamicBlockPosSetAABB()
 
     override val shipToWorld: Matrix4dc
         get() = transform.shipToWorld
@@ -70,7 +69,7 @@ class ShipData(
         get() = transform.worldToShip
 
     init {
-        shipActiveChunksSet.iterateChunkPos { chunkX: Int, chunkZ: Int ->
+        shipActiveChunksSet.forEach { chunkX: Int, chunkZ: Int ->
             missingLoadedChunks.add(chunkX, chunkZ)
         }
     }
@@ -79,8 +78,8 @@ class ShipData(
         posX: Int,
         posY: Int,
         posZ: Int,
-        oldBlockType: VSBlockType,
-        newBlockType: VSBlockType,
+        oldBlockType: BlockType,
+        newBlockType: BlockType,
         oldBlockMass: Double,
         newBlockMass: Double
     ) {
@@ -90,13 +89,13 @@ class ShipData(
         inertiaData.onSetBlock(posX, posY, posZ, oldBlockMass, newBlockMass)
 
         // Update [shipVoxelAABB]
-        updateShipAABBGenerator(posX, posY, posZ, newBlockType != VSBlockTypeImpl.AIR)
+        updateShipAABBGenerator(posX, posY, posZ, newBlockType != BlockTypeImpl.AIR)
     }
 
     /**
      * Update the [shipAABB] to when a block is added/removed.
      */
-    private fun updateShipAABBGenerator(posX: Int, posY: Int, posZ: Int, set: Boolean) {
+    override fun updateShipAABBGenerator(posX: Int, posY: Int, posZ: Int, set: Boolean) {
         if (set) {
             shipAABBGenerator.add(posX, posY, posZ)
         } else {
@@ -112,19 +111,19 @@ class ShipData(
         shipAABB = rawVoxelAABB
     }
 
-    fun onLoadChunk(chunkX: Int, chunkZ: Int) {
+    override fun onLoadChunk(chunkX: Int, chunkZ: Int) {
         if (chunkClaim.contains(chunkX, chunkZ)) {
             missingLoadedChunks.remove(chunkX, chunkZ)
         }
     }
 
-    fun onUnloadChunk(chunkX: Int, chunkZ: Int) {
+    override fun onUnloadChunk(chunkX: Int, chunkZ: Int) {
         if (chunkClaim.contains(chunkX, chunkZ) && activeChunksSet.contains(chunkX, chunkZ)) {
             missingLoadedChunks.add(chunkX, chunkZ)
         }
     }
 
-    fun areVoxelsFullyLoaded(): Boolean {
+    override fun areVoxelsFullyLoaded(): Boolean {
         // We are fully loaded if we have 0 missing chunks
         return missingLoadedChunks.size == 0
     }

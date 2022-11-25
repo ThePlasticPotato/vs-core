@@ -1,15 +1,23 @@
 package org.valkyrienskies.core.pipelines
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
-import org.joml.*
-import org.joml.primitives.AABBi
+import org.joml.Matrix3d
+import org.joml.Quaterniond
+import org.joml.Vector3d
+import org.joml.Vector3dc
+import org.joml.Vector3i
 import org.valkyrienskies.core.api.ServerShipInternal
 import org.valkyrienskies.core.api.ships.attachments.Ticked
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.api.world.properties.DimensionId
-import org.valkyrienskies.core.game.ships.*
+import org.valkyrienskies.core.game.ships.PhysInertia
+import org.valkyrienskies.core.game.ships.ShipData
+import org.valkyrienskies.core.game.ships.ShipObjectServer
+import org.valkyrienskies.core.game.ships.ShipObjectServerWorld
+import org.valkyrienskies.core.game.ships.ShipPhysicsData
+import org.valkyrienskies.core.game.ships.ShipTransformImpl
 import org.valkyrienskies.core.util.logger
 import org.valkyrienskies.physics_api.PhysicsWorldReference
 import org.valkyrienskies.physics_api.PoseVel
@@ -80,7 +88,6 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                     shipData.physicsData.linearVelocity = shipInPhysicsFrameData.poseVel.vel
                     shipData.physicsData.angularVelocity = shipInPhysicsFrameData.poseVel.omega
                     shipData.transform = newShipTransform
-                    shipObject.debugShipPhysicsAABB = shipInPhysicsFrameData.aabb
                 }
             } else {
                 // Check ground rigid body objects
@@ -154,7 +161,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val maxDefined = Vector3i()
             it.shipData.activeChunksSet.getMinMaxWorldPos(minDefined, maxDefined)
 
-            val totalVoxelRegion = it.shipData.chunkClaim.getTotalVoxelRegion(AABBi())
+            val totalVoxelRegion = it.chunkClaim.getTotalVoxelRegion(shipWorld.getYRange(it.chunkClaimDimension))
 
             val krunchDimensionId = getKrunchDimensionId(it.shipData.chunkClaimDimension)
             val scaling = it.shipData.transform.shipToWorldScaling.x()

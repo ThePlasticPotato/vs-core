@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import kotlin.ranges.IntRange;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.joml.primitives.AABBi;
@@ -39,13 +40,13 @@ public class BlockPosSetAABBGenerator implements IBlockPosSetAABB {
     private final FastMinMaxMap yMap;
     private final FastMinMaxMap zMap; // Only non-final so we can clear() quickly.
 
-    public BlockPosSetAABBGenerator(final ChunkClaim chunkClaim) {
-        this(chunkClaim, new DenseBlockPosSet());
+    public BlockPosSetAABBGenerator(final ChunkClaim chunkClaim, final IntRange yRange) {
+        this(chunkClaim, yRange, new DenseBlockPosSet());
     }
 
-    public BlockPosSetAABBGenerator(final ChunkClaim chunkClaim, final IBlockPosSet backingSet) {
-        final Vector3ic centerCoordinates = chunkClaim.getCenterBlockCoordinates(new Vector3i());
-        final Vector3ic claimSize = chunkClaim.getBlockSize(new Vector3i());
+    public BlockPosSetAABBGenerator(final ChunkClaim chunkClaim, final IntRange yRange, final IBlockPosSet backingSet) {
+        final Vector3ic centerCoordinates = chunkClaim.getCenterBlockCoordinates(yRange, new Vector3i());
+        final Vector3ic claimSize = chunkClaim.getBlockSize(yRange, new Vector3i());
 
         this.blockPosSet = backingSet;
         this.centerX = centerCoordinates.x();

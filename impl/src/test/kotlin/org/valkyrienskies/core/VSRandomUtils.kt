@@ -134,7 +134,9 @@ object VSRandomUtils {
             random.nextDouble(-scalingMaxMagnitude, scalingMaxMagnitude),
             random.nextDouble(-scalingMaxMagnitude, scalingMaxMagnitude)
         )
-        return ShipTransformImpl(randomVector3d(random), randomVector3d(random), randomQuaterniond(random), randomScaling)
+        return ShipTransformImpl(
+            randomVector3d(random), randomVector3d(random), randomQuaterniond(random), randomScaling
+        )
     }
 
     @Suppress("WeakerAccess")
@@ -145,7 +147,9 @@ object VSRandomUtils {
             random.nextDouble(-scalingMaxMagnitude, scalingMaxMagnitude),
             random.nextDouble(-scalingMaxMagnitude, scalingMaxMagnitude)
         )
-        return ShipTransformDataV0(randomVector3d(random), randomVector3d(random), randomQuaterniond(random), randomScaling)
+        return ShipTransformDataV0(
+            randomVector3d(random), randomVector3d(random), randomQuaterniond(random), randomScaling
+        )
     }
 
     @Suppress("WeakerAccess")

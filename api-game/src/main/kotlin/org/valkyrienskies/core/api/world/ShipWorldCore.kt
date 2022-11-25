@@ -1,18 +1,14 @@
-package org.valkyrienskies.core.api
+package org.valkyrienskies.core.api.world
 
-import org.valkyrienskies.core.api.ships.ShipCore
 import org.valkyrienskies.core.api.world.chunks.BlockType
+import org.valkyrienskies.core.api.world.properties.DimensionId
 
-/**
- * Abstraction of a ship, there are many types such as offline ships
- *  or loaded ships so this is the generic interface for all ships.
- */
-interface ShipInternal : ShipCore {
-
+interface ShipWorldCore : ShipWorld {
     fun onSetBlock(
         posX: Int,
         posY: Int,
         posZ: Int,
+        dimensionId: DimensionId,
         oldBlockType: BlockType,
         newBlockType: BlockType,
         oldBlockMass: Double,
