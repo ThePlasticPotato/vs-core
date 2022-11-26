@@ -1,21 +1,19 @@
 package org.valkyrienskies.core.game.ships.serialization.shipinertia
 
-import org.mapstruct.Mapper
-import org.mapstruct.Mapping
-import org.mapstruct.Mappings
+import dagger.Reusable
+import org.joml.Matrix3d
+import org.joml.Vector3d
 import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
 import org.valkyrienskies.core.game.ships.ShipInertiaDataImpl
-import org.valkyrienskies.core.game.ships.serialization.VSMapStructConfig
 import org.valkyrienskies.core.game.ships.serialization.shipinertia.dto.ShipInertiaDataV0
+import javax.inject.Inject
 
-@Mapper(config = VSMapStructConfig::class)
-interface ShipInertiaConverter {
-    @Mappings(
-        Mapping(target = "_momentOfInertiaTensor", source = "momentOfInertiaTensor"),
-        Mapping(target = "_mass", source = "shipMass"),
-        Mapping(target = "_centerOfMassInShip", source = "centerOfMassInShipSpace")
-    )
-    fun convertToModel(data: ShipInertiaDataV0): ShipInertiaDataImpl
+@Reusable
+class ShipInertiaConverter @Inject constructor() {
 
-    fun convertToDto(model: ShipInertiaData): ShipInertiaDataV0
+    fun convertToModel(data: ShipInertiaDataV0): ShipInertiaDataImpl =
+        ShipInertiaDataImpl(data.centerOfMassInShipSpace, data.shipMass, data.momentOfInertiaTensor)
+
+    fun convertToDto(model: ShipInertiaData): ShipInertiaDataV0 =
+        ShipInertiaDataV0(Vector3d(model.centerOfMassInShip), model.mass, Matrix3d(model.momentOfInertiaTensor))
 }

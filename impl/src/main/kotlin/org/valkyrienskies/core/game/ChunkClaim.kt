@@ -77,7 +77,7 @@ data class ChunkClaimImpl(override val xIndex: Int, override val zIndex: Int) : 
 
     override fun getBlockSize(yRange: IntRange, destination: Vector3i): Vector3i {
         val xSize = (xEnd - xStart + 1) * 16
-        val ySize = yRange.size
+        val ySize = 256
         val zSize = (zEnd - zStart + 1) * 16
         return destination.set(xSize, ySize, zSize)
     }

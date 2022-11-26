@@ -245,7 +245,10 @@ class ShipObjectServerWorld @Inject constructor(
 
             if (it is DenseVoxelShapeUpdate) {
                 it.forEachVoxel { x, y, z, voxelState ->
-                    ship.updateShipAABBGenerator(x, y, z, voxelState != blockTypes.air.toByte())
+                    ship.updateShipAABBGenerator(
+                        (it.regionX shl 4) + x, (it.regionY shl 4) + y, (it.regionZ shl 4) + z,
+                        voxelState != blockTypes.air.toByte()
+                    )
                 }
             }
 

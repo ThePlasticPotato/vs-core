@@ -24,9 +24,9 @@ open class ShipDataCommon(
     override val chunkClaimDimension: DimensionId,
     @DeltaIgnore
     val physicsData: ShipPhysicsData,
-    shipTransform: ShipTransform,
-    prevTickShipTransform: ShipTransform = shipTransform,
-    worldAABB: AABBdc = shipTransform.createEmptyAABB(),
+    transform: ShipTransform,
+    prevTickShipTransform: ShipTransform = transform,
+    worldAABB: AABBdc = transform.createEmptyAABB(),
     override var shipAABB: AABBic?,
     override val activeChunksSet: IShipActiveChunksSet
 ) : ShipInternal {
@@ -38,12 +38,12 @@ open class ShipDataCommon(
         get() = physicsData.angularVelocity
 
     @DeltaIgnore
-    override var transform: ShipTransform = shipTransform
-        set(shipTransform) {
-            field = shipTransform
+    override var transform: ShipTransform = transform
+        set(transform) {
+            field = transform
             // Update the [shipAABB]
-            worldAABB = shipAABB?.toAABBd(AABBd())?.transform(shipTransform.shipToWorld, AABBd())
-                ?: shipTransform.createEmptyAABB()
+            worldAABB = shipAABB?.toAABBd(AABBd())?.transform(transform.shipToWorld, AABBd())
+                ?: transform.createEmptyAABB()
         }
 
     @PacketIgnore

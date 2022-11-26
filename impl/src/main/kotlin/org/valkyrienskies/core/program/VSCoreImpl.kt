@@ -30,10 +30,10 @@ class VSCoreImpl @Inject constructor(
     override val pipelineComponentFactory: VSPipelineComponent.Factory,
     private val pipelineSerializer: VSPipelineSerializer,
     override val blockTypes: BlockTypes
-
 ) : VSCoreInternal {
     init {
         configurator.configure(tcp)
+        networking.init()
     }
 
     override fun newEmptyVoxelShapeUpdate(chunkX: Int, chunkY: Int, chunkZ: Int, overwrite: Boolean): TerrainUpdate {

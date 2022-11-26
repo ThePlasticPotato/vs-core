@@ -10,6 +10,8 @@ fun <T> fromVsRandom(generator: (Random) -> T): Arb<T> =
 
 fun Arb.Companion.shipData() = fromVsRandom(VSRandomUtils::randomShipData)
 
+fun Arb.Companion.inertiaData() = fromVsRandom(VSRandomUtils::randomShipInertiaData)
+
 fun Arb.Companion.queryableShipData(size: Arb<Int>) = arbitrary { rs ->
     VSRandomUtils.randomQueryableShipData(rs.random, size.bind())
 }
