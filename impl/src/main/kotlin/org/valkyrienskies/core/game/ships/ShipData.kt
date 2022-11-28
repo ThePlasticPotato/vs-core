@@ -9,6 +9,7 @@ import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.ServerShipInternal
+import org.valkyrienskies.core.api.ServerShipUser
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
@@ -72,6 +73,16 @@ class ShipData(
         shipActiveChunksSet.forEach { chunkX: Int, chunkZ: Int ->
             missingLoadedChunks.add(chunkX, chunkZ)
         }
+
+        for (attachment in this.persistentAttachedData) {
+            if (
+                ServerShipUser::class.java.isAssignableFrom(attachment.key) &&
+                attachment.value != null &&
+                (attachment.value as ServerShipUser).ship == null
+            ) {
+                (attachment.value as ServerShipUser).ship = this
+            }
+        }
     }
 
     override fun onSetBlock(
@@ -131,6 +142,10 @@ class ShipData(
     override fun asShipDataCommon(): ShipDataCommon = this
 
     override fun <T> saveAttachment(clazz: Class<T>, value: T?) {
+        if (value is ServerShipUser && value.ship == null) {
+            value.ship = this
+        }
+
         if (value == null)
             persistentAttachedData.remove(clazz)
         else

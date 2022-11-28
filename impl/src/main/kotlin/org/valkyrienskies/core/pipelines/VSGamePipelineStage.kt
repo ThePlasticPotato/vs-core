@@ -7,7 +7,7 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.Vector3i
 import org.valkyrienskies.core.api.ServerShipInternal
-import org.valkyrienskies.core.api.ships.attachments.Ticked
+import org.valkyrienskies.core.api.Ticked
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
 import org.valkyrienskies.core.api.ships.properties.ShipTransform

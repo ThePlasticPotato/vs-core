@@ -1,5 +1,6 @@
 package org.valkyrienskies.core
 
+import com.google.common.collect.MutableClassToInstanceMap
 import org.joml.Matrix3d
 import org.joml.Quaterniond
 import org.joml.Vector3d
@@ -304,7 +305,7 @@ object VSRandomUtils {
             shipAABB = null,
             activeChunks = randomShipActiveChunkSet(random, random.nextInt(100)),
             isStatic = random.nextBoolean(),
-            persistentAttachedData = HashMap()
+            persistentAttachedData = MutableClassToInstanceMap.create()
         )
     }
 }

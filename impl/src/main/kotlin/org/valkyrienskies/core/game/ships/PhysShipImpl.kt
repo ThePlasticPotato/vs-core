@@ -1,8 +1,8 @@
 package org.valkyrienskies.core.game.ships
 
 import org.joml.Vector3dc
+import org.valkyrienskies.core.api.ShipForcesInducer
 import org.valkyrienskies.core.api.ships.PhysShip
-import org.valkyrienskies.core.api.ships.attachments.ShipForcesInducer
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.util.assertions.assertIsPhysicsThread
 import org.valkyrienskies.core.util.assertions.requireIsFinite
@@ -25,7 +25,6 @@ data class PhysShipImpl constructor(
 
     val inertia: PhysInertia
         get() = _inertia
-
 
     private val invForces = ArrayDeque<Vector3dc>()
     private val invTorques = ArrayDeque<Vector3dc>()
@@ -84,5 +83,4 @@ data class PhysShipImpl constructor(
         invPosForces.add(force)
         invPosPositions.add(pos)
     }
-
 }

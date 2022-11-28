@@ -1,5 +1,6 @@
 package org.valkyrienskies.core.game.ships.serialization.shiptransform.dto
 
+import com.fasterxml.jackson.annotation.JsonIncludeProperties
 import org.joml.Matrix4d
 import org.joml.Matrix4dc
 import org.joml.Quaterniondc
@@ -7,6 +8,12 @@ import org.joml.Vector3dc
 import org.joml.primitives.AABBd
 import org.joml.primitives.AABBdc
 
+@JsonIncludeProperties(
+    "shipPositionInWorldCoordinates",
+    "shipPositionInShipCoordinates",
+    "shipCoordinatesToWorldCoordinatesRotation",
+    "shipCoordinatesToWorldCoordinatesScaling"
+)
 data class ShipTransformDataV0(
     val shipPositionInWorldCoordinates: Vector3dc,
     val shipPositionInShipCoordinates: Vector3dc,

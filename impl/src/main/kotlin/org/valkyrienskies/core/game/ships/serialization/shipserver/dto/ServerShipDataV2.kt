@@ -1,5 +1,6 @@
 package org.valkyrienskies.core.game.ships.serialization.shipserver.dto
 
+import com.google.common.collect.MutableClassToInstanceMap
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
@@ -23,5 +24,5 @@ class ServerShipDataV2(
     val shipVoxelAABB: AABBic?,
     val shipActiveChunksSet: IShipActiveChunksSet,
     val isStatic: Boolean,
-    val persistentAttachedData: Map<Class<*>, Any>
+    val persistentAttachedData: MutableClassToInstanceMap<Any>
 )

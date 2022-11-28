@@ -4,8 +4,9 @@ import com.google.common.collect.MutableClassToInstanceMap
 import org.joml.Vector3d
 import org.valkyrienskies.core.api.LoadedServerShipInternal
 import org.valkyrienskies.core.api.ServerShipInternal
-import org.valkyrienskies.core.api.ships.attachments.ShipForcesInducer
-import org.valkyrienskies.core.api.ships.attachments.Ticked
+import org.valkyrienskies.core.api.ServerShipUser
+import org.valkyrienskies.core.api.ShipForcesInducer
+import org.valkyrienskies.core.api.Ticked
 import org.valkyrienskies.core.networking.delta.DeltaEncodedChannelServerTCP
 import org.valkyrienskies.core.util.serialization.VSJacksonUtil
 
@@ -55,6 +56,9 @@ class ShipObjectServer(
         } else {
             if (value is ShipForcesInducer) {
                 forceInducers.add(value)
+            }
+            if (value is ServerShipUser) {
+                value.ship = this
             }
             if (value is Ticked) {
                 toBeTicked.add(value)
