@@ -2,6 +2,7 @@ package org.valkyrienskies.core.game.ships
 
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.ShipForcesInducer
+import org.valkyrienskies.core.api.VSBeta
 import org.valkyrienskies.core.api.ships.PhysShip
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.util.assertions.assertIsPhysicsThread
@@ -23,6 +24,7 @@ data class PhysShipImpl constructor(
     var poseVel: PoseVel,
     var segments: SegmentTracker
 ) : PhysShip {
+    @VSBeta
     override var buoyantFactor by rigidBodyReference::buoyantFactor
 
     val inertia: PhysInertia
