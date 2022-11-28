@@ -6,9 +6,11 @@ import org.valkyrienskies.core.api.ships.PhysShip
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.util.assertions.assertIsPhysicsThread
 import org.valkyrienskies.core.util.assertions.requireIsFinite
+import org.valkyrienskies.core.util.pollUntilEmpty
 import org.valkyrienskies.physics_api.PoseVel
 import org.valkyrienskies.physics_api.RigidBodyReference
 import org.valkyrienskies.physics_api.SegmentTracker
+import java.util.ArrayDeque
 
 data class PhysShipImpl constructor(
     override val id: ShipId,
@@ -36,14 +38,21 @@ data class PhysShipImpl constructor(
     override var isStatic = false
 
     fun applyQueuedForces() {
-        invForces.removeIf { i -> rigidBodyReference.addInvariantForceToNextPhysTick(i); true }
-        invTorques.removeIf { i -> rigidBodyReference.addInvariantTorqueToNextPhysTick(i); true }
-        rotForces.removeIf { i -> rigidBodyReference.addRotDependentForceToNextPhysTick(i); true }
-        rotTorques.removeIf { i -> rigidBodyReference.addRotDependentTorqueToNextPhysTick(i); true }
+        invForces.pollUntilEmpty(rigidBodyReference::addInvariantForceToNextPhysTick)
+        invTorques.pollUntilEmpty(rigidBodyReference::addInvariantTorqueToNextPhysTick)
+        rotForces.pollUntilEmpty(rigidBodyReference::addRotDependentForceToNextPhysTick)
+        rotTorques.pollUntilEmpty(rigidBodyReference::addRotDependentTorqueToNextPhysTick)
 
-        for ((index, force) in invPosForces.withIndex()) {
-            rigidBodyReference.addInvariantForceAtPosToNextPhysTick(force, invPosPositions.elementAt(index))
+        while (invPosForces.isNotEmpty()) {
+            rigidBodyReference.addInvariantForceAtPosToNextPhysTick(
+                invPosPositions.removeFirst(),
+                invPosForces.removeFirst()
+            )
         }
+
+        check(invPosPositions.isEmpty())
+        check(invPosForces.isEmpty())
+
         rigidBodyReference.isStatic = isStatic
     }
 
@@ -58,21 +67,21 @@ data class PhysShipImpl constructor(
         requireIsFinite(torque)
         assertIsPhysicsThread()
 
-        invForces.add(torque)
+        invTorques.add(torque)
     }
 
     override fun applyRotDependentForce(force: Vector3dc) {
         requireIsFinite(force)
         assertIsPhysicsThread()
 
-        invForces.add(force)
+        rotForces.add(force)
     }
 
     override fun applyRotDependentTorque(torque: Vector3dc) {
         requireIsFinite(torque)
         assertIsPhysicsThread()
 
-        invForces.add(torque)
+        rotTorques.add(torque)
     }
 
     override fun applyInvariantForceToPos(force: Vector3dc, pos: Vector3dc) {
