@@ -17,6 +17,7 @@ data class PhysShip internal constructor(
     var segments: SegmentTracker
 ) {
     var buoyantFactor by rigidBodyReference::buoyantFactor
+    var doFluidDrag by rigidBodyReference::doFluidDrag
 
     val inertia: PhysInertia
         get() = _inertia
