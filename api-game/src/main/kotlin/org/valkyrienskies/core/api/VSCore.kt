@@ -5,8 +5,9 @@ import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.world.VSPipeline
 import org.valkyrienskies.core.api.world.chunks.BlockTypes
 import org.valkyrienskies.core.api.world.chunks.TerrainUpdate
+import org.valkyrienskies.core.game.VSCoreCommands
 
-interface VSCore {
+interface VSCore : VSCoreCommands {
 
     val hooks: CoreHooks
 

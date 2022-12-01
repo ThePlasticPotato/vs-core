@@ -5,6 +5,8 @@ import org.valkyrienskies.core.api.world.VSPipeline
 import org.valkyrienskies.core.api.world.chunks.BlockTypes
 import org.valkyrienskies.core.api.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.game.ChunkClaimImpl
+import org.valkyrienskies.core.game.VSCoreCommands
+import org.valkyrienskies.core.game.VSCoreCommandsImpl
 import org.valkyrienskies.core.game.ships.modules.ShipWorldModule
 import org.valkyrienskies.core.game.ships.serialization.vspipeline.VSPipelineSerializer
 import org.valkyrienskies.core.game.ships.types.DenseTerrainUpdateBuilderImpl
@@ -30,7 +32,7 @@ class VSCoreImpl @Inject constructor(
     override val pipelineComponentFactory: VSPipelineComponent.Factory,
     private val pipelineSerializer: VSPipelineSerializer,
     override val blockTypes: BlockTypes
-) : VSCoreInternal {
+) : VSCoreInternal, VSCoreCommands by VSCoreCommandsImpl {
     init {
         configurator.configure(tcp)
         networking.init()

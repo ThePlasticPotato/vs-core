@@ -47,4 +47,5 @@ interface ServerShipWorldCore : ShipWorldCore, ServerShipWorld {
     fun addDimension(dimensionId: DimensionId, yRange: IntRange)
     fun removeDimension(dimensionId: DimensionId)
     fun onDisconnect(player: IPlayer)
+    fun deleteShip(ship: ServerShip)
 }

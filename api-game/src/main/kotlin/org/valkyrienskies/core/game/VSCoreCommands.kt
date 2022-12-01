@@ -3,19 +3,11 @@ package org.valkyrienskies.core.game
 import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.world.ServerShipWorld
 
-object VSCoreCommands {
+interface VSCoreCommands {
 
-    fun deleteShips(world: ServerShipWorld, ships: List<ServerShip>) {
-        ships.forEach { ship ->
-            world.deleteShip(ship)
-        }
-    }
+    fun deleteShips(world: ServerShipWorld, ships: List<ServerShip>)
 
-    fun renameShip(ship: ServerShip, newName: String) {
-        ship.slug = newName
-    }
+    fun renameShip(ship: ServerShip, newName: String)
 
-    fun scaleShip(serverShip: ServerShip, float: Float) {
-        TODO("Not yet implemented")
-    }
+    fun scaleShip(ship: ServerShip, newScale: Float)
 }
