@@ -5,7 +5,7 @@ import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
 
 interface ServerShip : Ship {
     // Slug is modifiable on server-side
-    override var slug: String
+    override var slug: String?
 
     val inertiaData: ShipInertiaData
 

@@ -29,7 +29,7 @@ import org.valkyrienskies.core.util.serialization.PacketIgnore
  */
 class ShipData(
     id: ShipId,
-    slug: String,
+    slug: String?,
     chunkClaim: ChunkClaim,
     chunkClaimDimension: DimensionId,
     physicsData: ShipPhysicsData,
