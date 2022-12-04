@@ -2,7 +2,7 @@ package org.valkyrienskies.test_utils.generators
 
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.arbitrary
-import org.valkyrienskies.core.VSRandomUtils
+import org.valkyrienskies.core.impl.VSRandomUtils
 import kotlin.random.Random
 
 fun <T> fromVsRandom(generator: (Random) -> T): Arb<T> =

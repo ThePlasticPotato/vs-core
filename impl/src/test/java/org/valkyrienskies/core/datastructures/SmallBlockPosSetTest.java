@@ -1,19 +1,20 @@
-package org.valkyrienskies.core.datastructures;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+package org.valkyrienskies.core.impl.datastructures;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import kotlin.random.Random;
 import org.joml.Vector3i;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.valkyrienskies.core.VSRandomUtils;
-import org.valkyrienskies.core.util.serialization.VSJacksonUtil;
+import org.valkyrienskies.core.impl.VSRandomUtils;
+import org.valkyrienskies.core.impl.util.serialization.VSJacksonUtil;
+
+import java.io.IOException;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SmallBlockPosSetTest {
 
