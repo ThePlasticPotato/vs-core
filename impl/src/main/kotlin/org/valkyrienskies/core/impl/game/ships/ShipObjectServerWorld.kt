@@ -6,14 +6,28 @@ import org.joml.Vector3i
 import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.properties.ShipId
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.apigame.world.IPlayer
 import org.valkyrienskies.core.apigame.world.ServerShipWorldCore
-import org.valkyrienskies.core.apigame.world.chunks.*
+import org.valkyrienskies.core.apigame.world.chunks.BlockType
+import org.valkyrienskies.core.apigame.world.chunks.BlockTypes
+import org.valkyrienskies.core.apigame.world.chunks.ChunkUnwatchTask
+import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
+import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTasks
+import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
+import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
 import org.valkyrienskies.core.impl.game.ChunkAllocatorProvider
 import org.valkyrienskies.core.impl.game.DimensionInfo
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.*
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.CLEAR_FOR_RESET
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.GET_CURRENT_TICK_CHANGES
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.GET_LAST_TICK_CHANGES
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.POST_TICK_FINISH
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.POST_TICK_GENERATED
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.POST_TICK_START
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.PRE_TICK
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_BLOCKS
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_CHUNKS
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_DIMENSIONS
 import org.valkyrienskies.core.impl.game.ships.loading.ShipLoadManagerServer
 import org.valkyrienskies.core.impl.game.ships.modules.AllShips
 import org.valkyrienskies.core.impl.game.ships.types.MutableShipVoxelUpdates
@@ -27,9 +41,14 @@ import org.valkyrienskies.core.impl.networking.VSNetworking
 import org.valkyrienskies.core.impl.util.WorldScoped
 import org.valkyrienskies.core.impl.util.assertions.stages.TickStageEnforcer
 import org.valkyrienskies.core.impl.util.names.NounListNameGenerator
-import org.valkyrienskies.physics_api.voxel_updates.*
+import org.valkyrienskies.physics_api.voxel_updates.DeleteVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel_updates.DenseVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel_updates.EmptyVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel_updates.SparseVoxelShapeUpdate
 import java.util.concurrent.CompletableFuture
 import javax.inject.Inject
+import javax.inject.Named
 
 @WorldScoped
 class ShipObjectServerWorld @Inject constructor(
@@ -37,7 +56,8 @@ class ShipObjectServerWorld @Inject constructor(
     val chunkAllocators: ChunkAllocatorProvider,
     private val loadManager: ShipLoadManagerServer,
     networking: VSNetworking,
-    private val blockTypes: BlockTypes
+    private val blockTypes: BlockTypes,
+    @Named("mutableDimensionInfo") private val dimensionInfo: MutableMap<DimensionId, DimensionInfo>
 ) : ShipObjectWorld<ShipObjectServer>(chunkAllocators), ServerShipWorldCore {
 
     private enum class Stages {
@@ -109,8 +129,6 @@ class ShipObjectServerWorld @Inject constructor(
         get() = enforcer.stage(GET_LAST_TICK_CHANGES).run { field }
 
     private val udpServer = networking.tryUdpServer()
-
-    private val dimensionInfo = mutableMapOf<DimensionId, DimensionInfo>()
 
     /**
      * A map of voxel updates pending to be applied to ships.

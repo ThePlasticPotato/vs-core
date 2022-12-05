@@ -8,22 +8,26 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBd
 import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.apigame.world.IPlayer
 import org.valkyrienskies.core.apigame.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTasks
+import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.config.VSCoreConfig
+import org.valkyrienskies.core.impl.game.DimensionInfo
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld
 import org.valkyrienskies.core.impl.util.set
 import org.valkyrienskies.core.impl.util.signedDistanceTo
 import java.util.*
 import java.util.function.LongFunction
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.math.min
 
 class ShipObjectServerWorldChunkTracker @Inject constructor(
-    val config: VSCoreConfig.Server
+    val config: VSCoreConfig.Server,
+    @Named("dimensionInfo") val dimensionInfoMap: Map<DimensionId, DimensionInfo>
 ) {
 
     private val chunkToPlayersWatchingMap: Long2ObjectMap<MutableSet<IPlayer>> = Long2ObjectOpenHashMap()
@@ -32,7 +36,7 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
      * Player -> Ship Id -> chunks on that ship the player is tracking
      */
     private val playersToShipsWatchingMap =
-        HashMap<IPlayer, MutableMap<org.valkyrienskies.core.impl.api.ServerShipInternal, LongSet>>()
+        HashMap<IPlayer, MutableMap<ServerShipInternal, LongSet>>()
 
     /**
      * Ship Id -> Players watching
@@ -45,7 +49,7 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
      * This gets cleared by [ShipObjectServerWorld] every tick
      */
     private val playersToShipsNewlyWatchingMap =
-        HashMap<IPlayer, MutableSet<org.valkyrienskies.core.impl.api.ServerShipInternal>>()
+        HashMap<IPlayer, MutableSet<ServerShipInternal>>()
 
     /**
      * Players -> ships that they are no longer watching
@@ -53,13 +57,13 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
      * This gets cleared by [ShipObjectServerWorld] every tick
      */
     private val playersToShipsNoLongerWatchingMap =
-        HashMap<IPlayer, MutableSet<org.valkyrienskies.core.impl.api.ServerShipInternal>>()
+        HashMap<IPlayer, MutableSet<ServerShipInternal>>()
 
-    private val shipsToLoad = HashSet<org.valkyrienskies.core.impl.api.ServerShipInternal>()
+    private val shipsToLoad = HashSet<ServerShipInternal>()
 
-    private val shipsToUnload = HashSet<org.valkyrienskies.core.impl.api.ServerShipInternal>()
+    private val shipsToUnload = HashSet<ServerShipInternal>()
 
-    private fun cleanDeletedShips(deletedShips: Iterable<org.valkyrienskies.core.impl.api.ServerShipInternal>) {
+    private fun cleanDeletedShips(deletedShips: Iterable<ServerShipInternal>) {
         for (ship in deletedShips) {
             playersToShipsWatchingMap.values.forEach { it.remove(ship) }
             shipsToPlayersWatchingMap.remove(ship.id)
@@ -83,8 +87,8 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
      */
     fun generateChunkWatchTasksAndUpdatePlayers(
         players: Set<IPlayer>, lastTickPlayers: Set<IPlayer>,
-        ships: Iterable<org.valkyrienskies.core.impl.api.ServerShipInternal>,
-        deletedShips: Iterable<org.valkyrienskies.core.impl.api.ServerShipInternal>
+        ships: Iterable<ServerShipInternal>,
+        deletedShips: Iterable<ServerShipInternal>
     ): ChunkWatchTasks {
         resetForNewTick()
         cleanDeletedShips(deletedShips)
@@ -104,14 +108,17 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
         ships.forEach { shipData ->
             val shipTransform = shipData.transform
             val voxelAABB = shipData.shipAABB
-            shipData.activeChunksSet.iterateChunkPos { chunkX, chunkZ ->
+            val worldHeight = dimensionInfoMap.getValue(shipData.chunkClaimDimension).yRange
+            shipData.activeChunksSet.forEach { chunkX, chunkZ ->
                 val chunkAABBInWorld = tempAABB
                     .set(
                         (chunkX shl 4).toDouble(),
-                        voxelAABB?.minY()?.toDouble() ?: 0.0, // start at the minY of the ship if available
+                        // start at the minY of the ship if available
+                        voxelAABB?.minY()?.toDouble() ?: worldHeight.first.toDouble(),
                         (chunkZ shl 4).toDouble(),
                         (chunkX shl 4).toDouble() + 16.0,
-                        (voxelAABB?.maxY()?.toDouble() ?: 255.0) + 1.0, // end at the maxY of the ship if available
+                        // end at the maxY of the ship if available
+                        (voxelAABB?.maxY()?.toDouble() ?: worldHeight.last.toDouble()) + 1.0,
                         (chunkZ shl 4).toDouble() + 16.0
                     )
                     .transform(shipTransform.shipToWorld)
@@ -194,14 +201,14 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
     ): ChunkTrackingInfo {
         for (task in executedWatchTasks) {
             addWatchersToChunk(
-                task.ship as org.valkyrienskies.core.impl.api.ServerShipInternal, task.chunkPos,
+                task.ship as ServerShipInternal, task.chunkPos,
                 task.playersNeedWatching
             )
         }
 
         for (task in executedUnwatchTasks) {
             removeWatchersFromChunk(
-                task.ship as org.valkyrienskies.core.impl.api.ServerShipInternal, task.chunkPos,
+                task.ship as ServerShipInternal, task.chunkPos,
                 task.playersNeedUnwatching
             )
         }
@@ -224,7 +231,7 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
     }
 
     private fun addWatchersToChunk(
-        shipData: org.valkyrienskies.core.impl.api.ServerShipInternal, chunkPos: Long,
+        shipData: ServerShipInternal, chunkPos: Long,
         newWatchingPlayers: Iterable<IPlayer>
     ) {
         chunkToPlayersWatchingMap
@@ -263,7 +270,7 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
     }
 
     private fun removeWatchersFromChunk(
-        shipData: org.valkyrienskies.core.impl.api.ServerShipInternal, chunkPos: Long,
+        shipData: ServerShipInternal, chunkPos: Long,
         removedWatchingPlayers: Iterable<IPlayer>
     ) {
         // If there are players watching this chunk, remove the removedWatchingPlayers

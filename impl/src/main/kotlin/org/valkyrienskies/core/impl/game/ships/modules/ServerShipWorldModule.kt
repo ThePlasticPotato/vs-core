@@ -3,8 +3,10 @@ package org.valkyrienskies.core.impl.game.ships.modules
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.game.ChunkAllocator
 import org.valkyrienskies.core.impl.game.ChunkAllocatorProvider
+import org.valkyrienskies.core.impl.game.DimensionInfo
 import org.valkyrienskies.core.impl.game.SingletonChunkAllocatorProviderImpl
 import org.valkyrienskies.core.impl.game.ships.MutableQueryableShipDataServer
 import org.valkyrienskies.core.impl.game.ships.QueryableShipDataImpl
@@ -24,9 +26,22 @@ annotation class AllShips
  */
 @Module
 class ShipWorldModule(
-    @get:Provides @get:WorldScoped @get:AllShips val allShips: MutableQueryableShipDataServer,
-    @get:Provides @get:WorldScoped @get:Named("primary") val chunkAllocator: ChunkAllocator
+    @get:Provides @get:WorldScoped @get:AllShips
+    val allShips: MutableQueryableShipDataServer,
+
+    @get:Provides @get:WorldScoped @get:Named("primary")
+    val chunkAllocator: ChunkAllocator
 ) {
+
+    @get:Provides
+    @get:WorldScoped
+    @get:Named("mutableDimensionInfo")
+    val mutableDimensionInfo = mutableMapOf<DimensionId, DimensionInfo>()
+
+    @get:Provides
+    @get:WorldScoped
+    @get:Named("dimensionInfo")
+    val dimensionInfo: Map<DimensionId, DimensionInfo> get() = mutableDimensionInfo
 
     @Module
     interface Declarations {
