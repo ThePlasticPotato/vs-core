@@ -1,7 +1,7 @@
 package org.valkyrienskies.core.apigame.hooks
 
 import io.netty.buffer.ByteBuf
-import org.valkyrienskies.core.apigame.world.ShipWorld
+import org.valkyrienskies.core.api.world.ShipWorld
 import org.valkyrienskies.core.apigame.world.IPlayer
 import java.nio.file.Path
 

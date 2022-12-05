@@ -2,12 +2,12 @@ package org.valkyrienskies.core.apigame.world
 
 import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ships.ServerShip
-import org.valkyrienskies.core.apigame.world.ServerShipWorld
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.ServerShipWorld
 import org.valkyrienskies.core.apigame.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTasks
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
+import org.valkyrienskies.core.apigame.world.properties.DimensionId
 
 interface ServerShipWorldCore : ShipWorldCore, ServerShipWorld {
 

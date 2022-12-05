@@ -1,4 +1,4 @@
-package org.valkyrienskies.core.apigame.world
+package org.valkyrienskies.core.api.world
 
 import org.joml.primitives.AABBdc
 import org.valkyrienskies.core.api.ships.LoadedShip

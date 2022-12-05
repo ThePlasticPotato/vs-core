@@ -1,6 +1,6 @@
 package org.valkyrienskies.core.apigame.world
 
-import org.valkyrienskies.core.apigame.world.ClientShipWorld
+import org.valkyrienskies.core.api.world.ClientShipWorld
 import java.net.SocketAddress
 
 // not impressed at all with this interface, just exists because
