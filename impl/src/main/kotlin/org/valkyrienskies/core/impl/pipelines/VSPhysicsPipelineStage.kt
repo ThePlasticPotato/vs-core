@@ -60,8 +60,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
      * Push a game frame to the physics engine stage
      */
     fun pushGameFrame(gameFrame: VSGameFrame) {
-        if (gameFramesQueue.size >= 10) {
-            // throw IllegalStateException("Too many game frames in the game frame queue. Is the physics stage broken?")
+        if (gameFramesQueue.size >= 100) {
             logger.warn("Too many game frames in the game frame queue. Is the physics stage broken?")
             Thread.sleep(1000L)
         }
