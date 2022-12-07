@@ -1,9 +1,10 @@
-package org.valkyrienskies.core.datastructures;
+package org.valkyrienskies.core.impl.datastructures;
+
+import org.joml.Vector3ic;
+import org.joml.primitives.AABBi;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.joml.Vector3ic;
-import org.joml.primitives.AABBi;
 
 /**
  * This class enables the updating of ship AABBs in O(1) time

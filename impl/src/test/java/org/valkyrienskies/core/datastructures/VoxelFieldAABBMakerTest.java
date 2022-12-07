@@ -1,15 +1,16 @@
-package org.valkyrienskies.core.datastructures;
+package org.valkyrienskies.core.impl.datastructures;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
+import org.junit.jupiter.api.RepeatedTest;
+import org.valkyrienskies.core.impl.VSRandomUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import org.joml.Vector3i;
-import org.joml.Vector3ic;
-import org.junit.jupiter.api.RepeatedTest;
-import org.valkyrienskies.core.VSRandomUtils;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"UnusedDeclaration", "WeakerAccess"})
 public class VoxelFieldAABBMakerTest {

@@ -8,7 +8,7 @@ import org.joml.Matrix4d
 import org.joml.Quaterniond
 import org.joml.Vector3d
 import org.joml.Vector3i
-import org.valkyrienskies.core.VSRandomUtils
+import org.valkyrienskies.core.impl.VSRandomUtils
 
 fun Arb.Companion.vector3d(): Arb<Vector3d> = arbitrary {
     Vector3d(numericDouble().bind(), numericDouble().bind(), numericDouble().bind())

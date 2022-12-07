@@ -1,11 +1,12 @@
-package org.valkyrienskies.core.datastructures;
+package org.valkyrienskies.core.impl.datastructures;
 
-import java.util.HashSet;
-import java.util.Set;
-import javax.annotation.Nonnull;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.joml.primitives.AABBi;
+
+import javax.annotation.Nonnull;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Only used for testing, don't actually use this ever. Its inefficient.

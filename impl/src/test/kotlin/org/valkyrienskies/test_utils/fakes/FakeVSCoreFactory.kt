@@ -1,6 +1,6 @@
 package org.valkyrienskies.test_utils.fakes
 
-import org.valkyrienskies.core.program.*
+import org.valkyrienskies.core.impl.program.*
 
 object FakeVSCoreFactory {
 

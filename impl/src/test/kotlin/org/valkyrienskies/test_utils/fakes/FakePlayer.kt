@@ -1,9 +1,9 @@
 package org.valkyrienskies.test_utils.fakes
 
 import org.joml.Vector3d
-import org.valkyrienskies.core.api.world.properties.DimensionId
-import org.valkyrienskies.core.api.world.IPlayer
-import java.util.UUID
+import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.apigame.world.IPlayer
+import java.util.*
 
 class FakePlayer(
     var position: Vector3d = Vector3d(),
