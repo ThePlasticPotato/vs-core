@@ -1,32 +1,12 @@
 package org.valkyrienskies.core.impl.program
 
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
-import org.valkyrienskies.core.api.world.VSPipeline
-import org.valkyrienskies.core.api.world.chunks.BlockTypes
-import org.valkyrienskies.core.api.world.chunks.TerrainUpdate
-import org.valkyrienskies.core.game.ChunkClaimImpl
-import org.valkyrienskies.core.game.VSCoreCommands
-import org.valkyrienskies.core.game.VSCoreCommandsImpl
-import org.valkyrienskies.core.game.ships.modules.ShipWorldModule
-import org.valkyrienskies.core.game.ships.serialization.vspipeline.VSPipelineSerializer
-import org.valkyrienskies.core.game.ships.types.DenseTerrainUpdateBuilderImpl
-import org.valkyrienskies.core.game.ships.types.SparseTerrainUpdateBuilderImpl
-import org.valkyrienskies.core.game.ships.types.TerrainUpdateImpl
-import org.valkyrienskies.core.hooks.CoreHooksImpl
-import org.valkyrienskies.core.networking.NetworkChannel
-import org.valkyrienskies.core.networking.VSNetworking
-import org.valkyrienskies.core.networking.VSNetworking.NetworkingModule.TCP
-import org.valkyrienskies.core.networking.VSNetworkingConfigurator
-import org.valkyrienskies.core.pipelines.VSPipelineComponent
-import org.valkyrienskies.core.pipelines.VSPipelineImpl
-import org.valkyrienskies.physics_api.voxel_updates.DeleteVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel_updates.EmptyVoxelShapeUpdate
-import org.valkyrienskies.physics_api_krunch.KrunchBootstrap
-import javax.inject.Inject
+import org.valkyrienskies.core.apigame.VSCoreCommands
 import org.valkyrienskies.core.apigame.world.VSPipeline
 import org.valkyrienskies.core.apigame.world.chunks.BlockTypes
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.impl.game.ChunkClaimImpl
+import org.valkyrienskies.core.impl.game.VSCoreCommandsImpl
 import org.valkyrienskies.core.impl.game.ships.modules.ShipWorldModule
 import org.valkyrienskies.core.impl.game.ships.serialization.vspipeline.VSPipelineSerializer
 import org.valkyrienskies.core.impl.game.ships.types.DenseTerrainUpdateBuilderImpl
@@ -39,6 +19,10 @@ import org.valkyrienskies.core.impl.networking.VSNetworking.NetworkingModule.TCP
 import org.valkyrienskies.core.impl.networking.VSNetworkingConfigurator
 import org.valkyrienskies.core.impl.pipelines.VSPipelineComponent
 import org.valkyrienskies.core.impl.pipelines.VSPipelineImpl
+import org.valkyrienskies.physics_api.voxel_updates.DeleteVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel_updates.EmptyVoxelShapeUpdate
+import org.valkyrienskies.physics_api_krunch.KrunchBootstrap
+import javax.inject.Inject
 
 class VSCoreImpl @Inject constructor(
     override val networking: VSNetworking,

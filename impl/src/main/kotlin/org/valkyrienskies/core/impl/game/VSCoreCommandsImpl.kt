@@ -1,8 +1,9 @@
-package org.valkyrienskies.core.game
+package org.valkyrienskies.core.impl.game
 
 import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.world.ServerShipWorld
-import org.valkyrienskies.core.api.world.ServerShipWorldCore
+import org.valkyrienskies.core.apigame.VSCoreCommands
+import org.valkyrienskies.core.apigame.world.ServerShipWorldCore
 
 object VSCoreCommandsImpl : VSCoreCommands {
 

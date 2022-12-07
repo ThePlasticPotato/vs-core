@@ -1,4 +1,4 @@
-package org.valkyrienskies.core.game
+package org.valkyrienskies.core.apigame
 
 import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.world.ServerShipWorld
