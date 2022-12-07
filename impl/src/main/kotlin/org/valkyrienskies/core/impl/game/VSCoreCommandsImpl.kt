@@ -21,4 +21,8 @@ object VSCoreCommandsImpl : VSCoreCommands {
     override fun scaleShip(ship: ServerShip, newScale: Float) {
         TODO("Not yet implemented")
     }
+
+    override fun teleportShip(ship: ServerShip, x: Double, y: Double, z: Double) {
+        TODO("Not yet implemented")
+    }
 }

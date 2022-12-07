@@ -10,4 +10,6 @@ interface VSCoreCommands {
     fun renameShip(ship: ServerShip, newName: String)
 
     fun scaleShip(ship: ServerShip, newScale: Float)
+
+    fun teleportShip(ship: ServerShip, x: Double, y: Double, z: Double)
 }
