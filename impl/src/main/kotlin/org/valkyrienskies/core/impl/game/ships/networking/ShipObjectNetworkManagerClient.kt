@@ -46,6 +46,9 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
 
     private var secretKey: SecretKey? = null
 
+    /**
+     * Set to true once the player has received their first [PacketShipDataCreate]
+     */
     @Volatile
     var hasReceivedInitialShips = false
 

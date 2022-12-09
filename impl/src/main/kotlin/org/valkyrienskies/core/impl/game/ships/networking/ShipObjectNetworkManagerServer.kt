@@ -75,6 +75,20 @@ class ShipObjectNetworkManagerServer @Inject constructor(
         for (player in players) {
             val shipsNoLongerWatching = tracker.playersToShipsNoLongerWatchingMap[player] ?: emptySet()
             endTracking(player, tracker.shipsToUnload + shipsNoLongerWatching)
+
+            sendEmptyWatchPacketToNewPlayer(player)
+        }
+    }
+
+    /**
+     * If [player] is a new player who's not tracking any ships, send them an empty watch packet so that
+     * they know they're not colliding with any unloaded ships.
+     *
+     * @see [ShipObjectNetworkManagerClient.hasReceivedInitialShips]
+     */
+    private fun sendEmptyWatchPacketToNewPlayer(player: IPlayer) {
+        if (tracker.newPlayers.contains(player) && tracker.playersToShipsNewlyWatchingMap[player].isNullOrEmpty()) {
+            spNetwork.sendToClient(PacketShipDataCreate(listOf()), player)
         }
     }
 

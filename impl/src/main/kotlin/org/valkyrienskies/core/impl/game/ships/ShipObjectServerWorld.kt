@@ -28,6 +28,7 @@ import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.PRE_
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_BLOCKS
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_CHUNKS
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_DIMENSIONS
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_PLAYERS
 import org.valkyrienskies.core.impl.game.ships.loading.ShipLoadManagerServer
 import org.valkyrienskies.core.impl.game.ships.modules.AllShips
 import org.valkyrienskies.core.impl.game.ships.types.MutableShipVoxelUpdates
@@ -74,6 +75,7 @@ class ShipObjectServerWorld @Inject constructor(
         UPDATE_DIMENSIONS,
         UPDATE_BLOCKS,
         UPDATE_CHUNKS,
+        UPDATE_PLAYERS,
         CLEAR_FOR_RESET
     }
 
@@ -87,12 +89,11 @@ class ShipObjectServerWorld @Inject constructor(
             single(POST_TICK_GENERATED)
             single(POST_TICK_FINISH)
             single(CLEAR_FOR_RESET)
+            single(UPDATE_PLAYERS)
         }
 
         requireOrder(POST_TICK_GENERATED, GET_CURRENT_TICK_CHANGES, CLEAR_FOR_RESET)
         requireStages(PRE_TICK, POST_TICK_START, POST_TICK_GENERATED, POST_TICK_FINISH, CLEAR_FOR_RESET)
-
-        requireFinal(CLEAR_FOR_RESET)
     }
 
     var lastTickPlayers: Set<IPlayer> = setOf()
@@ -100,6 +101,7 @@ class ShipObjectServerWorld @Inject constructor(
 
     override var players: Set<IPlayer> = setOf()
         set(value) {
+            enforcer.stage(UPDATE_PLAYERS)
             lastTickPlayers = field
             field = value
         }
