@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet
 import dagger.Lazy
 import io.netty.buffer.Unpooled
 import org.valkyrienskies.core.apigame.world.IPlayer
+import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.chunk_tracking.ChunkTrackingInfo
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServer
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld
@@ -45,12 +46,12 @@ class ShipObjectNetworkManagerServer @Inject constructor(
         // Transforms are sent in [VSNetworkPipelineStage]
     }
 
-    private fun IPlayer.getTrackedShips(): Iterable<org.valkyrienskies.core.impl.api.ServerShipInternal> {
+    private fun IPlayer.getTrackedShips(): Iterable<ServerShipInternal> {
         return tracker.getShipsPlayerIsWatching(this)
     }
 
     private fun updateTrackedShips() {
-        val builder = ImmutableMap.builder<IPlayer, ImmutableSet<org.valkyrienskies.core.impl.api.ServerShipInternal>>()
+        val builder = ImmutableMap.builder<IPlayer, ImmutableSet<ServerShipInternal>>()
         tracker.playersToShipsWatchingMap.forEach { (player, ships) ->
             builder.put(player, ships.keys.toImmutableSet())
         }
@@ -61,7 +62,8 @@ class ShipObjectNetworkManagerServer @Inject constructor(
      * Used by VSNetworkPipeline as a threadsafe way to access the transforms to send
      */
     @Volatile
-    var playersToTrackedShips: ImmutableMap<IPlayer, ImmutableSet<org.valkyrienskies.core.impl.api.ServerShipInternal>> = ImmutableMap.of()
+    var playersToTrackedShips: ImmutableMap<IPlayer, ImmutableSet<ServerShipInternal>> =
+        ImmutableMap.of()
 
     /**
      * Send create and destroy packets for ships that players have started/stopped watching
@@ -76,14 +78,14 @@ class ShipObjectNetworkManagerServer @Inject constructor(
         }
     }
 
-    private fun endTracking(player: IPlayer, shipsToNotTrack: Iterable<org.valkyrienskies.core.impl.api.ServerShipInternal>) {
+    private fun endTracking(player: IPlayer, shipsToNotTrack: Iterable<ServerShipInternal>) {
         val shipIds = shipsToNotTrack.map { it.id }
         if (shipIds.isEmpty()) return
         logger.debug("${player.uuid} unwatched ships $shipIds")
         spNetwork.sendToClient(PacketShipRemove(shipIds), player)
     }
 
-    private fun startTracking(player: IPlayer, shipsToTrack: Iterable<org.valkyrienskies.core.impl.api.ServerShipInternal>) {
+    private fun startTracking(player: IPlayer, shipsToTrack: Iterable<ServerShipInternal>) {
         val ships = shipsToTrack.map { it.asShipDataCommon() }
         if (ships.isEmpty()) return
         logger.debug("${player.uuid} watched ships: ${ships.map { it.id }}")

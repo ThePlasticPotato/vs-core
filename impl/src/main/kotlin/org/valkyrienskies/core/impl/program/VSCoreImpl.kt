@@ -75,6 +75,10 @@ class VSCoreImpl @Inject constructor(
         return ChunkClaimImpl(claimX, claimZ)
     }
 
+    override fun newChunkClaimFromChunkPos(chunkX: Int, chunkZ: Int): ChunkClaim {
+        return ChunkClaimImpl(ChunkClaim.getClaimXIndex(chunkX), ChunkClaim.getClaimZIndex(chunkZ))
+    }
+
     @Deprecated("Surely we can do better than this")
     override var clientUsesUDP: Boolean by networking::clientUsesUDP
 
