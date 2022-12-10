@@ -14,6 +14,9 @@ interface PhysShip {
     @VSBeta
     var buoyantFactor: Double
 
+    @VSBeta
+    var doFluidDrag: Boolean
+
     fun applyRotDependentForce(force: Vector3dc)
 
     fun applyInvariantForce(force: Vector3dc)

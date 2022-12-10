@@ -27,6 +27,9 @@ data class PhysShipImpl constructor(
     @VSBeta
     override var buoyantFactor by rigidBodyReference::buoyantFactor
 
+    @VSBeta
+    override var doFluidDrag by rigidBodyReference::doFluidDrag
+
     val inertia: PhysInertia
         get() = _inertia
 
