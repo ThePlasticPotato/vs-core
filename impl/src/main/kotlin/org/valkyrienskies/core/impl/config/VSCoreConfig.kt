@@ -41,7 +41,7 @@ object VSCoreConfig {
         @JsonSchema(
             description = "Is udp enabled? If not, the server will only use TCP"
         )
-        var enableUdp = true
+        var enableUdp = false
 
         @JsonSchema(
             description = "Ship load distance in blocks"
