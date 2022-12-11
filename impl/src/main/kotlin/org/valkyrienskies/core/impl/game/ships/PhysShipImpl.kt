@@ -1,5 +1,6 @@
 package org.valkyrienskies.core.impl.game.ships
 
+import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.VSBeta
 import org.valkyrienskies.core.api.ships.PhysShip
@@ -96,5 +97,11 @@ data class PhysShipImpl constructor(
 
         invPosForces.add(force)
         invPosPositions.add(pos)
+    }
+
+    override fun applyRotDependentForceToPos(forceInWorld: Vector3dc, relPosInWorld: Vector3dc) {
+        applyRotDependentForce(poseVel.rot.transformInverse(forceInWorld, Vector3d()))
+        val rotDependentTorque = poseVel.rot.transformInverse(relPosInWorld.cross(forceInWorld, Vector3d()))
+        applyInvariantTorque(rotDependentTorque)
     }
 }

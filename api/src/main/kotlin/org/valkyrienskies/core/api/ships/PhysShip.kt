@@ -4,7 +4,6 @@ import org.joml.Vector3dc
 import org.valkyrienskies.core.api.VSBeta
 import org.valkyrienskies.core.api.ships.properties.ShipId
 
-
 interface PhysShip {
 
     val id: ShipId
@@ -26,4 +25,15 @@ interface PhysShip {
     fun applyRotDependentTorque(torque: Vector3dc)
 
     fun applyInvariantTorque(torque: Vector3dc)
+
+    /**
+     * Use this for blocks whose force direction and force position both depend on the ship's rotation.
+     *
+     * For example, the old propeller blocks in VS1 would use this function.
+     *
+     * @param forceInWorld is the force the block makes in world coordinates
+     * @param relPosInWorld is the position the force is applied to relative to the ship's center of mass, in world
+     *                       coordinates
+     */
+    fun applyRotDependentForceToPos(forceInWorld: Vector3dc, relPosInWorld: Vector3dc)
 }
