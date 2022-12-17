@@ -114,3 +114,12 @@ fun String.execute(envp: Array<String>? = null, dir: File = projectDir): String 
 }
 
 // endregion
+
+publishing {
+    publications {
+        create<MavenPublication>(project.name) {
+            from(components["java"])
+        }
+    }
+}
+

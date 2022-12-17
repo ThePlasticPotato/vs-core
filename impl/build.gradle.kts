@@ -81,12 +81,5 @@ java {
     withSourcesJar()
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("impl") {
-            from(components["java"])
-        }
-    }
-}
 
 
