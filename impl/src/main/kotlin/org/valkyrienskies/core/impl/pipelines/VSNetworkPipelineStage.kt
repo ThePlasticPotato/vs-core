@@ -2,6 +2,7 @@ package org.valkyrienskies.core.impl.pipelines
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
+import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld
 import org.valkyrienskies.core.impl.networking.Packets
 import org.valkyrienskies.core.impl.networking.VSNetworking
@@ -32,7 +33,7 @@ class VSNetworkPipelineStage @Inject constructor(
         shipWorld.playersToTrackedShips.forEach { (player, trackedShips) ->
             val buf = Unpooled.buffer()
 
-            fun send(shipDatas: List<org.valkyrienskies.core.impl.api.ServerShipInternal>) {
+            fun send(shipDatas: List<ServerShipInternal>) {
                 // Write ship transforms into a ByteBuf
                 buf.clear()
                 writePacket(buf, shipDatas, physicsFrame)
@@ -51,7 +52,7 @@ class VSNetworkPipelineStage @Inject constructor(
     }
 
     companion object {
-        fun writePacket(buf: ByteBuf, shipDatas: List<org.valkyrienskies.core.impl.api.ServerShipInternal>, frame: VSPhysicsFrame) {
+        fun writePacket(buf: ByteBuf, shipDatas: List<ServerShipInternal>, frame: VSPhysicsFrame) {
             val ships = frame.shipDataMap
             buf.writeInt(frame.physTickNumber)
             shipDatas.forEach { shipData ->

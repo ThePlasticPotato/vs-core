@@ -145,7 +145,7 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
                     val shipId = buf.readLong()
                     val ship = shipObjects[shipId]
                     if (ship == null) {
-                        logger.warn("Received ship transform for ship with unknown ID!")
+                        logger.debug("Received ship transform for ship with unknown id: $shipId")
                         buf.skipBytes(VSNetworkPipelineStage.TRANSFORM_SIZE - 8)
                     } else if (ship.latestNetworkTTick >= tickNum) {
                         // Skip the transform if we already have it
