@@ -11,6 +11,7 @@ import io.kotest.property.arbitrary.set
 import io.kotest.property.arbitrary.zip
 import io.kotest.property.checkAll
 import org.joml.Vector3i
+import org.valkyrienskies.core.util.datastructures.blockpos.set.SingleChunkDenseBlockPosSet
 
 class SingleChunkDenseBlockPosSetTest : StringSpec({
 

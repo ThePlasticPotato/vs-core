@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.ints.*;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.valkyrienskies.core.api.util.functions.IntTernaryConsumer;
+import org.valkyrienskies.core.util.datastructures.blockposset.IBlockPosSet;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;

@@ -45,6 +45,16 @@ data class ShipTransformImpl(
         worldToShip = shipToWorld.invert(Matrix4d())
     }
 
+    fun withShipToWorld(shipToWorld: Matrix4dc): ShipTransform {
+        val m = Matrix4d(shipToWorld)
+        require(m.isAffine)
+        val positionInWorld = m.transformPosition(Vector3d(positionInShip))
+        val rotation = m.getNormalizedRotation(Quaterniond())
+        val scaling = m.getScale(Vector3d())
+
+        return ShipTransformImpl(positionInWorld, positionInShip, rotation, scaling)
+    }
+
     override fun transformDirectionNoScalingFromShipToWorld(directionInShip: Vector3dc, dest: Vector3d): Vector3d {
         return shipToWorldRotation.transform(directionInShip, dest)
     }

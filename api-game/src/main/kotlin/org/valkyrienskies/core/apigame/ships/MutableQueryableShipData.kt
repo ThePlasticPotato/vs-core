@@ -10,6 +10,8 @@ interface MutableQueryableShipData<ShipType : Ship> : QueryableShipData<ShipType
     fun remove(ship: ShipType)
     fun remove(id: ShipId)
 
+    // region Deprecated
+
     @Deprecated("renamed", ReplaceWith("add(ship)"))
     fun addShipData(ship: ShipType) = add(ship)
 
@@ -18,4 +20,6 @@ interface MutableQueryableShipData<ShipType : Ship> : QueryableShipData<ShipType
 
     @Deprecated("renamed", ReplaceWith("remove(id)"))
     fun removeShipData(id: ShipId) = remove(id)
+
+    // endregion
 }

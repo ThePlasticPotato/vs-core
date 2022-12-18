@@ -1,10 +1,10 @@
-package org.valkyrienskies.core.impl.datastructures
+package org.valkyrienskies.core.util.datastructures.blockpos.map
 
 import it.unimi.dsi.fastutil.Hash
 import it.unimi.dsi.fastutil.HashCommon.arraySize
 import it.unimi.dsi.fastutil.HashCommon.maxFill
-import org.valkyrienskies.core.impl.datastructures.MurmurHash3.fmix32
-import org.valkyrienskies.core.impl.datastructures.MurmurHash3.mix32
+import org.valkyrienskies.core.util.datastructures.blockpos.map.MurmurHash3.fmix32
+import org.valkyrienskies.core.util.datastructures.blockpos.map.MurmurHash3.mix32
 
 class BlockPos2ObjectOpenHashMap<T>(expected: Int = 10, loadFactor: Float = 0.75f) {
 

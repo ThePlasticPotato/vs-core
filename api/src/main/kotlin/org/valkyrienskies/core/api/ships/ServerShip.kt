@@ -1,11 +1,32 @@
 package org.valkyrienskies.core.api.ships
 
 import org.jetbrains.annotations.ApiStatus
+import org.joml.Matrix4dc
 import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
 
 interface ServerShip : Ship {
 
     val inertiaData: ShipInertiaData
+
+
+    /**
+     * Immediately sets the position of the ship such that the specified position in the ship, [shipX], [shipY], [shipZ]
+     * corresponds with the specified position in the world, [worldX], [worldY], [worldZ]
+     *
+     * Transform updates from the physics thread will be ignored until it reads the updated transform.
+     */
+    fun setPosition(shipX: Double, shipY: Double, shipZ: Double, worldX: Double, worldY: Double, worldZ: Double) {
+        TODO()
+    }
+
+    /**
+     * Immediately sets the [shipToWorld] transform of the ship.
+     *
+     * Transform updates from the physics thread will be ignored until it reads the updated transform.
+     */
+    fun setTransform(shipToWorld: Matrix4dc) {
+
+    }
 
     /**
      * Sets data in the persistent storage

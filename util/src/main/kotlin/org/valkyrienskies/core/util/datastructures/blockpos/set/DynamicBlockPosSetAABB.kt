@@ -1,10 +1,13 @@
-package org.valkyrienskies.core.impl.datastructures
+package org.valkyrienskies.core.util.datastructures.blockpos.set
 
 import it.unimi.dsi.fastutil.ints.Int2IntAVLTreeMap
 import org.joml.primitives.AABBi
+import org.valkyrienskies.core.util.datastructures.blockposset.IBlockPosSet
+import org.valkyrienskies.core.util.datastructures.blockposset.IBlockPosSetAABB
 
 class DynamicBlockPosSetAABB @JvmOverloads constructor(private val backing: IBlockPosSet = DenseBlockPosSet()) :
-    IBlockPosSet by backing, IBlockPosSetAABB {
+    IBlockPosSet by backing,
+    IBlockPosSetAABB {
 
     private val xMap = Int2IntAVLTreeMap()
     private val yMap = Int2IntAVLTreeMap()

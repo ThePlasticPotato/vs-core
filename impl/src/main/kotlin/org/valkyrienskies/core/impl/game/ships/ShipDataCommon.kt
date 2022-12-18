@@ -12,7 +12,7 @@ import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
 import org.valkyrienskies.core.impl.api.ShipInternal
-import org.valkyrienskies.core.impl.datastructures.IBlockPosSet
+import org.valkyrienskies.core.util.datastructures.blockposset.IBlockPosSet
 import org.valkyrienskies.core.impl.util.serialization.DeltaIgnore
 import org.valkyrienskies.core.impl.util.serialization.PacketIgnore
 import org.valkyrienskies.core.impl.util.toAABBd

@@ -6,6 +6,7 @@ import io.kotest.property.Arb
 import io.kotest.property.arbitrary.boolean
 import io.kotest.property.arbitrary.int
 import io.kotest.property.checkAll
+import org.valkyrienskies.core.util.datastructures.blockpos.set.DynamicBlockPosSetAABB
 import org.valkyrienskies.test_utils.generators.intNotNearLimit
 
 class BlockPosSetAABBGeneratorTest2 : StringSpec({

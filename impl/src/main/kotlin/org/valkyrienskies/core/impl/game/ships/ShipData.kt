@@ -14,10 +14,11 @@ import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
+import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipUser
 import org.valkyrienskies.core.impl.chunk_tracking.ShipActiveChunksSet
-import org.valkyrienskies.core.impl.datastructures.DynamicBlockPosSetAABB
-import org.valkyrienskies.core.impl.datastructures.IBlockPosSetAABB
+import org.valkyrienskies.core.util.datastructures.blockpos.set.DynamicBlockPosSetAABB
+import org.valkyrienskies.core.util.datastructures.blockposset.IBlockPosSetAABB
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
 import org.valkyrienskies.core.impl.util.serialization.PacketIgnore
 
@@ -43,7 +44,7 @@ class ShipData(
 ) : ShipDataCommon(
     id, name, chunkClaim, chunkClaimDimension, physicsData, shipTransform, prevTickShipTransform,
     shipAABB, shipVoxelAABB, shipActiveChunksSet
-), org.valkyrienskies.core.impl.api.ServerShipInternal {
+), ServerShipInternal {
     /**
      * The set of chunks that must be loaded before this ship is fully loaded.
      *
@@ -82,6 +83,10 @@ class ShipData(
                 (attachment.value as ServerShipUser).ship = this
             }
         }
+    }
+
+    override fun setTransform(shipToWorld: Matrix4dc) {
+
     }
 
     override fun onSetBlock(

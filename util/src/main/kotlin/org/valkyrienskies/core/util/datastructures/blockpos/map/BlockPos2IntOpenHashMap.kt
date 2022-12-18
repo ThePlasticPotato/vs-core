@@ -1,12 +1,12 @@
-package org.valkyrienskies.core.impl.datastructures
+package org.valkyrienskies.core.util.datastructures.blockpos.map
 
 import it.unimi.dsi.fastutil.Hash
 import it.unimi.dsi.fastutil.HashCommon.arraySize
 import it.unimi.dsi.fastutil.HashCommon.maxFill
-import org.valkyrienskies.core.impl.datastructures.MurmurHash3.fmix32
-import org.valkyrienskies.core.impl.datastructures.MurmurHash3.mix32
+import org.valkyrienskies.core.util.datastructures.blockpos.map.MurmurHash3.fmix32
+import org.valkyrienskies.core.util.datastructures.blockpos.map.MurmurHash3.mix32
 
-class BlockPos2ByteOpenHashMap(expected: Int = 10, loadFactor: Float = 0.75f) {
+class BlockPos2IntOpenHashMap(expected: Int = 10, loadFactor: Float = 0.75f) {
 
     companion object {
         private const val NUM_KEYS = 3
@@ -16,12 +16,12 @@ class BlockPos2ByteOpenHashMap(expected: Int = 10, loadFactor: Float = 0.75f) {
     private var size: Int = 0
 
     private var keys: IntArray
-    private var values: ByteArray
+    private var values: IntArray
 
     private var containsNullKey = false
     private var maxFill: Int
 
-    var defRetValue: Byte = 0
+    var defRetValue: Int = 0
 
     private val minN: Int
     private val f: Float = loadFactor // load factor
@@ -33,26 +33,26 @@ class BlockPos2ByteOpenHashMap(expected: Int = 10, loadFactor: Float = 0.75f) {
         minN = n
         maxFill = maxFill(n, loadFactor)
         keys = IntArray((n + 1) * NUM_KEYS)
-        values = ByteArray(n + 1)
+        values = IntArray(n + 1)
     }
 
-    fun get(x: Int, y: Int, z: Int): Byte {
+    fun get(x: Int, y: Int, z: Int): Int {
         val pos = find(x, y, z)
         return if (pos < 0) defRetValue else values[pos]
     }
 
-    fun put(x: Int, y: Int, z: Int, v: Byte): Byte {
+    fun put(x: Int, y: Int, z: Int, v: Int): Int {
         val pos = find(x, y, z)
         if (pos < 0) {
             insert(-pos - 1, x, y, z, v)
             return defRetValue
         }
-        val oldValue: Byte = values[pos]
+        val oldValue: Int = values[pos]
         values[pos] = v
         return oldValue
     }
 
-    fun remove(x: Int, y: Int, z: Int): Byte {
+    fun remove(x: Int, y: Int, z: Int): Int {
         if (x == 0 && y == 0 && z == 0) {
             return if (containsNullKey) removeNullEntry() else defRetValue
         }
@@ -69,16 +69,16 @@ class BlockPos2ByteOpenHashMap(expected: Int = 10, loadFactor: Float = 0.75f) {
         return find(x, y, z) >= 0
     }
 
-    private fun removeNullEntry(): Byte {
+    private fun removeNullEntry(): Int {
         containsNullKey = false
-        val oldValue: Byte = values[n]
+        val oldValue: Int = values[n]
         size--
         if (n > minN && size < maxFill / 4 && n > Hash.DEFAULT_INITIAL_SIZE) rehash(n / 2)
         return oldValue
     }
 
-    private fun removeEntry(pos: Int): Byte {
-        val oldValue: Byte = values[pos]
+    private fun removeEntry(pos: Int): Int {
+        val oldValue: Int = values[pos]
         size--
         shiftKeys(pos)
         if (n > minN && size < maxFill / 4 && n > Hash.DEFAULT_INITIAL_SIZE) rehash(n / 2)
@@ -141,7 +141,7 @@ class BlockPos2ByteOpenHashMap(expected: Int = 10, loadFactor: Float = 0.75f) {
         return fmix32(hash)
     }
 
-    private fun insert(pos: Int, x: Int, y: Int, z: Int, v: Byte) {
+    private fun insert(pos: Int, x: Int, y: Int, z: Int, v: Int) {
         if (pos == n) {
             containsNullKey = true
         }
@@ -164,7 +164,7 @@ class BlockPos2ByteOpenHashMap(expected: Int = 10, loadFactor: Float = 0.75f) {
 
         val newMask = newN - 1
         val newKey = IntArray((newN + 1) * NUM_KEYS)
-        val newValue = ByteArray(newN + 1)
+        val newValue = IntArray(newN + 1)
         var pos: Int
         var j: Int = realSize
 

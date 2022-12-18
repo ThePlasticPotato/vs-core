@@ -1,14 +1,16 @@
-package org.valkyrienskies.core.impl.datastructures
+package org.valkyrienskies.core.util.datastructures.blockpos.set
 
 import org.joml.Vector3i
 import org.joml.Vector3ic
-import org.valkyrienskies.core.impl.util.iterateBits
-import org.valkyrienskies.core.impl.util.unwrapIndex
-import org.valkyrienskies.core.impl.util.wrapIndex
+import org.valkyrienskies.core.util.datastructures.blockpos.set.SingleChunkBlockPosSet.Companion.isInBounds
+import org.valkyrienskies.core.util.datastructures.blockpos.set.SingleChunkBlockPosSet.Companion.requireInBounds
+import org.valkyrienskies.core.util.functions.iterateBits
+import org.valkyrienskies.core.util.functions.unwrapIndex
+import org.valkyrienskies.core.util.functions.wrapIndex
 import kotlin.experimental.and
 import kotlin.experimental.or
 
-class SingleChunkDenseBlockPosSet {
+class SingleChunkDenseBlockPosSet : SingleChunkBlockPosSet {
 
     val data: ByteArray = ByteArray(512)
 
@@ -32,7 +34,7 @@ class SingleChunkDenseBlockPosSet {
         }
     }
 
-    fun remove(x: Int, y: Int, z: Int): Boolean {
+    override fun remove(x: Int, y: Int, z: Int): Boolean {
         requireInBounds(x, y, z)
         val index = wrapIndex(x, y, z, dimensions)
         val realIndex = index / 8
@@ -43,7 +45,7 @@ class SingleChunkDenseBlockPosSet {
         return prev.isBitSet(offset)
     }
 
-    fun add(x: Int, y: Int, z: Int): Boolean {
+    override fun add(x: Int, y: Int, z: Int): Boolean {
         requireInBounds(x, y, z)
         val index = wrapIndex(x, y, z, dimensions)
         val realIndex = index / 8
@@ -55,7 +57,7 @@ class SingleChunkDenseBlockPosSet {
         return !prev.isBitSet(offset)
     }
 
-    fun contains(x: Int, y: Int, z: Int): Boolean {
+    override fun contains(x: Int, y: Int, z: Int): Boolean {
         if (!isInBounds(x, y, z)) {
             return false
         }
@@ -65,16 +67,6 @@ class SingleChunkDenseBlockPosSet {
         val offset = index % 8
 
         return data[realIndex].isBitSet(offset)
-    }
-
-    private fun requireInBounds(x: Int, y: Int, z: Int) {
-        require(isInBounds(x, y, z)) {
-            "Block coordinates ($x, $y, $z) must be within the bounds of the chunk (0 <= x, y, z <= 15)"
-        }
-    }
-
-    private fun isInBounds(x: Int, y: Int, z: Int): Boolean {
-        return x < dimensions.x() && x >= 0 && y < dimensions.y() && y >= 0 && z < dimensions.z() && z >= 0
     }
 }
 

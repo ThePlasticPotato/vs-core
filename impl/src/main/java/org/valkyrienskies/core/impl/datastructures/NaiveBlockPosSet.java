@@ -3,6 +3,7 @@ package org.valkyrienskies.core.impl.datastructures;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
+import org.valkyrienskies.core.util.datastructures.blockposset.IBlockPosSet;
 
 import java.util.HashSet;
 import java.util.Iterator;

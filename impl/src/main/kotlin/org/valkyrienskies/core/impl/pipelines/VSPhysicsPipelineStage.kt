@@ -5,15 +5,14 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBd
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.impl.config.PhysicsConfig
 import org.valkyrienskies.core.impl.config.VSCoreConfig
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl
+import org.valkyrienskies.core.impl.game.ships.ShipTransformImpl
 import org.valkyrienskies.core.impl.util.logger
-import org.valkyrienskies.physics_api.PhysicsWorldReference
-import org.valkyrienskies.physics_api.PoseVel
-import org.valkyrienskies.physics_api.RigidBodyInertiaData
-import org.valkyrienskies.physics_api.SegmentTracker
+import org.valkyrienskies.physics_api.*
 import org.valkyrienskies.physics_api.dummy_impl.DummyPhysicsWorldReference
 import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.VoxelRigidBodyShapeUpdates
@@ -288,6 +287,11 @@ class VSPhysicsPipelineStage @Inject constructor() {
     }
 
     companion object {
+
+        private fun RigidBodyReference.makeShipTransform(): ShipTransform {
+            TODO()
+        }
+
         private fun physInertiaToRigidBodyInertiaData(inertia: PhysInertia): RigidBodyInertiaData {
             val invMass = 1.0 / inertia.shipMass
             if (!invMass.isFinite())

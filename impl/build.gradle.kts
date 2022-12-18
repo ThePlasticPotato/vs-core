@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     api(project(":api-game"))
-
+    api(project(":util"))
     // Kotlin
     api(kotlin("stdlib-jdk8"))
     api(kotlin("reflect"))

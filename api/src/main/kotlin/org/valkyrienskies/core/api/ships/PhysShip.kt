@@ -1,12 +1,22 @@
 package org.valkyrienskies.core.api.ships
 
 import org.joml.Vector3dc
+import org.joml.primitives.AABBdc
+import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.VSBeta
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
 
 interface PhysShip {
 
     val id: ShipId
+
+//    val transform: ShipTransform
+//    val velocity: Vector3dc
+//    val omega: Vector3dc
+//
+//    val worldAABB: AABBdc
+//    val shipAABB: AABBic
 
     var isStatic: Boolean
 

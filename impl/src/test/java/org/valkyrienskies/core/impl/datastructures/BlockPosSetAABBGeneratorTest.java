@@ -12,6 +12,8 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.valkyrienskies.core.impl.VSRandomUtils;
 import org.valkyrienskies.core.impl.util.serialization.VSJacksonUtil;
+import org.valkyrienskies.core.util.datastructures.blockpos.set.DynamicBlockPosSetAABB;
+import org.valkyrienskies.core.util.datastructures.blockposset.IBlockPosSetAABB;
 
 public class BlockPosSetAABBGeneratorTest {
 

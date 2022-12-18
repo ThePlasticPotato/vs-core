@@ -10,6 +10,7 @@ import io.kotest.property.Arb
 import io.kotest.property.arbitrary.set
 import io.kotest.property.checkAll
 import org.joml.Vector3i
+import org.valkyrienskies.core.util.datastructures.blockpos.set.DenseBlockPosSet
 import org.valkyrienskies.test_utils.generators.vector3i
 import kotlin.random.Random
 

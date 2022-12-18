@@ -33,6 +33,8 @@ interface Ship {
     val shipToWorld: Matrix4dc get() = transform.shipToWorld
     val worldToShip: Matrix4dc get() = transform.worldToShip
 
+    // region Deprecated
+
     @Deprecated("renamed", ReplaceWith("prevTickTransform"))
     val prevTickShipTransform: ShipTransform get() = prevTickTransform
 
@@ -44,4 +46,6 @@ interface Ship {
 
     @Deprecated("renamed", ReplaceWith("activeChunksSet"))
     val shipActiveChunksSet: IShipActiveChunksSet get() = activeChunksSet
+
+    // endregion
 }

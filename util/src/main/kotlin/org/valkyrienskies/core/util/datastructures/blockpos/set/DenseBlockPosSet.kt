@@ -1,6 +1,9 @@
-package org.valkyrienskies.core.impl.datastructures
+package org.valkyrienskies.core.util.datastructures.blockpos.set
 
 import org.joml.Vector3ic
+import org.valkyrienskies.core.api.util.functions.IntTernaryConsumer
+import org.valkyrienskies.core.util.datastructures.blockpos.map.BlockPos2ObjectOpenHashMap
+import org.valkyrienskies.core.util.datastructures.blockposset.IBlockPosSet
 
 class DenseBlockPosSet : IBlockPosSet {
 
@@ -48,7 +51,7 @@ class DenseBlockPosSet : IBlockPosSet {
         return true
     }
 
-    inline fun forEachChunk(fn: (Int, Int, Int, SingleChunkDenseBlockPosSet) -> Unit) {
+    inline fun forEachChunk(fn: (Int, Int, Int, SingleChunkBlockPosSet) -> Unit) {
         chunks.forEach { x, y, z, chunk ->
             fn(x, y, z, chunk)
         }
@@ -60,5 +63,9 @@ class DenseBlockPosSet : IBlockPosSet {
                 fn(x + (chunkX shl 4), y + (chunkY shl 4), z + (chunkZ shl 4))
             }
         }
+    }
+
+    override fun forEach(action: IntTernaryConsumer) {
+        forEach { x, y, z -> action.accept(x, y, z) }
     }
 }

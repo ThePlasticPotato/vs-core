@@ -16,6 +16,9 @@ import org.joml.Vector3ic;
 import org.joml.primitives.AABBi;
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim;
 import org.valkyrienskies.core.api.util.functions.IntTernaryConsumer;
+import org.valkyrienskies.core.util.datastructures.blockpos.set.DenseBlockPosSet;
+import org.valkyrienskies.core.util.datastructures.blockposset.IBlockPosSet;
+import org.valkyrienskies.core.util.datastructures.blockposset.IBlockPosSetAABB;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

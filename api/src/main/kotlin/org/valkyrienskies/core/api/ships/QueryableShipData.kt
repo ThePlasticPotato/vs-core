@@ -39,6 +39,8 @@ interface QueryableShipData<out ShipType : Ship> : Collection<ShipType> {
 
     override fun isEmpty(): Boolean = size == 0
 
+    // region Deprecated
+
     @Deprecated("renamed", ReplaceWith("getIntersecting(aabb)"))
     fun getShipDataIntersecting(aabb: AABBdc): Iterable<ShipType> = getIntersecting(aabb)
 
@@ -48,5 +50,7 @@ interface QueryableShipData<out ShipType : Ship> : Collection<ShipType> {
 
     @Deprecated(message = "Use the specific functions instead, such as #getById or #iterator")
     val idToShipData: Map<ShipId, ShipType>
+
+    // endregion
 }
 

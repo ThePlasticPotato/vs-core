@@ -1,4 +1,4 @@
-package org.valkyrienskies.core.impl.datastructures;
+package org.valkyrienskies.core.util.datastructures.blockposset;
 
 import org.joml.Vector3ic;
 import org.valkyrienskies.core.api.util.functions.IntTernaryConsumer;

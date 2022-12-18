@@ -1,4 +1,4 @@
-package org.valkyrienskies.core.impl.datastructures
+package org.valkyrienskies.core.util.datastructures.blockpos.map
 
 /**
  * Implementation of MurmurHash3 directly yanked from Apache Commons

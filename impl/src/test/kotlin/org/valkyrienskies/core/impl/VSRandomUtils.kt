@@ -11,7 +11,7 @@ import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.api.ships.saveAttachment
 import org.valkyrienskies.core.impl.chunk_tracking.ShipActiveChunksSet
 import org.valkyrienskies.core.impl.datastructures.BlockPosSetAABBGenerator
-import org.valkyrienskies.core.impl.datastructures.IBlockPosSet
+import org.valkyrienskies.core.util.datastructures.blockposset.IBlockPosSet
 import org.valkyrienskies.core.impl.datastructures.SmallBlockPosSet
 import org.valkyrienskies.core.impl.game.ChunkClaimImpl
 import org.valkyrienskies.core.impl.game.ships.*
