@@ -1,13 +1,23 @@
 package org.valkyrienskies.core.impl.pipelines
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
-import org.joml.*
+import org.joml.Matrix3d
+import org.joml.Quaterniond
+import org.joml.Vector3d
+import org.joml.Vector3dc
+import org.joml.Vector3i
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.Ticked
-import org.valkyrienskies.core.impl.game.ships.*
+import org.valkyrienskies.core.impl.game.ships.PhysInertia
+import org.valkyrienskies.core.impl.game.ships.ShipData
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServer
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld
+import org.valkyrienskies.core.impl.game.ships.ShipPhysicsData
+import org.valkyrienskies.core.impl.game.ships.ShipTransformImpl
 import org.valkyrienskies.core.impl.util.logger
 import org.valkyrienskies.physics_api.PhysicsWorldReference
 import org.valkyrienskies.physics_api.PoseVel
@@ -221,7 +231,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
         }
 
         fun generateTransformFromPhysicsFrameData(
-            physicsFrameData: ShipInPhysicsFrameData, shipData: org.valkyrienskies.core.impl.api.ServerShipInternal
+            physicsFrameData: ShipInPhysicsFrameData, shipData: ServerShipInternal
         ): ShipTransform {
             val poseVelFromPhysics = physicsFrameData.poseVel
             val voxelOffsetFromPhysics = physicsFrameData.shipVoxelOffset

@@ -15,6 +15,7 @@ import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTasks
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
 import org.valkyrienskies.core.impl.game.ChunkAllocatorProvider
 import org.valkyrienskies.core.impl.game.DimensionInfo
@@ -256,7 +257,7 @@ class ShipObjectServerWorld @Inject constructor(
         }
     }
 
-    fun getShipObject(ship: org.valkyrienskies.core.impl.api.ServerShipInternal): ShipObjectServer? {
+    fun getShipObject(ship: ServerShipInternal): ShipObjectServer? {
         return loadedShips.getById(ship.id)
     }
 
