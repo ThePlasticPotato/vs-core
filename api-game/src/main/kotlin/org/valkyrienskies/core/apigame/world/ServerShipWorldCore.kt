@@ -2,12 +2,15 @@ package org.valkyrienskies.core.apigame.world
 
 import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ships.ServerShip
+import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.world.ServerShipWorld
 import org.valkyrienskies.core.apigame.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTasks
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.apigame.constraints.VSConstraint
+import org.valkyrienskies.core.apigame.constraints.VSConstraintId
 
 interface ServerShipWorldCore : ShipWorldCore, ServerShipWorld {
 
@@ -42,10 +45,27 @@ interface ServerShipWorldCore : ShipWorldCore, ServerShipWorld {
     ): ServerShip
 
     /**
+     * @return True non-null if [vsConstraint] was created successfully.
+     */
+    fun createNewConstraint(vsConstraint: VSConstraint): VSConstraintId?
+
+    /**
+     * @return True iff the constraint with id [constraintId] was successfully updated.
+     */
+    fun updateConstraint(constraintId: VSConstraintId, updatedVSConstraint: VSConstraint): Boolean
+
+    /**
+     * @return True if a constraint with [constraintId] was removed successfully.
+     */
+    fun removeConstraint(constraintId: VSConstraintId): Boolean
+
+    /**
      * Adds a newly loaded dimension with [dimensionId]. [yRange] specifies the range of valid y values for this dimension.
      * In older versions of Minecraft, this should be `[0, 255]`
      */
     fun addDimension(dimensionId: DimensionId, yRange: IntRange)
     fun removeDimension(dimensionId: DimensionId)
     fun onDisconnect(player: IPlayer)
+
+    val dimensionToGroundBodyIdImmutable: Map<DimensionId, ShipId>
 }
