@@ -82,9 +82,9 @@ object EntityPolygonCollider {
         stepHeight: Double
     ): Pair<Vector3dc, ShipId?>? {
         // region Validate inputs
-        assert(stepHeight >= 0.0) { "StepHeight was $stepHeight, which is less than 0.0!" }
-        assert(maxSlopeClimbAngle >= 0.0) { "MaxSlopeClimbAngle was $maxSlopeClimbAngle, which is less than 0.0!" }
-        assert(maxSlopeClimbAngle < 90.0) {
+        require(stepHeight >= 0.0) { "StepHeight was $stepHeight, which is less than 0.0!" }
+        require(maxSlopeClimbAngle >= 0.0) { "MaxSlopeClimbAngle was $maxSlopeClimbAngle, which is less than 0.0!" }
+        require(maxSlopeClimbAngle < 90.0) {
             "MaxSlopeClimbAngle was $maxSlopeClimbAngle, which is greater than or equal to 90.0!"
         }
         // endregion
@@ -247,12 +247,7 @@ object EntityPolygonCollider {
      * Return a thin slice of the bounding box, positioned below the feet of [entityAABB].
      */
     private fun getFeetSlice(entityAABB: AABBdc, topPosRelative: Double, botPosRelative: Double): AABBdc {
-        assert(topPosRelative <= 0.0) { " topPosRelative was $topPosRelative. It must be less than or equal to 0!" }
-        assert(
-            botPosRelative < topPosRelative
-        ) { " botPosRelative was $botPosRelative, which is less than topPosRelative with value of $topPosRelative" }
         val height = entityAABB.maxY() - entityAABB.minY()
-        assert(height > 0.0) { "height was $height. It must be greater than 0.0!" }
         val footYPos = entityAABB.minY()
         val topPos = footYPos + topPosRelative * height
         val botPos = footYPos + botPosRelative * height
