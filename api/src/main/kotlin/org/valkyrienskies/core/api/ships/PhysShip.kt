@@ -31,9 +31,9 @@ interface PhysShip {
      *
      * For example, the old propeller blocks in VS1 would use this function.
      *
-     * @param forceInWorld is the force the block makes in world coordinates
-     * @param relPosInWorld is the position the force is applied to relative to the ship's center of mass, in world
+     * @param force is the force the block makes in world coordinates will be transformed based on ship rotation.
+     * @param pos is the position the force is applied to relative to the ship's center of mass, in world
      *                       coordinates
      */
-    fun applyRotDependentForceToPos(forceInWorld: Vector3dc, relPosInWorld: Vector3dc)
+    fun applyRotDependentForceToPos(force: Vector3dc, pos: Vector3dc)
 }

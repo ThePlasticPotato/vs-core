@@ -12,7 +12,7 @@ import org.valkyrienskies.core.impl.util.pollUntilEmpty
 import org.valkyrienskies.physics_api.PoseVel
 import org.valkyrienskies.physics_api.RigidBodyReference
 import org.valkyrienskies.physics_api.SegmentTracker
-import java.util.*
+import java.util.ArrayDeque
 
 data class PhysShipImpl constructor(
     override val id: ShipId,
@@ -99,9 +99,12 @@ data class PhysShipImpl constructor(
         invPosPositions.add(pos)
     }
 
-    override fun applyRotDependentForceToPos(forceInWorld: Vector3dc, relPosInWorld: Vector3dc) {
-        applyRotDependentForce(poseVel.rot.transformInverse(forceInWorld, Vector3d()))
-        val rotDependentTorque = poseVel.rot.transformInverse(relPosInWorld.cross(forceInWorld, Vector3d()))
-        applyInvariantTorque(rotDependentTorque)
+    override fun applyRotDependentForceToPos(force: Vector3dc, pos: Vector3dc) {
+        requireIsFinite(force)
+        requireIsFinite(pos)
+        assertIsPhysicsThread()
+
+        invPosForces.add(poseVel.rot.transform(force, Vector3d()))
+        invPosPositions.add(pos)
     }
 }
