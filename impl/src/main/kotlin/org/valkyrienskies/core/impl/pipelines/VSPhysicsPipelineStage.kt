@@ -63,6 +63,7 @@ import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.VoxelRigidBodyShapeUpdates
 import org.valkyrienskies.physics_api_krunch.KrunchBootstrap
 import org.valkyrienskies.physics_api_krunch.KrunchPhysicsWorldSettings
+import org.valkyrienskies.physics_api_krunch.SolverType.GAUSS_SEIDEL
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
 import kotlin.math.max
@@ -344,6 +345,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
         val settings = KrunchPhysicsWorldSettings()
         // Only use 10 sub-steps
         settings.subSteps = 10
+        settings.solverType = GAUSS_SEIDEL
+        settings.iterations = 1
 
         // Decrease max de-penetration speed so that rigid bodies don't go
         // flying apart when they overlap
