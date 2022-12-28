@@ -1,6 +1,8 @@
 package org.valkyrienskies.core.apigame.world
 
 import org.joml.Vector3ic
+import org.valkyrienskies.core.api.physics.constraints.VSConstraint
+import org.valkyrienskies.core.api.physics.constraints.VSConstraintId
 import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.world.ServerShipWorld
@@ -9,8 +11,6 @@ import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTasks
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
-import org.valkyrienskies.core.apigame.constraints.VSConstraint
-import org.valkyrienskies.core.apigame.constraints.VSConstraintId
 
 interface ServerShipWorldCore : ShipWorldCore, ServerShipWorld {
 

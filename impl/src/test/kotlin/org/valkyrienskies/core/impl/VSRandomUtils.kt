@@ -246,7 +246,7 @@ object VSRandomUtils {
     fun randomShipInPhysicsFrame(id: ShipId = randomShipId()): ShipInPhysicsFrameData =
         ShipInPhysicsFrameData(
             id,
-            RigidBodyInertiaData(
+            PhysicsBodyInertiaData(
                 Random.nextDouble(),
                 randomMatrix3d()
             ),
@@ -256,7 +256,7 @@ object VSRandomUtils {
                 randomVector3d(),
                 randomVector3d()
             ),
-            SingleSegmentTracker(Segment(0, SegmentDisplacement(PoseVel.NULL_POSE_VEL, 1.0, 0))),
+            SingleSegmentTracker(),
             randomVector3d(),
             randomAABBd()
         )

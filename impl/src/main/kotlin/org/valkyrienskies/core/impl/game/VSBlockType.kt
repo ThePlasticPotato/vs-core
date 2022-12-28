@@ -1,7 +1,7 @@
 package org.valkyrienskies.core.impl.game
 
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
-import org.valkyrienskies.physics_api.voxel_updates.KrunchVoxelStates
+import org.valkyrienskies.physics_api.voxel.KrunchVoxelStates
 
 data class BlockTypeImpl(val state: Byte) : BlockType {
     @Deprecated("", ReplaceWith("state"))

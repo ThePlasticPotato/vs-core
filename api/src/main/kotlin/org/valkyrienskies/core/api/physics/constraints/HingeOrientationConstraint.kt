@@ -1,6 +1,8 @@
-package org.valkyrienskies.core.apigame.constraints
+package org.valkyrienskies.core.api.physics.constraints
 
 import org.joml.Quaterniondc
+import org.valkyrienskies.core.api.VSBeta
+import org.valkyrienskies.core.api.physics.constraints.VSConstraintType.HINGE_ORIENTATION
 import org.valkyrienskies.core.api.ships.properties.ShipId
 
 /**
@@ -8,7 +10,8 @@ import org.valkyrienskies.core.api.ships.properties.ShipId
  *
  * The result is the two bodies will be forced to rotate along a hinge.
  */
-data class VSHingeOrientationConstraint(
+@VSBeta
+data class HingeOrientationConstraint(
     override val shipId0: ShipId,
     override val shipId1: ShipId,
     override val compliance: Double,
@@ -16,5 +19,5 @@ data class VSHingeOrientationConstraint(
     override val localRot1: Quaterniondc,
     override val maxTorque: Double
 ) : VSTorqueConstraint {
-    override val constraintType: VSConstraintType = VSConstraintType.HINGE_ORIENTATION
+    override val constraintType: VSConstraintType = HINGE_ORIENTATION
 }

@@ -3,24 +3,23 @@ package org.valkyrienskies.core.impl.pipelines
 import org.joml.Vector3dc
 import org.joml.Vector3ic
 import org.joml.primitives.AABBic
+import org.valkyrienskies.core.api.physics.constraints.VSConstraintAndId
+import org.valkyrienskies.core.api.physics.constraints.VSConstraintId
 import org.valkyrienskies.core.api.ships.properties.ShipId
-import org.valkyrienskies.core.apigame.constraints.VSConstraint
-import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
-import org.valkyrienskies.core.apigame.constraints.VSConstraintId
 import org.valkyrienskies.core.impl.api.ShipForcesInducer
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.ShipPhysicsData
 import org.valkyrienskies.physics_api.PoseVel
 import org.valkyrienskies.physics_api.SegmentTracker
-import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
 
 /**
  * A [VSGameFrame] represents the change of state of the game that occurred over 1 tick
  */
 data class VSGameFrame(
-    val newShips: List<NewShipInGameFrameData>, // Ships to be added to the Physics simulation
-    val deletedShips: List<ShipId>, // Ships to be deleted from the Physics simulation
-    val updatedShips: Map<ShipId, UpdateShipInGameFrameData>, // Map of ship updates
+    val newBodies: List<NewVoxelRigidBodyFrameData>, // Ships to be added to the Physics simulation
+    val deletedBodies: List<ShipId>, // Ships to be deleted from the Physics simulation
+    val updatedBodies: Map<ShipId, UpdateRigidBodyFrameData>, // Map of ship updates
     val voxelUpdatesMap: Map<ShipId, List<IVoxelShapeUpdate>>, // Voxel updates applied by this frame
     val constraintsCreatedThisTick: List<VSConstraintAndId>,
     val constraintsUpdatedThisTick: List<VSConstraintAndId>,
@@ -30,7 +29,7 @@ data class VSGameFrame(
 /**
  * The data used to add a new ship to the physics engine
  */
-data class NewShipInGameFrameData(
+data class NewVoxelRigidBodyFrameData(
     val uuid: ShipId,
     val dimension: Int,
     val minDefined: Vector3ic,
@@ -46,7 +45,7 @@ data class NewShipInGameFrameData(
     val forcesInducers: List<ShipForcesInducer>
 )
 
-data class UpdateShipInGameFrameData(
+data class UpdateRigidBodyFrameData(
     val uuid: ShipId,
     val newVoxelOffset: Vector3dc,
     val inertiaData: PhysInertia,

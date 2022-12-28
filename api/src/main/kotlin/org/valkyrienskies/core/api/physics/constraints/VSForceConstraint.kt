@@ -1,10 +1,12 @@
-package org.valkyrienskies.core.apigame.constraints
+package org.valkyrienskies.core.api.physics.constraints
 
 import org.joml.Vector3dc
+import org.valkyrienskies.core.api.VSBeta
 
 /**
  * A constraint that applies a force on two bodies.
  */
+@VSBeta
 interface VSForceConstraint : VSConstraint {
     // The local position of the constraint in body0
     val localPos0: Vector3dc

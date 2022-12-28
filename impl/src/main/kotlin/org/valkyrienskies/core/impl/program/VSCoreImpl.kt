@@ -17,8 +17,8 @@ import org.valkyrienskies.core.impl.networking.VSNetworking.NetworkingModule.TCP
 import org.valkyrienskies.core.impl.networking.VSNetworkingConfigurator
 import org.valkyrienskies.core.impl.pipelines.VSPipelineComponent
 import org.valkyrienskies.core.impl.pipelines.VSPipelineImpl
-import org.valkyrienskies.physics_api.voxel_updates.DeleteVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel_updates.EmptyVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.DeleteVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.EmptyVoxelShapeUpdate
 import org.valkyrienskies.physics_api_krunch.KrunchBootstrap
 import javax.inject.Inject
 

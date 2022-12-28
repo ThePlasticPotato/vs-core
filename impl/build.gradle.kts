@@ -2,6 +2,10 @@ plugins {
     id("vs-core.convention")
 }
 
+repositories {
+    mavenLocal()
+}
+
 dependencies {
     api(project(":api-game"))
 
@@ -15,7 +19,7 @@ dependencies {
     val kotestVersion = "5.4.1"
 
     // VS Physics
-    api("org.valkyrienskies:physics_api_krunch:1.0.0+622fabeb30")
+    api("org.valkyrienskies:physics_api_krunch:1.0.0+706f2c5e58")
 
     // JOML for Math
     api("org.joml:joml:1.10.4")

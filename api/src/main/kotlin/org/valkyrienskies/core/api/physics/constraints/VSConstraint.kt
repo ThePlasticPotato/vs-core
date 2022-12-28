@@ -1,7 +1,9 @@
-package org.valkyrienskies.core.apigame.constraints
+package org.valkyrienskies.core.api.physics.constraints
 
+import org.valkyrienskies.core.api.VSBeta
 import org.valkyrienskies.core.api.ships.properties.ShipId
 
+@VSBeta
 sealed interface VSConstraint {
     val shipId0: ShipId
     val shipId1: ShipId

@@ -4,13 +4,14 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.valkyrienskies.physics_api.*
 
+@Deprecated("Segments don't exist anymore")
 object SegmentUtils {
     fun createSegmentDisplacementFromScaling(dimension: Int, scaling: Double): SegmentDisplacement {
         return SegmentDisplacement(PoseVel.NULL_POSE_VEL, scaling, dimension)
     }
 
     fun createSegmentTrackerFromScaling(dimension: Int, scaling: Double): SegmentTracker {
-        return SingleSegmentTracker(Segment(0, createSegmentDisplacementFromScaling(dimension, scaling)))
+        return SingleSegmentTracker()
     }
 
     fun transformPos(

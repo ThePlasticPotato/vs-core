@@ -4,12 +4,12 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.Vector3i
 import org.joml.Vector3ic
+import org.valkyrienskies.core.api.physics.constraints.VSConstraint
+import org.valkyrienskies.core.api.physics.constraints.VSConstraintAndId
+import org.valkyrienskies.core.api.physics.constraints.VSConstraintId
+import org.valkyrienskies.core.api.physics.constraints.VSForceConstraint
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.properties.ShipId
-import org.valkyrienskies.core.apigame.constraints.VSConstraint
-import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
-import org.valkyrienskies.core.apigame.constraints.VSConstraintId
-import org.valkyrienskies.core.apigame.constraints.VSForceConstraint
 import org.valkyrienskies.core.apigame.world.IPlayer
 import org.valkyrienskies.core.apigame.world.ServerShipWorldCore
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
@@ -47,11 +47,11 @@ import org.valkyrienskies.core.impl.networking.VSNetworking
 import org.valkyrienskies.core.impl.util.WorldScoped
 import org.valkyrienskies.core.impl.util.assertions.stages.TickStageEnforcer
 import org.valkyrienskies.core.impl.util.names.NounListNameGenerator
-import org.valkyrienskies.physics_api.voxel_updates.DeleteVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel_updates.DenseVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel_updates.EmptyVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel_updates.SparseVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.DeleteVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.DenseVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.EmptyVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.SparseVoxelShapeUpdate
 import java.util.concurrent.CompletableFuture
 import javax.inject.Inject
 import javax.inject.Named
@@ -242,6 +242,8 @@ class ShipObjectServerWorld @Inject constructor(
                     newVoxelShapeUpdate.addUpdate(posX and 15, posY and 15, posZ and 15, voxelType)
                     voxelUpdates[chunkPos] = newVoxelShapeUpdate
                 }
+
+                is DeleteVoxelShapeUpdate -> TODO()
             }
         }
     }
@@ -259,6 +261,7 @@ class ShipObjectServerWorld @Inject constructor(
             when (it) {
                 is DenseVoxelShapeUpdate, is EmptyVoxelShapeUpdate -> ship.onLoadChunk(it.regionX, it.regionZ)
                 is DeleteVoxelShapeUpdate -> ship.onUnloadChunk(it.regionX, it.regionZ)
+                is SparseVoxelShapeUpdate -> TODO()
             }
 
             if (it is DenseVoxelShapeUpdate) {

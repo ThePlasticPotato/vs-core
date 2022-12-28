@@ -1,7 +1,9 @@
-package org.valkyrienskies.core.apigame.constraints
+package org.valkyrienskies.core.api.physics.constraints
 
 import org.joml.Vector3d
 import org.joml.Vector3dc
+import org.valkyrienskies.core.api.VSBeta
+import org.valkyrienskies.core.api.physics.constraints.VSConstraintType.SLIDE
 import org.valkyrienskies.core.api.ships.properties.ShipId
 
 /**
@@ -12,7 +14,8 @@ import org.valkyrienskies.core.api.ships.properties.ShipId
  * This should always be used with a [HingeOrientationConstraint] to prevent the axis of the slide constraint from
  * changing.
  */
-data class VSSlideConstraint(
+@VSBeta
+data class SlideConstraint(
     override val shipId0: ShipId,
     override val shipId1: ShipId,
     override val compliance: Double,
@@ -24,12 +27,12 @@ data class VSSlideConstraint(
     // The max distance the two points can differ along the slide axis
     val maxDistBetweenPoints: Double
 ) : VSForceConstraint {
-    override fun offsetLocalPositions(offset0: Vector3dc, offset1: Vector3dc): VSSlideConstraint {
-        return VSSlideConstraint(
+    override fun offsetLocalPositions(offset0: Vector3dc, offset1: Vector3dc): SlideConstraint {
+        return SlideConstraint(
             shipId0, shipId1, compliance, localPos0.add(offset0, Vector3d()), localPos1.add(offset1, Vector3d()),
             maxForce, localSlideAxis0, maxDistBetweenPoints
         )
     }
 
-    override val constraintType: VSConstraintType = VSConstraintType.SLIDE
+    override val constraintType: VSConstraintType = SLIDE
 }
