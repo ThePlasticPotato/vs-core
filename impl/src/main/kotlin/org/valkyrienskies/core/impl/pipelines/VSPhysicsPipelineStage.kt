@@ -127,6 +127,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
             ship.forceInducers.forEach { it.applyForces(ship) }
             ship.applyQueuedForces()
         }
+        
+        // TODO Tick physics tick hooks
 
         // Run the physics engine
         physicsEngine.tick(gravity, timeStep, simulatePhysics)
