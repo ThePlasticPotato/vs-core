@@ -5,7 +5,6 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBd
 import org.valkyrienskies.core.api.VSBeta
-import org.valkyrienskies.core.api.physics.PhysicsVoxelShape
 import org.valkyrienskies.core.api.physics.constraints.HingeTargetAngleConstraint
 import org.valkyrienskies.core.api.physics.constraints.MaxDistanceConstraint
 import org.valkyrienskies.core.api.physics.constraints.VSConstraint
@@ -38,7 +37,6 @@ import org.valkyrienskies.physics_api.PhysicsWorldReference
 import org.valkyrienskies.physics_api.PoseVel
 import org.valkyrienskies.physics_api.SegmentId
 import org.valkyrienskies.physics_api.SegmentTracker
-import org.valkyrienskies.physics_api.VoxelShape
 import org.valkyrienskies.physics_api.constraints.AttachmentConstraintData
 import org.valkyrienskies.physics_api.constraints.ConstraintAndId
 import org.valkyrienskies.physics_api.constraints.ConstraintData
@@ -190,7 +188,6 @@ class VSPhysicsPipelineStage @Inject constructor() {
                 PhysShipImpl(
                     shipId,
                     newRigidBodyReference,
-                    voxelShape.intoVS(),
                     newShipInGameFrameData.forcesInducers,
                     inertiaData,
                     poseVel,
@@ -490,8 +487,6 @@ class VSPhysicsPipelineStage @Inject constructor() {
 
             return PhysicsBodyInertiaData(invMass, invInertiaMatrix)
         }
-
-        private fun VoxelShape.intoVS() = object : PhysicsVoxelShape {}
 
         private const val MAX_UPDATES_PER_PHYS_TICK = 1000
 

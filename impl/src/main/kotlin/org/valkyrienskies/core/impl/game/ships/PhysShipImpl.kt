@@ -3,7 +3,6 @@ package org.valkyrienskies.core.impl.game.ships
 import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.VSBeta
-import org.valkyrienskies.core.api.physics.PhysicsVoxelShape
 import org.valkyrienskies.core.api.ships.PhysShip
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.impl.api.ShipForcesInducer
@@ -20,7 +19,6 @@ data class PhysShipImpl constructor(
     override val id: ShipId,
     // Don't use these outside of vs-core, I beg of thee
     val rigidBodyReference: PhysicsBodyReference<VoxelShape>,
-    override val shape: PhysicsVoxelShape,
 
     var forceInducers: List<ShipForcesInducer>,
     var _inertia: PhysInertia,

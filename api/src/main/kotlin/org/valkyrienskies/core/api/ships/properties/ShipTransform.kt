@@ -6,17 +6,12 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
 
+
 interface ShipTransform {
 
     val positionInWorld: Vector3dc
-    val positionInShip: Vector3dc // Center of mass in shipyard
-    val rotation: Quaterniondc get() = shipToWorldRotation
-    val scaling: Double get() = shipToWorldScaling.x()
-
-    @Deprecated("renamed", ReplaceWith("rotation"))
+    val positionInShip: Vector3dc
     val shipToWorldRotation: Quaterniondc
-
-    @Deprecated("renamed", ReplaceWith("scaling"))
     val shipToWorldScaling: Vector3dc
 
     /**
@@ -53,4 +48,5 @@ interface ShipTransform {
 
     @Deprecated("renamed", ReplaceWith("worldToShip"))
     val worldToShipMatrix: Matrix4dc get() = worldToShip
+
 }
