@@ -11,21 +11,20 @@ import org.valkyrienskies.core.impl.util.assertions.requireIsFinite
 import org.valkyrienskies.core.impl.util.pollUntilEmpty
 import org.valkyrienskies.physics_api.PhysicsBodyReference
 import org.valkyrienskies.physics_api.PoseVel
-import org.valkyrienskies.physics_api.SegmentTracker
-import org.valkyrienskies.physics_api.VoxelShape
+import org.valkyrienskies.physics_api.VoxelShapeReference
 import java.util.ArrayDeque
 
 data class PhysShipImpl constructor(
     override val id: ShipId,
     // Don't use these outside of vs-core, I beg of thee
-    val rigidBodyReference: PhysicsBodyReference<VoxelShape>,
+    val rigidBodyReference: PhysicsBodyReference<VoxelShapeReference>,
 
     var forceInducers: List<ShipForcesInducer>,
     var _inertia: PhysInertia,
 
     // TODO transformation matrix
     var poseVel: PoseVel,
-    var segments: SegmentTracker,
+    internal val dimension: Int
 ) : PhysShip {
     @VSBeta
     override var buoyantFactor by rigidBodyReference::buoyantFactor
@@ -43,7 +42,7 @@ data class PhysShipImpl constructor(
     private val invPosForces = ArrayDeque<Vector3dc>()
     private val invPosPositions = ArrayDeque<Vector3dc>()
 
-    override var isStatic = false
+    override var isStatic by rigidBodyReference::isStatic
 
     fun applyQueuedForces() {
         invForces.pollUntilEmpty(rigidBodyReference::addInvariantForceToNextPhysTick)
@@ -60,8 +59,6 @@ data class PhysShipImpl constructor(
 
         check(invPosPositions.isEmpty())
         check(invPosForces.isEmpty())
-
-        rigidBodyReference.isStatic = isStatic
     }
 
     override fun applyInvariantForce(force: Vector3dc) {

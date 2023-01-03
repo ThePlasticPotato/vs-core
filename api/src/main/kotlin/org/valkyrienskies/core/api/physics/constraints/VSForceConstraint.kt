@@ -17,5 +17,5 @@ interface VSForceConstraint : VSConstraint {
     // The maximum force this constraint can tolerate before it breaks
     val maxForce: Double
 
-    fun offsetLocalPositions(offset0: Vector3dc, offset1: Vector3dc): VSConstraint
+    fun setLocalPositions(pos0: Vector3dc, pos1: Vector3dc): VSConstraint
 }

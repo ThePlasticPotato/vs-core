@@ -1,6 +1,5 @@
 package org.valkyrienskies.core.api.physics.constraints
 
-import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.VSBeta
 import org.valkyrienskies.core.api.physics.constraints.VSConstraintType.POS_DAMPING
@@ -19,11 +18,8 @@ data class PosDampingConstraint(
     override val maxForce: Double,
     val posDamping: Double
 ) : VSForceConstraint {
-    override fun offsetLocalPositions(offset0: Vector3dc, offset1: Vector3dc): PosDampingConstraint {
-        return PosDampingConstraint(
-            shipId0, shipId1, compliance, localPos0.add(offset0, Vector3d()), localPos1.add(offset1, Vector3d()),
-            maxForce, posDamping
-        )
+    override fun setLocalPositions(pos0: Vector3dc, pos1: Vector3dc): PosDampingConstraint {
+        return PosDampingConstraint(shipId0, shipId1, compliance, pos0, pos1, maxForce, posDamping)
     }
 
     override val constraintType: VSConstraintType = POS_DAMPING

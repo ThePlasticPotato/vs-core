@@ -16,7 +16,7 @@ interface IShipActiveChunksSet {
 
     fun forEach(func: IntBinaryConsumer)
 
-    fun getMinMaxWorldPos(minWorldPos: Vector3i, maxWorldPos: Vector3i) {
+    fun getMinMaxWorldPos(minWorldPos: Vector3i, maxWorldPos: Vector3i, worldYRange: IntRange) {
         if (size == 0) {
             // Just set the ship to be undefined everywhere
             minWorldPos.set(Int.MAX_VALUE)
@@ -33,8 +33,8 @@ interface IShipActiveChunksSet {
             maxChunkX = max(maxChunkX, chunkX)
             maxChunkZ = max(maxChunkZ, chunkZ)
         }
-        minWorldPos.set(minChunkX shl 4, 0, minChunkZ shl 4)
-        maxWorldPos.set((maxChunkX shl 4) + 15, 255, (maxChunkZ shl 4) + 15)
+        minWorldPos.set(minChunkX shl 4, worldYRange.first, minChunkZ shl 4)
+        maxWorldPos.set((maxChunkX shl 4) + 15, worldYRange.last, (maxChunkZ shl 4) + 15)
     }
 
     @Deprecated("renamed", ReplaceWith("remove(chunkX, chunkZ)"))

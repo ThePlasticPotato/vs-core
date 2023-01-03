@@ -256,7 +256,7 @@ object VSRandomUtils {
                 randomVector3d(),
                 randomVector3d()
             ),
-            SingleSegmentTracker(),
+            defaultRandom.nextDouble(),
             randomVector3d(),
             randomAABBd()
         )

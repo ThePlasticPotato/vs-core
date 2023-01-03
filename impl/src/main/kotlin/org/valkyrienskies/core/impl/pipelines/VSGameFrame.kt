@@ -10,7 +10,6 @@ import org.valkyrienskies.core.impl.api.ShipForcesInducer
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.ShipPhysicsData
 import org.valkyrienskies.physics_api.PoseVel
-import org.valkyrienskies.physics_api.SegmentTracker
 import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
 
 /**
@@ -38,7 +37,7 @@ data class NewVoxelRigidBodyFrameData(
     val inertiaData: PhysInertia,
     val physicsData: ShipPhysicsData,
     val poseVel: PoseVel,
-    val segments: SegmentTracker,
+    val shipScaling: Double,
     val voxelOffset: Vector3dc,
     val isStatic: Boolean,
     val shipVoxelsFullyLoaded: Boolean,
@@ -48,6 +47,7 @@ data class NewVoxelRigidBodyFrameData(
 data class UpdateRigidBodyFrameData(
     val uuid: ShipId,
     val newVoxelOffset: Vector3dc,
+    val newScaling: Double,
     val inertiaData: PhysInertia,
     val physicsData: ShipPhysicsData,
     val isStatic: Boolean,

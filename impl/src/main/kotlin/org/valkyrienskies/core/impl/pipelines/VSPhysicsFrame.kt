@@ -5,7 +5,6 @@ import org.joml.primitives.AABBdc
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.physics_api.PhysicsBodyInertiaData
 import org.valkyrienskies.physics_api.PoseVel
-import org.valkyrienskies.physics_api.SegmentTracker
 import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
 
 /**
@@ -22,7 +21,7 @@ data class ShipInPhysicsFrameData(
     val uuid: ShipId,
     val inertiaData: PhysicsBodyInertiaData,
     val poseVel: PoseVel,
-    val segments: SegmentTracker,
+    val shipScaling: Double, // The scaling applied to the collision shape of the ship
     val shipVoxelOffset: Vector3dc, // The voxel offset of the ship at this physics frame
     val aabb: AABBdc
 )
