@@ -9,7 +9,7 @@ import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
 import org.valkyrienskies.core.impl.api.ShipInternal
 import org.valkyrienskies.core.impl.datastructures.IBlockPosSet
@@ -35,7 +35,7 @@ class AbstractUnloadedShip(private val data: ShipDataCommon) : ShipInternal {
         set(shipTransform) {
             field = shipTransform
             // Update the [shipAABB]
-            worldAABB = shipAABB?.toAABBd(AABBd())?.transform(shipTransform.shipToWorld, AABBd())
+            worldAABB = shipAABB?.toAABBd(AABBd())?.transform(shipTransform.toWorld, AABBd())
                 ?: shipTransform.createEmptyAABB()
         }
 
@@ -88,9 +88,9 @@ class AbstractUnloadedShip(private val data: ShipDataCommon) : ShipInternal {
     }
 
     override val shipToWorld: Matrix4dc
-        get() = transform.shipToWorld
+        get() = transform.toWorld
     override val worldToShip: Matrix4dc
-        get() = transform.worldToShip
+        get() = transform.toModel
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

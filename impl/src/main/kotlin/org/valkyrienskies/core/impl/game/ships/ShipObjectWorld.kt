@@ -8,7 +8,7 @@ import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.world.ShipWorld
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.impl.api.ShipInternal
 import org.valkyrienskies.core.impl.game.ChunkAllocatorProvider
 import org.valkyrienskies.core.impl.util.coroutines.TickableCoroutineDispatcher

@@ -20,7 +20,7 @@ import org.valkyrienskies.core.apigame.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTasks
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
 import org.valkyrienskies.core.impl.game.ChunkAllocatorProvider
@@ -270,7 +270,7 @@ class ShipObjectServerWorld @Inject constructor(
             when (it) {
                 is DenseVoxelShapeUpdate, is EmptyVoxelShapeUpdate -> ship.onLoadChunk(it.regionX, it.regionZ)
                 is DeleteVoxelShapeUpdate -> ship.onUnloadChunk(it.regionX, it.regionZ)
-                is SparseVoxelShapeUpdate -> TODO()
+                else -> {}
             }
 
             if (it is DenseVoxelShapeUpdate) {
@@ -600,4 +600,12 @@ class ShipObjectServerWorld @Inject constructor(
         val dimensionId: DimensionId,
         val updates: List<IVoxelShapeUpdate>
     )
+}
+
+fun main() {
+    val a: Any = "xd"
+    when (a) {
+        is Int -> println("hi")
+    }
+    println(a)
 }

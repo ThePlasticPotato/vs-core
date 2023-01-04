@@ -2,7 +2,7 @@ package org.valkyrienskies.core.apigame.world
 
 import org.valkyrienskies.core.api.world.ShipWorld
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 
 interface ShipWorldCore : ShipWorld {
     fun onSetBlock(

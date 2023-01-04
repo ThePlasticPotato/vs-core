@@ -18,4 +18,6 @@ interface MutableQueryableShipData<ShipType : Ship> : QueryableShipData<ShipType
 
     @Deprecated("renamed", ReplaceWith("remove(id)"))
     fun removeShipData(id: ShipId) = remove(id)
+
+    fun updatePositionIndex()
 }

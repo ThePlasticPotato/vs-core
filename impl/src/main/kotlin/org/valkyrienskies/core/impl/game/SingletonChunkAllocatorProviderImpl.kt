@@ -1,6 +1,6 @@
 package org.valkyrienskies.core.impl.game
 
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import javax.inject.Inject
 import javax.inject.Named
 

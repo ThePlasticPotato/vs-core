@@ -2,7 +2,7 @@ package org.valkyrienskies.core.apigame.world.chunks
 
 import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.apigame.world.IPlayer
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 
 interface ChunkWatchTask : Comparable<ChunkWatchTask> {
     val chunkPos: Long

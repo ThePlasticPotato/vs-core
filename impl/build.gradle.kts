@@ -21,6 +21,8 @@ dependencies {
     // VS Physics
     api("org.valkyrienskies:physics_api_krunch:1.0.0+cf19fdcc84")
 
+    implementation("ch.ethz.globis.phtree:phtree:2.5.0")
+
     // JOML for Math
     api("org.joml:joml:1.10.4")
     api("org.joml:joml-primitives:1.10.0")

@@ -1,7 +1,7 @@
 package org.valkyrienskies.core.apigame.world
 
 import org.joml.Vector3d
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import java.util.UUID
 
 /**

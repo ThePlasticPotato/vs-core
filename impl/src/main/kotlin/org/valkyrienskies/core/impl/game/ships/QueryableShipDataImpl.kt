@@ -1,10 +1,11 @@
 package org.valkyrienskies.core.impl.game.ships
 
+import ch.ethz.globis.phtree.PhTreeSolidF
 import org.joml.primitives.AABBdc
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.Ship
 import org.valkyrienskies.core.api.ships.properties.ShipId
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.apigame.ships.MutableQueryableShipData
 import org.valkyrienskies.core.impl.datastructures.ChunkClaimMap
 import org.valkyrienskies.core.impl.util.intersectsAABB
@@ -26,6 +27,8 @@ open class QueryableShipDataImpl<ShipType : Ship>(
      * a ship between dimensions.
      */
     private val chunkClaimToShipData: ChunkClaimMap<ShipType> = ChunkClaimMap()
+
+    private val spatialIndex = PhTreeSolidF.create<ShipType>(3)
 
     init {
         data.forEach(::add)
@@ -50,6 +53,10 @@ open class QueryableShipDataImpl<ShipType : Ship>(
                 last = null
             }
         }
+    }
+
+    override fun updatePositionIndex() {
+
     }
 
     override fun add(ship: ShipType) {

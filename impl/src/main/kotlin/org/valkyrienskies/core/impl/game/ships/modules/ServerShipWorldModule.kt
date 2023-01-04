@@ -3,7 +3,7 @@ package org.valkyrienskies.core.impl.game.ships.modules
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.impl.game.ChunkAllocator
 import org.valkyrienskies.core.impl.game.ChunkAllocatorProvider
 import org.valkyrienskies.core.impl.game.DimensionInfo

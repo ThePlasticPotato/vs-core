@@ -13,7 +13,7 @@ import org.valkyrienskies.core.api.physics.constraints.VSForceConstraint
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.Ticked
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
@@ -170,10 +170,10 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val totalVoxelRegion = it.chunkClaim.getTotalVoxelRegion(yRange)
 
             val krunchDimensionId = getKrunchDimensionId(it.shipData.chunkClaimDimension)
-            val scaling = it.shipData.transform.shipToWorldScaling.x()
+            val scaling = it.shipData.transform.scaling.x()
 
             val poseVel = PoseVel.createPoseVel(
-                it.shipData.transform.positionInWorld, it.shipData.transform.shipToWorldRotation
+                it.shipData.transform.position, it.shipData.transform.rotation
             )
             val voxelOffset = getShipVoxelOffset(it.shipData.inertiaData)
             val isStatic = it.shipData.isStatic
@@ -200,7 +200,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
         updatedShipObjects.forEach {
             val uuid = it.shipData.id
             val newVoxelOffset = getShipVoxelOffset(it.shipData.inertiaData)
-            val newScaling = it.shipData.transform.shipToWorldScaling.x()
+            val newScaling = it.shipData.transform.scaling.x()
             val isStatic = it.shipData.isStatic
             val isVoxelsFullyLoaded = it.shipData.areVoxelsFullyLoaded()
             // Deep copy objects from ShipData, since we don't want VSGameFrame to be modified
@@ -293,8 +293,8 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
         }
 
         // TODO: Make a helper for this
-        val ship0Scaling = ship0?.shipData?.transform?.shipToWorldScaling?.x() ?: 1.0
-        val ship1Scaling = ship1?.shipData?.transform?.shipToWorldScaling?.x() ?: 1.0
+        val ship0Scaling = ship0?.shipData?.transform?.scaling?.x() ?: 1.0
+        val ship1Scaling = ship1?.shipData?.transform?.scaling?.x() ?: 1.0
 
         // Offset force constraints by the center of mass before sending them to the physics pipeline
         // TODO: I'm not entirely sure why I have to subtract 0.5 here, but it works
@@ -319,7 +319,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val voxelOffsetFromPhysics = physicsFrameData.shipVoxelOffset
             val voxelOffsetFromGame = getShipVoxelOffset(shipData.inertiaData)
 
-            val oldScaling = shipData.transform.shipToWorldScaling.x()
+            val oldScaling = shipData.transform.scaling.x()
             val newScaling = physicsFrameData.shipScaling
             val deltaVoxelOffset = poseVelFromPhysics.rot.transform(Vector3d(voxelOffsetFromGame).mul(newScaling).sub(Vector3d(voxelOffsetFromPhysics).mul(oldScaling)))
 

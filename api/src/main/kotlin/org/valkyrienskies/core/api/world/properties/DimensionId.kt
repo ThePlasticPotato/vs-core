@@ -1,3 +1,3 @@
-package org.valkyrienskies.core.apigame.world.properties
+package org.valkyrienskies.core.api.world.properties
 
 typealias DimensionId = String

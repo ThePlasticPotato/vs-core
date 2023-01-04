@@ -8,30 +8,28 @@ import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.vsentities.VSEntity
+import org.valkyrienskies.core.api.world.properties.DimensionId
 
 /**
  * Abstraction of a ship, there are many types such as offline ships
  *  or loaded ships so this is the generic interface for all ships.
  */
-interface Ship {
+interface Ship : VSEntity {
 
-    val id: ShipId
+    override val id: ShipId
 
-    val transform: ShipTransform
-    val prevTickTransform: ShipTransform
+    override val transform: ShipTransform
+    override val prevTickTransform: ShipTransform
 
     val chunkClaim: ChunkClaim
     val chunkClaimDimension: DimensionId
-    val worldAABB: AABBdc
     val shipAABB: AABBic?
-    val velocity: Vector3dc
-    val omega: Vector3dc
 
     val activeChunksSet: IShipActiveChunksSet
 
-    val shipToWorld: Matrix4dc get() = transform.shipToWorld
-    val worldToShip: Matrix4dc get() = transform.worldToShip
+    val shipToWorld: Matrix4dc get() = transform.toWorld
+    val worldToShip: Matrix4dc get() = transform.toModel
 
     @Deprecated("renamed", ReplaceWith("prevTickTransform"))
     val prevTickShipTransform: ShipTransform get() = prevTickTransform

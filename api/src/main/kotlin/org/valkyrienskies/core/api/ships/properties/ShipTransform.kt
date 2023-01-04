@@ -5,48 +5,54 @@ import org.joml.Quaterniondc
 import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
+import org.valkyrienskies.core.api.vsentities.properties.EntityTransform
 
 
-interface ShipTransform {
+@Deprecated("renamed", ReplaceWith("EntityTransform", "org.valkyrienskies.core.api.vsentities.properties.EntityTransform"))
+interface ShipTransform : EntityTransform {
 
-    val positionInWorld: Vector3dc
-    val positionInShip: Vector3dc
-    val shipToWorldRotation: Quaterniondc
-    val shipToWorldScaling: Vector3dc
-
-    /**
-     * Transforms positions and directions from ship coordinates to world coordinates
-     */
-    val shipToWorld: Matrix4dc
-
-    /**
-     * Transforms positions and directions from world coordinates to ships coordinates
-     */
-    val worldToShip: Matrix4dc
     fun transformDirectionNoScalingFromShipToWorld(directionInShip: Vector3dc, dest: Vector3d): Vector3d
     fun transformDirectionNoScalingFromWorldToShip(directionInWorld: Vector3dc, dest: Vector3d): Vector3d
 
     /**
-     * Create an empty [AABBdc] centered around [positionInWorld].
+     * Create an empty [AABBdc] centered around [position].
      */
     fun createEmptyAABB(): AABBdc
 
-    @Deprecated("renamed", ReplaceWith("positionInWorld"))
-    val shipPositionInWorldCoordinates: Vector3dc get() = positionInWorld
+    @Deprecated("renamed", ReplaceWith("positionInModel"))
+    val positionInShip: Vector3dc get() = positionInModel
 
-    @Deprecated("renamed", ReplaceWith("positionInShip"))
-    val shipPositionInShipCoordinates: Vector3dc get() = positionInShip
+    @Deprecated("renamed", ReplaceWith("rotation"))
+    val shipToWorldRotation: Quaterniondc get() = rotation
 
-    @Deprecated("renamed", ReplaceWith("shipToWorldRotation"))
-    val shipCoordinatesToWorldCoordinatesRotation: Quaterniondc get() = shipToWorldRotation
+    @Deprecated("renamed", ReplaceWith("scaling"))
+    val shipToWorldScaling: Vector3dc get() = scaling
 
-    @Deprecated("renamed", ReplaceWith("shipToWorldScaling"))
-    val shipCoordinatesToWorldCoordinatesScaling: Vector3dc get() = shipToWorldScaling
+    @Deprecated("renamed", ReplaceWith("toWorld"))
+    val shipToWorld: Matrix4dc get() = toWorld
 
-    @Deprecated("renamed", ReplaceWith("shipToWorld"))
-    val shipToWorldMatrix: Matrix4dc get() = shipToWorld
+    @Deprecated("renamed", ReplaceWith("toModel"))
+    val worldToShip: Matrix4dc get() = toModel
 
-    @Deprecated("renamed", ReplaceWith("worldToShip"))
-    val worldToShipMatrix: Matrix4dc get() = worldToShip
+    @Deprecated("renamed", ReplaceWith("position"))
+    val positionInWorld: Vector3dc get() = position
+
+    @Deprecated("renamed", ReplaceWith("position"))
+    val shipPositionInWorldCoordinates: Vector3dc get() = position
+
+    @Deprecated("renamed", ReplaceWith("positionInModel"))
+    val shipPositionInShipCoordinates: Vector3dc get() = positionInModel
+
+    @Deprecated("renamed", ReplaceWith("rotation"))
+    val shipCoordinatesToWorldCoordinatesRotation: Quaterniondc get() = rotation
+
+    @Deprecated("renamed", ReplaceWith("scaling"))
+    val shipCoordinatesToWorldCoordinatesScaling: Vector3dc get() = scaling
+
+    @Deprecated("renamed", ReplaceWith("toWorld"))
+    val shipToWorldMatrix: Matrix4dc get() = toWorld
+
+    @Deprecated("renamed", ReplaceWith("toModel"))
+    val worldToShipMatrix: Matrix4dc get() = toModel
 
 }

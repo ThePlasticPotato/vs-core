@@ -42,7 +42,7 @@ class ShipObjectClient(
     fun updateRenderShipTransform(partialTicks: Double) {
         renderTransform =
             ShipTransformImpl.createFromSlerp(shipData.prevTickTransform, shipData.transform, partialTicks)
-        renderAABB = shipData.shipAABB?.toAABBd(AABBd())?.transform(renderTransform.shipToWorld, AABBd())
+        renderAABB = shipData.shipAABB?.toAABBd(AABBd())?.transform(renderTransform.toWorld, AABBd())
             ?: renderTransform.createEmptyAABB()
     }
 

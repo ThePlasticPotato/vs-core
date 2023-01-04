@@ -2,7 +2,7 @@ package org.valkyrienskies.core.impl.chunk_tracking
 
 import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.apigame.world.IPlayer
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
 

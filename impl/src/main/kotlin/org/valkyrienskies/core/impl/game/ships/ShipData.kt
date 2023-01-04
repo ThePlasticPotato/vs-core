@@ -13,7 +13,7 @@ import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipUser
 import org.valkyrienskies.core.impl.chunk_tracking.ShipActiveChunksSet
@@ -65,9 +65,9 @@ class ShipData(
     private val shipAABBGenerator: IBlockPosSetAABB = DynamicBlockPosSetAABB()
 
     override val shipToWorld: Matrix4dc
-        get() = transform.shipToWorld
+        get() = transform.toWorld
     override val worldToShip: Matrix4dc
-        get() = transform.worldToShip
+        get() = transform.toModel
 
     init {
         shipActiveChunksSet.forEach { chunkX: Int, chunkZ: Int ->

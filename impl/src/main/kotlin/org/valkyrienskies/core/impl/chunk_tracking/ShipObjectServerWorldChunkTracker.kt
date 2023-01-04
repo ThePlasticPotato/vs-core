@@ -12,7 +12,7 @@ import org.valkyrienskies.core.apigame.world.IPlayer
 import org.valkyrienskies.core.apigame.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTasks
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.config.VSCoreConfig
 import org.valkyrienskies.core.impl.game.DimensionInfo
@@ -124,7 +124,7 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
                         (voxelAABB?.maxY()?.toDouble() ?: worldHeight.last.toDouble()) + 1.0,
                         (chunkZ shl 4).toDouble() + 16.0
                     )
-                    .transform(shipTransform.shipToWorld)
+                    .transform(shipTransform.toWorld)
 
                 val newPlayersWatching: MutableList<IPlayer> = ArrayList()
                 val newPlayersUnwatching: MutableList<IPlayer> = ArrayList()
