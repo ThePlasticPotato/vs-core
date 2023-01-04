@@ -1,6 +1,5 @@
 package org.valkyrienskies.core.impl.game.ships
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.google.common.collect.MutableClassToInstanceMap
 import org.joml.Matrix4dc
 import org.joml.Quaterniond
@@ -12,15 +11,14 @@ import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
-import org.valkyrienskies.core.apigame.world.chunks.BlockType
 import org.valkyrienskies.core.api.world.properties.DimensionId
+import org.valkyrienskies.core.apigame.world.chunks.BlockType
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipUser
 import org.valkyrienskies.core.impl.chunk_tracking.ShipActiveChunksSet
 import org.valkyrienskies.core.impl.datastructures.DynamicBlockPosSetAABB
 import org.valkyrienskies.core.impl.datastructures.IBlockPosSetAABB
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
-import org.valkyrienskies.core.impl.util.serialization.PacketIgnore
 
 /**
  * The purpose of [ShipData] is to keep track of the state of a ship; it does not manage the behavior of a ship.
@@ -33,7 +31,7 @@ class ShipData(
     chunkClaim: ChunkClaim,
     chunkClaimDimension: DimensionId,
     physicsData: ShipPhysicsData,
-    @PacketIgnore override val inertiaData: ShipInertiaDataImpl,
+    override val inertiaData: ShipInertiaDataImpl,
     shipTransform: ShipTransform,
     prevTickShipTransform: ShipTransform,
     shipAABB: AABBdc,
@@ -52,7 +50,6 @@ class ShipData(
      *
      * Also, this is transient, so we don't want to save it
      */
-    @JsonIgnore
     private val missingLoadedChunks: IShipActiveChunksSet = ShipActiveChunksSet.create()
 
     /**
@@ -61,7 +58,6 @@ class ShipData(
      *
      * This can also be used to quickly iterate over every block in this ship.
      */
-    @JsonIgnore
     private val shipAABBGenerator: IBlockPosSetAABB = DynamicBlockPosSetAABB()
 
     override val shipToWorld: Matrix4dc
