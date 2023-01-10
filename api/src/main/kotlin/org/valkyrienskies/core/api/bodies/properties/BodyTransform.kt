@@ -4,7 +4,7 @@ import org.joml.Matrix4dc
 import org.joml.Quaterniondc
 import org.joml.Vector3dc
 
-interface EntityTransform {
+interface BodyTransform {
 
     /**
      * The position of the entity in world-space

@@ -5,11 +5,11 @@ import org.joml.Quaterniondc
 import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
-import org.valkyrienskies.core.api.bodies.properties.EntityTransform
+import org.valkyrienskies.core.api.bodies.properties.BodyTransform
 
 
-@Deprecated("renamed", ReplaceWith("EntityTransform", "org.valkyrienskies.core.api.vsentities.properties.EntityTransform"))
-interface ShipTransform : EntityTransform {
+@Deprecated("renamed", ReplaceWith("BodyTransform", "org.valkyrienskies.core.api.bodies.properties.BodyTransform"))
+interface ShipTransform : BodyTransform {
 
     fun transformDirectionNoScalingFromShipToWorld(directionInShip: Vector3dc, dest: Vector3d): Vector3d
     fun transformDirectionNoScalingFromWorldToShip(directionInWorld: Vector3dc, dest: Vector3d): Vector3d
