@@ -1,11 +1,11 @@
 package org.valkyrienskies.core.impl.game.ships.serialization
 
 class ChainUpdaterImpl<T>(
-    val updateTo: Class<T>,
-    vararg mappings: Pair<Class<*>, DtoUpdater<*, *>>
+    private val updateTo: Class<T>,
+    private val mappings: Map<Class<*>, DtoUpdater<*, *>>,
 ) : ChainUpdater<T> {
-
-    private val mappings = mappings.toMap()
+    constructor(updateTo: Class<T>, vararg mappings: Pair<Class<*>, DtoUpdater<*, *>>)
+        : this(updateTo, mappings.toMap())
 
     @Suppress("UNCHECKED_CAST")
     override fun updateToLatest(value: Any): T {

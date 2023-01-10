@@ -4,6 +4,7 @@ import org.valkyrienskies.core.apigame.ships.ServerShipCore
 import org.valkyrienskies.core.impl.game.ships.ShipDataCommon
 
 interface ServerShipInternal : ServerShipCore, ShipInternal {
+    @Deprecated("not good, should have separate dto for sending over network")
     fun asShipDataCommon(): ShipDataCommon
 
     /**

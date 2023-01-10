@@ -1,4 +1,4 @@
-package org.valkyrienskies.core.api.vsentities.properties
+package org.valkyrienskies.core.api.bodies.properties
 
 import org.joml.Matrix4dc
 import org.joml.Quaterniondc

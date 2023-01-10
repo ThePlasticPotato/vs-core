@@ -17,10 +17,15 @@ interface QueryableShipData<out ShipType : Ship> : Collection<ShipType> {
      */
     fun getByChunkPos(chunkX: Int, chunkZ: Int, dimensionId: DimensionId): ShipType?
 
-    /**
-     * Returns an [Iterable] containing every ship with an in-world AABB that intersects the supplied [aabb]
-     */
+
+    @Deprecated("should filter by dimension", ReplaceWith("getIntersecting(aabb, dimensionId)"))
     fun getIntersecting(aabb: AABBdc): Iterable<ShipType>
+
+    /**
+     * Returns an [Iterable] containing every ship with an in-world AABB that intersects the supplied [aabb],
+     * in the specified [dimensionId]
+     */
+    fun getIntersecting(aabb: AABBdc, dimensionId: DimensionId): Iterable<ShipType>
 
     /**
      * Returns true if a ship with the supplied [shipId] exists in this collection

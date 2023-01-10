@@ -1,21 +1,19 @@
 package org.valkyrienskies.core.api.ships
 
 import org.joml.Matrix4dc
-import org.joml.Vector3dc
-import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
-import org.valkyrienskies.core.api.vsentities.VSEntity
+import org.valkyrienskies.core.api.bodies.VSBody
 import org.valkyrienskies.core.api.world.properties.DimensionId
 
 /**
  * Abstraction of a ship, there are many types such as offline ships
  *  or loaded ships so this is the generic interface for all ships.
  */
-interface Ship : VSEntity {
+interface Ship : VSBody {
 
     override val id: ShipId
 

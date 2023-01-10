@@ -96,9 +96,14 @@ open class QueryableShipDataImpl<ShipType : Ship>(
     override val size: Int
         get() = _idToShipData.size
 
+    @Deprecated("should filter by dimension", replaceWith = ReplaceWith("getIntersecting(aabb, dimensionId)"))
     override fun getIntersecting(aabb: AABBdc): Iterable<ShipType> {
         // TODO Use https://github.com/tzaeschke/phtree
         return _idToShipData.values.filter { it.worldAABB.intersectsAABB(aabb) }
+    }
+
+    override fun getIntersecting(aabb: AABBdc, dimensionId: DimensionId): Iterable<ShipType> {
+        return _idToShipData.values.filter { it.worldAABB.intersectsAABB(aabb) && it.chunkClaimDimension == dimensionId }
     }
 
     override fun equals(other: Any?): Boolean {

@@ -5,7 +5,7 @@ import org.joml.Quaterniondc
 import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
-import org.valkyrienskies.core.api.vsentities.properties.EntityTransform
+import org.valkyrienskies.core.api.bodies.properties.EntityTransform
 
 
 @Deprecated("renamed", ReplaceWith("EntityTransform", "org.valkyrienskies.core.api.vsentities.properties.EntityTransform"))

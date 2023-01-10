@@ -34,7 +34,7 @@ class ServerShipDataConverterImpl @Inject constructor(
         shipAABB = model.shipAABB,
         activeChunks = model.activeChunksSet,
         isStatic = model.isStatic,
-        persistentAttachedData = model.persistentAttachedData
+        persistentAttachedData = model.legacyPersistentAttachedData
     )
 
     override fun convertToModel(dto: ServerShipDataV3): ShipData = ShipData(
@@ -50,6 +50,6 @@ class ServerShipDataConverterImpl @Inject constructor(
         shipVoxelAABB = dto.shipAABB,
         shipActiveChunksSet = dto.activeChunks,
         isStatic = dto.isStatic,
-        persistentAttachedData = MutableClassToInstanceMap.create(dto.persistentAttachedData)
+        legacyPersistentAttachedData = MutableClassToInstanceMap.create(dto.persistentAttachedData)
     )
 }

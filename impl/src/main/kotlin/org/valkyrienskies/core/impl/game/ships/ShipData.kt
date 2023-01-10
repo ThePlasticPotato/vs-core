@@ -38,7 +38,7 @@ class ShipData(
     shipVoxelAABB: AABBic?,
     shipActiveChunksSet: IShipActiveChunksSet,
     var isStatic: Boolean = false,
-    val persistentAttachedData: MutableClassToInstanceMap<Any> = MutableClassToInstanceMap.create(),
+    val legacyPersistentAttachedData: MutableClassToInstanceMap<Any> = MutableClassToInstanceMap.create(),
 ) : ShipDataCommon(
     id, name, chunkClaim, chunkClaimDimension, physicsData, shipTransform, prevTickShipTransform,
     shipAABB, shipVoxelAABB, shipActiveChunksSet
@@ -70,7 +70,7 @@ class ShipData(
             missingLoadedChunks.add(chunkX, chunkZ)
         }
 
-        for (attachment in this.persistentAttachedData) {
+        for (attachment in this.legacyPersistentAttachedData) {
             if (
                 ServerShipUser::class.java.isAssignableFrom(attachment.key) &&
                 attachment.value != null &&
@@ -135,6 +135,7 @@ class ShipData(
         return missingLoadedChunks.size == 0
     }
 
+    @Deprecated("not good, should have separate dto for sending over network")
     override fun asShipDataCommon(): ShipDataCommon = this
 
     override fun <T> saveAttachment(clazz: Class<T>, value: T?) {
@@ -143,12 +144,12 @@ class ShipData(
         }
 
         if (value == null)
-            persistentAttachedData.remove(clazz)
+            legacyPersistentAttachedData.remove(clazz)
         else
-            persistentAttachedData[clazz] = value
+            legacyPersistentAttachedData[clazz] = value
     }
 
-    override fun <T> getAttachment(clazz: Class<T>): T? = persistentAttachedData.getInstance(clazz)
+    override fun <T> getAttachment(clazz: Class<T>): T? = legacyPersistentAttachedData.getInstance(clazz)
 
     companion object {
         /**

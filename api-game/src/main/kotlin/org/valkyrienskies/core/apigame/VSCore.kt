@@ -1,12 +1,13 @@
 package org.valkyrienskies.core.apigame
 
+import org.valkyrienskies.core.api.VSCoreApi
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.apigame.hooks.CoreHooks
 import org.valkyrienskies.core.apigame.world.VSPipeline
 import org.valkyrienskies.core.apigame.world.chunks.BlockTypes
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 
-interface VSCore {
+interface VSCore : VSCoreApi {
 
     val hooks: CoreHooks
 

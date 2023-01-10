@@ -1,4 +1,5 @@
 package org.valkyrienskies.core.api.world
 
-interface ValkyrienServerWorld {
+interface ValkyrienServerWorld : ValkyrienGameWorld {
+
 }

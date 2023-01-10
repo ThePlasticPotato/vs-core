@@ -25,7 +25,7 @@ class ShipObjectServer(
     val toBeTicked = mutableListOf<Ticked>()
 
     init {
-        for (data in shipData.persistentAttachedData) {
+        for (data in shipData.legacyPersistentAttachedData) {
             applyAttachmentInterfaces(data.key, data.value)
         }
     }
