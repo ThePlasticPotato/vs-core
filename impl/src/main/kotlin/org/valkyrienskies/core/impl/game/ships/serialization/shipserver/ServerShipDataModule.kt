@@ -18,5 +18,8 @@ interface ServerShipDataModule {
 
     @Binds
     fun v2(impl: ServerShipDataV2UpdaterImpl): ServerShipDataV2Updater
+
+    @Binds
+    fun v3(impl: ServerShipDataV3UpdaterImpl): ServerShipDataV3Updater
 }
 

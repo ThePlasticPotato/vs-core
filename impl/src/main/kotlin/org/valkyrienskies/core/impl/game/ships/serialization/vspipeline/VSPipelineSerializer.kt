@@ -11,7 +11,7 @@ import org.valkyrienskies.core.impl.game.ships.serialization.shipserver.dto.Serv
 import org.valkyrienskies.core.impl.game.ships.serialization.shipserver.dto.ServerShipDataV0Updater
 import org.valkyrienskies.core.impl.game.ships.serialization.vspipeline.dto.VSPipelineData
 import org.valkyrienskies.core.impl.game.ships.serialization.vspipeline.dto.VSPipelineDataV1
-import org.valkyrienskies.core.impl.game.ships.serialization.vspipeline.dto.VSPipelineDataV3
+import org.valkyrienskies.core.impl.game.ships.serialization.vspipeline.dto.VSPipelineDataV4
 import org.valkyrienskies.core.impl.pipelines.VSPipelineImpl
 import org.valkyrienskies.core.impl.util.serialization.VSJacksonUtil
 import javax.inject.Inject
@@ -20,7 +20,7 @@ import javax.inject.Named
 class VSPipelineSerializer @Inject constructor(
     @Named("dto") private val objectMapper: ObjectMapper,
     private val shipDataMapper: ServerShipDataConverter,
-    private val updater: ChainUpdater<VSPipelineDataV3>,
+    private val updater: ChainUpdater<VSPipelineDataV4>,
     private val v0Updater: ServerShipDataV0Updater,
     private val pipelineDataConverter: VSPipelineDataConverter
 ) {
@@ -40,7 +40,7 @@ class VSPipelineSerializer @Inject constructor(
         // eventually we will want to have different chunk allocators per dimension, but for now we have only one.
         val chunks = (pipeline.shipWorld.chunkAllocators as SingletonChunkAllocatorProviderImpl).allocator
 
-        val pipelineData = VSPipelineDataV3(chunks, ships)
+        val pipelineData = VSPipelineDataV4(chunks, ships)
 
         return objectMapper.writeValueAsBytes(pipelineData)
     }

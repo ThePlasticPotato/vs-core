@@ -27,6 +27,12 @@ interface ServerShip : Ship {
      */
     @ApiStatus.Experimental
     fun <T> getAttachment(clazz: Class<T>): T?
+
+    fun setWing(posX: Int, posY: Int, posZ: Int, wing: Wing): Boolean
+
+    fun getWing(posX: Int, posY: Int, posZ: Int): Wing?
+
+    fun getWings(): Collection<PositionedWing>
 }
 
 @ApiStatus.Experimental

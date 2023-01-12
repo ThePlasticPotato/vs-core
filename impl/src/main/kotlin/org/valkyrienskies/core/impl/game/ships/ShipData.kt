@@ -6,8 +6,11 @@ import org.joml.Matrix4dc
 import org.joml.Quaterniond
 import org.joml.Vector3d
 import org.joml.Vector3dc
+import org.joml.Vector3i
 import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
+import org.valkyrienskies.core.api.ships.PositionedWing
+import org.valkyrienskies.core.api.ships.Wing
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet
 import org.valkyrienskies.core.api.ships.properties.ShipId
@@ -17,6 +20,7 @@ import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipUser
 import org.valkyrienskies.core.impl.chunk_tracking.ShipActiveChunksSet
+import org.valkyrienskies.core.impl.datastructures.BlockPos2ObjectOpenHashMap
 import org.valkyrienskies.core.impl.datastructures.DynamicBlockPosSetAABB
 import org.valkyrienskies.core.impl.datastructures.IBlockPosSetAABB
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
@@ -41,6 +45,7 @@ class ShipData(
     shipActiveChunksSet: IShipActiveChunksSet,
     var isStatic: Boolean = false,
     val persistentAttachedData: MutableClassToInstanceMap<Any> = MutableClassToInstanceMap.create(),
+    @PacketIgnore val wingsMap: BlockPos2ObjectOpenHashMap<Wing> = BlockPos2ObjectOpenHashMap()
 ) : ShipDataCommon(
     id, name, chunkClaim, chunkClaimDimension, physicsData, shipTransform, prevTickShipTransform,
     shipAABB, shipVoxelAABB, shipActiveChunksSet
@@ -153,6 +158,22 @@ class ShipData(
     }
 
     override fun <T> getAttachment(clazz: Class<T>): T? = persistentAttachedData.getInstance(clazz)
+
+    override fun setWing(posX: Int, posY: Int, posZ: Int, wing: Wing): Boolean {
+        return wingsMap.put(posX, posY, posZ, wing) != null
+    }
+
+    override fun getWing(posX: Int, posY: Int, posZ: Int): Wing? {
+        return wingsMap.get(posX, posY, posZ)
+    }
+
+    override fun getWings(): Collection<PositionedWing> {
+        val wings = ArrayList<PositionedWing>()
+        wingsMap.forEach { x, y, z, wing ->
+            wings.add(PositionedWing(Vector3i(x, y, z), wing))
+        }
+        return wings
+    }
 
     companion object {
         /**

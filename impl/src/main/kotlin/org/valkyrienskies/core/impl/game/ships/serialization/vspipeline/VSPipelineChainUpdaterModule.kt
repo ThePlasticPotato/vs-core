@@ -10,10 +10,11 @@ import org.valkyrienskies.core.impl.game.ships.serialization.vspipeline.dto.*
 class VSPipelineChainUpdaterModule {
 
     @Provides
-    fun updater(v1: VSPipelineDataV1Updater, v2: VSPipelineDataV2Updater): ChainUpdater<VSPipelineDataV3> =
+    fun updater(v1: VSPipelineDataV1Updater, v2: VSPipelineDataV2Updater, v3: VSPipelineDataV3Updater): ChainUpdater<VSPipelineDataV4> =
         ChainUpdaterImpl(
-            updateTo = VSPipelineDataV3::class.java,
+            updateTo = VSPipelineDataV4::class.java,
             VSPipelineDataV1::class.java to v1,
-            VSPipelineDataV2::class.java to v2
+            VSPipelineDataV2::class.java to v2,
+            VSPipelineDataV3::class.java to v3,
         )
 }
