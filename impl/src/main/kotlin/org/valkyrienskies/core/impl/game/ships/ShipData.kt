@@ -12,8 +12,9 @@ import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
+import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipUser
 import org.valkyrienskies.core.impl.chunk_tracking.ShipActiveChunksSet
 import org.valkyrienskies.core.impl.datastructures.DynamicBlockPosSetAABB
@@ -43,7 +44,7 @@ class ShipData(
 ) : ShipDataCommon(
     id, slug, chunkClaim, chunkClaimDimension, physicsData, shipTransform, prevTickShipTransform,
     shipAABB, shipVoxelAABB, shipActiveChunksSet
-), org.valkyrienskies.core.impl.api.ServerShipInternal {
+), ServerShipInternal {
     /**
      * The set of chunks that must be loaded before this ship is fully loaded.
      *

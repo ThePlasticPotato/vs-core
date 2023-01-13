@@ -16,6 +16,7 @@ data class ChunkTrackingInfo(
     val playersToShipsNoLongerWatchingMap: Map<IPlayer, Set<ServerShipInternal>>,
     val shipsToLoad: Set<ServerShipInternal>,
     val shipsToUnload: Set<ServerShipInternal>,
+    val newPlayers: Set<IPlayer>
 ) {
     fun getShipsPlayerIsWatching(player: IPlayer): Iterable<ServerShipInternal> {
         return (playersToShipsWatchingMap[player] ?: emptyMap()).keys

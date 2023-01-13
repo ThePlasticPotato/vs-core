@@ -15,4 +15,6 @@ interface ClientShipWorldCore : ShipWorldCore, ClientShipWorld {
     fun updateRenderTransforms(partialTicks: Double)
 
     fun destroyWorld()
+
+    val isSyncedWithServer: Boolean
 }

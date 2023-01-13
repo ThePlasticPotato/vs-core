@@ -2,6 +2,8 @@ package org.valkyrienskies.core.impl.game.ships
 
 import com.google.common.collect.MutableClassToInstanceMap
 import org.joml.Vector3d
+import org.valkyrienskies.core.impl.api.LoadedServerShipInternal
+import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipUser
 import org.valkyrienskies.core.impl.api.ShipForcesInducer
 import org.valkyrienskies.core.impl.api.Ticked
@@ -10,8 +12,7 @@ import org.valkyrienskies.core.impl.util.serialization.VSJacksonUtil
 
 class ShipObjectServer(
     override val shipData: ShipData
-) : ShipObject(shipData),
-    org.valkyrienskies.core.impl.api.LoadedServerShipInternal, org.valkyrienskies.core.impl.api.ServerShipInternal by shipData {
+) : ShipObject(shipData), LoadedServerShipInternal, ServerShipInternal by shipData {
 
     val shipDataChannel = DeltaEncodedChannelServerTCP(
         jsonDiffDeltaAlgorithm,

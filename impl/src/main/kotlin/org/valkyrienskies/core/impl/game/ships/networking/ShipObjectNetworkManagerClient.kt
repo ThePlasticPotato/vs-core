@@ -10,10 +10,15 @@ import org.valkyrienskies.core.impl.game.ships.ShipDataCommon
 import org.valkyrienskies.core.impl.game.ships.ShipObjectClient
 import org.valkyrienskies.core.impl.game.ships.ShipObjectClientWorld
 import org.valkyrienskies.core.impl.game.ships.ShipTransformImpl
-import org.valkyrienskies.core.impl.networking.*
+import org.valkyrienskies.core.impl.networking.Packet
+import org.valkyrienskies.core.impl.networking.Packets
+import org.valkyrienskies.core.impl.networking.RegisteredHandler
+import org.valkyrienskies.core.impl.networking.VSCryptUtils
+import org.valkyrienskies.core.impl.networking.VSNetworking
 import org.valkyrienskies.core.impl.networking.impl.PacketShipDataCreate
 import org.valkyrienskies.core.impl.networking.impl.PacketShipRemove
 import org.valkyrienskies.core.impl.networking.simple.SimplePacketNetworking
+import org.valkyrienskies.core.impl.networking.unregisterAll
 import org.valkyrienskies.core.impl.pipelines.VSNetworkPipelineStage
 import org.valkyrienskies.core.impl.util.logger
 import org.valkyrienskies.core.impl.util.read3FAsNormQuatd
@@ -40,6 +45,12 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
     private lateinit var handlers: List<RegisteredHandler>
 
     private var secretKey: SecretKey? = null
+
+    /**
+     * Set to true once the player has received their first [PacketShipDataCreate]
+     */
+    @Volatile
+    var hasReceivedInitialShips = false
 
     fun registerPacketListeners() {
         handlers = listOf(
@@ -77,6 +88,7 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
                 )
             }
         }
+        hasReceivedInitialShips = true
     }
 
     private fun onShipDataDelta(packet: Packet) = worldScope.launch {
@@ -133,7 +145,7 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
                     val shipId = buf.readLong()
                     val ship = shipObjects[shipId]
                     if (ship == null) {
-                        logger.warn("Received ship transform for ship with unknown ID!")
+                        logger.debug("Received ship transform for ship with unknown id: $shipId")
                         buf.skipBytes(VSNetworkPipelineStage.TRANSFORM_SIZE - 8)
                     } else if (ship.latestNetworkTTick >= tickNum) {
                         // Skip the transform if we already have it

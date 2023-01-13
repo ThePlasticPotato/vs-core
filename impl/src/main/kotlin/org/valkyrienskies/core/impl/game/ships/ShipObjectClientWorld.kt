@@ -34,6 +34,9 @@ class ShipObjectClientWorld @Inject constructor(
 
     private val _loadedShips: MutableQueryableShipData<ShipObjectClient> = QueryableShipDataImpl()
 
+    override val isSyncedWithServer: Boolean
+        get() = networkManager.hasReceivedInitialShips
+
     override val loadedShips: QueryableShipData<ShipObjectClient>
         get() = _loadedShips
 

@@ -63,6 +63,8 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
 
     private val shipsToUnload = HashSet<ServerShipInternal>()
 
+    private var newPlayers: Set<IPlayer> = setOf()
+
     private fun cleanDeletedShips(deletedShips: Iterable<ServerShipInternal>) {
         for (ship in deletedShips) {
             playersToShipsWatchingMap.values.forEach { it.remove(ship) }
@@ -94,6 +96,7 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
         cleanDeletedShips(deletedShips)
         // Remove players that left the world
         removePlayers(lastTickPlayers - players)
+        newPlayers = players - lastTickPlayers
 
         val newChunkWatchTasks = TreeSet<ChunkWatchTask>()
         val newChunkUnwatchTasks = TreeSet<ChunkUnwatchTask>()
@@ -219,7 +222,8 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
             playersToShipsNewlyWatchingMap,
             playersToShipsNoLongerWatchingMap,
             shipsToLoad,
-            shipsToUnload
+            shipsToUnload,
+            newPlayers
         )
     }
 

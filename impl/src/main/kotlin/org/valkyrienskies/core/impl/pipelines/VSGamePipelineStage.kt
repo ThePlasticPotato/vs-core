@@ -1,13 +1,27 @@
 package org.valkyrienskies.core.impl.pipelines
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
-import org.joml.*
+import org.joml.Matrix3d
+import org.joml.Quaterniond
+import org.joml.Vector3d
+import org.joml.Vector3dc
+import org.joml.Vector3i
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
+import org.valkyrienskies.core.apigame.constraints.VSConstraint
+import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
+import org.valkyrienskies.core.apigame.constraints.VSConstraintId
+import org.valkyrienskies.core.apigame.constraints.VSForceConstraint
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.Ticked
-import org.valkyrienskies.core.impl.game.ships.*
+import org.valkyrienskies.core.impl.game.ships.PhysInertia
+import org.valkyrienskies.core.impl.game.ships.ShipData
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServer
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld
+import org.valkyrienskies.core.impl.game.ships.ShipPhysicsData
+import org.valkyrienskies.core.impl.game.ships.ShipTransformImpl
 import org.valkyrienskies.core.impl.util.logger
 import org.valkyrienskies.physics_api.PhysicsWorldReference
 import org.valkyrienskies.physics_api.PoseVel
@@ -208,8 +222,81 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             gameFrameVoxelUpdatesMap[shipId] = voxelUpdatesMap.values.toList()
         }
 
+        // region Convert the coordinates of the constraints to be relative to center of mass
+        val constraintsCreatedThisTick: MutableList<VSConstraintAndId> = ArrayList()
+        lastTickChanges.constraintsCreatedThisTick.forEach {
+            val vsConstraint = it.vsConstraint
+            if (vsConstraint !is VSForceConstraint) {
+                constraintsCreatedThisTick.add(it)
+            } else {
+                val adjusted = adjustConstraintLocalPositions(vsConstraint)
+                if (adjusted == null) {
+                    logger.warn("Failed to adjust a constraint. Was a ship deleted?")
+                    return@forEach
+                }
+                constraintsCreatedThisTick.add(VSConstraintAndId(it.constraintId, adjusted))
+            }
+        }
+
+        val constraintsUpdatedThisTick: MutableList<VSConstraintAndId> = ArrayList()
+        lastTickChanges.constraintsUpdatedThisTick.forEach {
+            val vsConstraint = it.vsConstraint
+            if (vsConstraint !is VSForceConstraint) {
+                constraintsUpdatedThisTick.add(it)
+            } else {
+                val adjusted = adjustConstraintLocalPositions(vsConstraint)
+                if (adjusted == null) {
+                    logger.warn("Failed to adjust a constraint. Was a ship deleted?")
+                    return@forEach
+                }
+                constraintsUpdatedThisTick.add(VSConstraintAndId(it.constraintId, adjusted))
+            }
+        }
+
+        val constraintsDeletedThisTick: List<VSConstraintId> = ArrayList(lastTickChanges.constraintsDeletedThisTick)
+        // endregion
+
         shipWorld.clearNewUpdatedDeletedShipObjectsAndVoxelUpdates() // can we move this into [ShipObjectServerWorld]?
-        return VSGameFrame(newShips, deletedShips, updatedShips, gameFrameVoxelUpdatesMap)
+
+        return VSGameFrame(
+            newShips, deletedShips, updatedShips, gameFrameVoxelUpdatesMap, constraintsCreatedThisTick,
+            constraintsUpdatedThisTick, constraintsDeletedThisTick
+        )
+    }
+
+    /**
+     * Converts the local positions of [vsConstraint] from shipyard coordinates to be relative to the center of mass of
+     * the ship.
+     *
+     * This is used before we send the constraint to Krunch, since Krunch expects constraint positions to be relative to
+     * the center of mass.
+     */
+    private fun adjustConstraintLocalPositions(vsConstraint: VSForceConstraint): VSConstraint? {
+        val ship0 = shipWorld.loadedShips.getById(vsConstraint.shipId0)
+        val ship1 = shipWorld.loadedShips.getById(vsConstraint.shipId1)
+
+        val cm0: Vector3dc = if (!shipWorld.dimensionToGroundBodyIdImmutable.containsValue(vsConstraint.shipId0)) {
+            if (ship0 == null) return null
+            ship0.shipData.inertiaData.centerOfMassInShip
+        } else {
+            // Account for the center of mass of ground bodies being (-0.5, -0.5, -0.5)
+            Vector3d(-0.5, -0.5, -0.5)
+        }
+
+        val cm1: Vector3dc = if (!shipWorld.dimensionToGroundBodyIdImmutable.containsValue(vsConstraint.shipId1)) {
+            if (ship1 == null) return null
+            ship1.shipData.inertiaData.centerOfMassInShip
+        } else {
+            // Account for the center of mass of ground bodies being (-0.5, -0.5, -0.5)
+            Vector3d(-0.5, -0.5, -0.5)
+        }
+
+        // Offset force constraints by the center of mass before sending them to the physics pipeline
+        // TODO: I'm not entirely sure why I have to subtract 0.5 here, but it works
+        return vsConstraint.offsetLocalPositions(
+            cm0.mul(-1.0, Vector3d()).sub(0.5, 0.5, 0.5),
+            cm1.mul(-1.0, Vector3d()).sub(0.5, 0.5, 0.5),
+        )
     }
 
     companion object {
@@ -221,7 +308,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
         }
 
         fun generateTransformFromPhysicsFrameData(
-            physicsFrameData: ShipInPhysicsFrameData, shipData: org.valkyrienskies.core.impl.api.ServerShipInternal
+            physicsFrameData: ShipInPhysicsFrameData, shipData: ServerShipInternal
         ): ShipTransform {
             val poseVelFromPhysics = physicsFrameData.poseVel
             val voxelOffsetFromPhysics = physicsFrameData.shipVoxelOffset

@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 rootProject.name = "vs-core"
-include("api", "impl", "api-game")
+include("api", "impl", "api-game", "util")

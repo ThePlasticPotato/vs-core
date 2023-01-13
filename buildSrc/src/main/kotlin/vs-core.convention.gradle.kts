@@ -7,12 +7,8 @@ plugins {
 
 group = "org.valkyrienskies.core"
 // Determine the version
-version = if (project.hasProperty("CustomReleaseVersion")) {
-    project.property("CustomReleaseVersion") as String
-} else {
-    val gitRevision = "git rev-parse HEAD".execute()
-    "1.1.0+" + gitRevision.substring(0, 10)
-}
+val gitRevision = "git rev-parse HEAD".execute()
+version = "1.1.0+" + gitRevision.substring(0, 10)
 
 repositories {
     mavenCentral()
@@ -118,3 +114,12 @@ fun String.execute(envp: Array<String>? = null, dir: File = projectDir): String 
 }
 
 // endregion
+
+publishing {
+    publications {
+        create<MavenPublication>(project.name) {
+            from(components["java"])
+        }
+    }
+}
+

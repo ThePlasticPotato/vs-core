@@ -1,5 +1,6 @@
 package org.valkyrienskies.core.impl.game.ships
 
+import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.VSBeta
 import org.valkyrienskies.core.api.ships.PhysShip
@@ -11,7 +12,7 @@ import org.valkyrienskies.core.impl.util.pollUntilEmpty
 import org.valkyrienskies.physics_api.PoseVel
 import org.valkyrienskies.physics_api.RigidBodyReference
 import org.valkyrienskies.physics_api.SegmentTracker
-import java.util.*
+import java.util.ArrayDeque
 
 data class PhysShipImpl constructor(
     override val id: ShipId,
@@ -26,6 +27,9 @@ data class PhysShipImpl constructor(
 ) : PhysShip {
     @VSBeta
     override var buoyantFactor by rigidBodyReference::buoyantFactor
+
+    @VSBeta
+    override var doFluidDrag by rigidBodyReference::doFluidDrag
 
     val inertia: PhysInertia
         get() = _inertia
@@ -92,6 +96,15 @@ data class PhysShipImpl constructor(
         assertIsPhysicsThread()
 
         invPosForces.add(force)
+        invPosPositions.add(pos)
+    }
+
+    override fun applyRotDependentForceToPos(force: Vector3dc, pos: Vector3dc) {
+        requireIsFinite(force)
+        requireIsFinite(pos)
+        assertIsPhysicsThread()
+
+        invPosForces.add(poseVel.rot.transform(force, Vector3d()))
         invPosPositions.add(pos)
     }
 }

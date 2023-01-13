@@ -5,20 +5,65 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.primitives.AABBd
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint
+import org.valkyrienskies.core.apigame.constraints.VSConstraint
+import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
+import org.valkyrienskies.core.apigame.constraints.VSConstraintId
+import org.valkyrienskies.core.apigame.constraints.VSConstraintType.ATTACHMENT
+import org.valkyrienskies.core.apigame.constraints.VSConstraintType.FIXED_ORIENTATION
+import org.valkyrienskies.core.apigame.constraints.VSConstraintType.HINGE_ORIENTATION
+import org.valkyrienskies.core.apigame.constraints.VSConstraintType.HINGE_SWING_LIMITS
+import org.valkyrienskies.core.apigame.constraints.VSConstraintType.HINGE_TARGET_ANGLE
+import org.valkyrienskies.core.apigame.constraints.VSConstraintType.POS_DAMPING
+import org.valkyrienskies.core.apigame.constraints.VSConstraintType.ROPE
+import org.valkyrienskies.core.apigame.constraints.VSConstraintType.ROT_DAMPING
+import org.valkyrienskies.core.apigame.constraints.VSConstraintType.SLIDE
+import org.valkyrienskies.core.apigame.constraints.VSConstraintType.SPHERICAL_SWING_LIMITS
+import org.valkyrienskies.core.apigame.constraints.VSConstraintType.SPHERICAL_TWIST_LIMITS
+import org.valkyrienskies.core.apigame.constraints.VSFixedOrientationConstraint
+import org.valkyrienskies.core.apigame.constraints.VSHingeOrientationConstraint
+import org.valkyrienskies.core.apigame.constraints.VSHingeSwingLimitsConstraint
+import org.valkyrienskies.core.apigame.constraints.VSHingeTargetAngleConstraint
+import org.valkyrienskies.core.apigame.constraints.VSPosDampingConstraint
+import org.valkyrienskies.core.apigame.constraints.VSRopeConstraint
+import org.valkyrienskies.core.apigame.constraints.VSRotDampingAxes.ALL_AXES
+import org.valkyrienskies.core.apigame.constraints.VSRotDampingAxes.PARALLEL
+import org.valkyrienskies.core.apigame.constraints.VSRotDampingAxes.PERPENDICULAR
+import org.valkyrienskies.core.apigame.constraints.VSRotDampingConstraint
+import org.valkyrienskies.core.apigame.constraints.VSSlideConstraint
+import org.valkyrienskies.core.apigame.constraints.VSSphericalSwingLimitsConstraint
+import org.valkyrienskies.core.apigame.constraints.VSSphericalTwistLimitsConstraint
 import org.valkyrienskies.core.impl.config.PhysicsConfig
 import org.valkyrienskies.core.impl.config.VSCoreConfig
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl
 import org.valkyrienskies.core.impl.util.logger
+import org.valkyrienskies.physics_api.ConstraintId
 import org.valkyrienskies.physics_api.PhysicsWorldReference
 import org.valkyrienskies.physics_api.PoseVel
+import org.valkyrienskies.physics_api.RigidBodyId
 import org.valkyrienskies.physics_api.RigidBodyInertiaData
+import org.valkyrienskies.physics_api.SegmentId
 import org.valkyrienskies.physics_api.SegmentTracker
+import org.valkyrienskies.physics_api.constraints.AttachmentConstraint
+import org.valkyrienskies.physics_api.constraints.Constraint
+import org.valkyrienskies.physics_api.constraints.ConstraintAndId
+import org.valkyrienskies.physics_api.constraints.FixedOrientationConstraint
+import org.valkyrienskies.physics_api.constraints.HingeOrientationConstraint
+import org.valkyrienskies.physics_api.constraints.HingeSwingLimitsConstraint
+import org.valkyrienskies.physics_api.constraints.PosDampingConstraint
+import org.valkyrienskies.physics_api.constraints.RopeConstraint
+import org.valkyrienskies.physics_api.constraints.RotDampingAxes
+import org.valkyrienskies.physics_api.constraints.RotDampingConstraint
+import org.valkyrienskies.physics_api.constraints.SlideConstraint
+import org.valkyrienskies.physics_api.constraints.SphericalSwingLimitsConstraint
+import org.valkyrienskies.physics_api.constraints.SphericalTwistLimitsConstraint
 import org.valkyrienskies.physics_api.dummy_impl.DummyPhysicsWorldReference
 import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.VoxelRigidBodyShapeUpdates
 import org.valkyrienskies.physics_api_krunch.KrunchBootstrap
 import org.valkyrienskies.physics_api_krunch.KrunchPhysicsWorldSettings
+import org.valkyrienskies.physics_api_krunch.SolverType.GAUSS_SEIDEL
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
 import kotlin.math.max
@@ -208,6 +253,28 @@ class VSPhysicsPipelineStage @Inject constructor() {
             }
         }
 
+        // region Create/Update/Delete constraints
+        gameFrame.constraintsCreatedThisTick.forEach { vsConstraintAndId: VSConstraintAndId ->
+            physicsEngine.addConstraint(
+                ConstraintAndId(
+                    vsConstraintAndId.constraintId,
+                    convertVSConstraintToPhysicsConstraint(vsConstraintAndId.vsConstraint)
+                )
+            )
+        }
+        gameFrame.constraintsUpdatedThisTick.forEach { vsConstraintAndId: VSConstraintAndId ->
+            physicsEngine.updateConstraint(
+                ConstraintAndId(
+                    vsConstraintAndId.constraintId,
+                    convertVSConstraintToPhysicsConstraint(vsConstraintAndId.vsConstraint)
+                )
+            )
+        }
+        gameFrame.constraintsDeletedThisTick.forEach { vsConstraintId: VSConstraintId ->
+            physicsEngine.removeConstraint(convertVSConstraintIdToConstraintId(vsConstraintId))
+        }
+        // endregion
+
         // region Send updates to static ships, staggered to limit number of updates per tick
         val updatesToSend =
             max(min(pendingUpdatesSize, MAX_UPDATES_PER_PHYS_TICK), pendingUpdatesSize - MAX_PENDING_UPDATES_SIZE)
@@ -278,6 +345,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
         val settings = KrunchPhysicsWorldSettings()
         // Only use 10 sub-steps
         settings.subSteps = 10
+        settings.solverType = GAUSS_SEIDEL
+        settings.iterations = 1
 
         // Decrease max de-penetration speed so that rigid bodies don't go
         // flying apart when they overlap
@@ -286,6 +355,116 @@ class VSPhysicsPipelineStage @Inject constructor() {
         settings.maxVoxelShapeCollisionPoints = lodDetail
         return settings
     }
+
+    private fun convertVSConstraintToPhysicsConstraint(vsConstraint: VSConstraint): Constraint {
+        val body0Id: RigidBodyId = shipIdToPhysShip[vsConstraint.shipId0]!!.rigidBodyReference.rigidBodyId
+        val body1Id: RigidBodyId = shipIdToPhysShip[vsConstraint.shipId1]!!.rigidBodyReference.rigidBodyId
+        val segment0Id: SegmentId = 0
+        val segment1Id: SegmentId = 0
+        return when (vsConstraint.constraintType) {
+            ATTACHMENT -> {
+                val attachmentConstraint = vsConstraint as VSAttachmentConstraint
+                AttachmentConstraint(
+                    body0Id, body1Id, segment0Id, segment1Id, attachmentConstraint.compliance,
+                    attachmentConstraint.localPos0, attachmentConstraint.localPos1, attachmentConstraint.maxForce,
+                    attachmentConstraint.fixedDistance
+                )
+            }
+            FIXED_ORIENTATION -> {
+                val fixedOrientationConstraint = vsConstraint as VSFixedOrientationConstraint
+                FixedOrientationConstraint(
+                    body0Id, body1Id, segment0Id, segment1Id, fixedOrientationConstraint.compliance,
+                    fixedOrientationConstraint.localRot0, fixedOrientationConstraint.localRot1,
+                    fixedOrientationConstraint.maxTorque
+                )
+            }
+            HINGE_ORIENTATION -> {
+                val hingeOrientationConstraint = vsConstraint as VSHingeOrientationConstraint
+                HingeOrientationConstraint(
+                    body0Id, body1Id, segment0Id, segment1Id, hingeOrientationConstraint.compliance,
+                    hingeOrientationConstraint.localRot0, hingeOrientationConstraint.localRot1,
+                    hingeOrientationConstraint.maxTorque
+                )
+            }
+            HINGE_SWING_LIMITS -> {
+                val hingeSwingLimitsConstraint = vsConstraint as VSHingeSwingLimitsConstraint
+                HingeSwingLimitsConstraint(
+                    body0Id, body1Id, segment0Id, segment1Id, hingeSwingLimitsConstraint.compliance,
+                    hingeSwingLimitsConstraint.localRot0, hingeSwingLimitsConstraint.localRot1,
+                    hingeSwingLimitsConstraint.maxTorque, hingeSwingLimitsConstraint.minSwingAngle,
+                    hingeSwingLimitsConstraint.maxSwingAngle
+                )
+            }
+            HINGE_TARGET_ANGLE -> {
+                val hingeTargetAngleConstraint = vsConstraint as VSHingeTargetAngleConstraint
+                HingeSwingLimitsConstraint(
+                    body0Id, body1Id, segment0Id, segment1Id, hingeTargetAngleConstraint.compliance,
+                    hingeTargetAngleConstraint.localRot0, hingeTargetAngleConstraint.localRot1,
+                    hingeTargetAngleConstraint.maxTorque, hingeTargetAngleConstraint.targetAngle,
+                    hingeTargetAngleConstraint.nextTickTargetAngle
+                )
+            }
+            POS_DAMPING -> {
+                val posDampingConstraint = vsConstraint as VSPosDampingConstraint
+                PosDampingConstraint(
+                    body0Id, body1Id, segment0Id, segment1Id, posDampingConstraint.compliance,
+                    posDampingConstraint.localPos0, posDampingConstraint.localPos1, posDampingConstraint.maxForce,
+                    posDampingConstraint.posDamping
+                )
+            }
+            ROPE -> {
+                val ropeConstraint = vsConstraint as VSRopeConstraint
+                RopeConstraint(
+                    body0Id, body1Id, segment0Id, segment1Id, ropeConstraint.compliance,
+                    ropeConstraint.localPos0, ropeConstraint.localPos1, ropeConstraint.maxForce,
+                    ropeConstraint.ropeLength
+                )
+            }
+            ROT_DAMPING -> {
+                val rotDampingConstraint = vsConstraint as VSRotDampingConstraint
+                val rotDampingAxes: RotDampingAxes = when (rotDampingConstraint.rotDampingAxes) {
+                    PARALLEL -> RotDampingAxes.PARALLEL
+                    PERPENDICULAR -> RotDampingAxes.PERPENDICULAR
+                    ALL_AXES -> RotDampingAxes.ALL_AXES
+                }
+                RotDampingConstraint(
+                    body0Id, body1Id, segment0Id, segment1Id, rotDampingConstraint.compliance,
+                    rotDampingConstraint.localRot0, rotDampingConstraint.localRot1,
+                    rotDampingConstraint.maxTorque, rotDampingConstraint.rotDamping,
+                    rotDampingAxes
+                )
+            }
+            SLIDE -> {
+                val slideConstraint = vsConstraint as VSSlideConstraint
+                SlideConstraint(
+                    body0Id, body1Id, segment0Id, segment1Id, slideConstraint.compliance,
+                    slideConstraint.localPos0, slideConstraint.localPos1, slideConstraint.maxForce,
+                    slideConstraint.localSlideAxis0, slideConstraint.maxDistBetweenPoints
+                )
+            }
+            SPHERICAL_SWING_LIMITS -> {
+                val sphericalSwingLimitsConstraint = vsConstraint as VSSphericalSwingLimitsConstraint
+                SphericalSwingLimitsConstraint(
+                    body0Id, body1Id, segment0Id, segment1Id, sphericalSwingLimitsConstraint.compliance,
+                    sphericalSwingLimitsConstraint.localRot0, sphericalSwingLimitsConstraint.localRot1,
+                    sphericalSwingLimitsConstraint.maxTorque, sphericalSwingLimitsConstraint.minSwingAngle,
+                    sphericalSwingLimitsConstraint.maxSwingAngle
+                )
+            }
+            SPHERICAL_TWIST_LIMITS -> {
+                val sphericalTwistLimitsConstraint = vsConstraint as VSSphericalTwistLimitsConstraint
+                SphericalTwistLimitsConstraint(
+                    body0Id, body1Id, segment0Id, segment1Id, sphericalTwistLimitsConstraint.compliance,
+                    sphericalTwistLimitsConstraint.localRot0, sphericalTwistLimitsConstraint.localRot1,
+                    sphericalTwistLimitsConstraint.maxTorque, sphericalTwistLimitsConstraint.minTwistAngle,
+                    sphericalTwistLimitsConstraint.maxTwistAngle
+                )
+            }
+            else -> throw IllegalArgumentException("Unknown constraint type ${vsConstraint.constraintType}")
+        }
+    }
+
+    private fun convertVSConstraintIdToConstraintId(vsConstraintId: VSConstraintId): ConstraintId = vsConstraintId
 
     companion object {
         private fun physInertiaToRigidBodyInertiaData(inertia: PhysInertia): RigidBodyInertiaData {

@@ -15,7 +15,7 @@ dependencies {
     val kotestVersion = "5.4.1"
 
     // VS Physics
-    api("org.valkyrienskies:physics_api_krunch:1.0.0+bcbbe44ea9")
+    api("org.valkyrienskies:physics_api_krunch:1.0.0+622fabeb30")
 
     // JOML for Math
     api("org.joml:joml:1.10.4")
@@ -81,12 +81,5 @@ java {
     withSourcesJar()
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("impl") {
-            from(components["java"])
-        }
-    }
-}
 
 

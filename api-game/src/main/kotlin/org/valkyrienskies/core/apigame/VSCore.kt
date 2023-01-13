@@ -53,6 +53,7 @@ interface VSCore : VSCoreCommands {
     fun serializePipeline(pipeline: VSPipeline): ByteArray
 
     fun newChunkClaim(claimX: Int, claimZ: Int): ChunkClaim
+    fun newChunkClaimFromChunkPos(chunkX: Int, chunkZ: Int): ChunkClaim
 
     @Deprecated("Surely we can do better than this")
     var clientUsesUDP: Boolean

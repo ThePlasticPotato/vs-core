@@ -7,6 +7,10 @@ import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.apigame.constraints.VSConstraint
+import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
+import org.valkyrienskies.core.apigame.constraints.VSConstraintId
+import org.valkyrienskies.core.apigame.constraints.VSForceConstraint
 import org.valkyrienskies.core.apigame.world.IPlayer
 import org.valkyrienskies.core.apigame.world.ServerShipWorldCore
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
@@ -16,6 +20,7 @@ import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTasks
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
 import org.valkyrienskies.core.impl.game.ChunkAllocatorProvider
 import org.valkyrienskies.core.impl.game.DimensionInfo
@@ -29,6 +34,7 @@ import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.PRE_
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_BLOCKS
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_CHUNKS
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_DIMENSIONS
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_PLAYERS
 import org.valkyrienskies.core.impl.game.ships.loading.ShipLoadManagerServer
 import org.valkyrienskies.core.impl.game.ships.modules.AllShips
 import org.valkyrienskies.core.impl.game.ships.types.MutableShipVoxelUpdates
@@ -75,6 +81,7 @@ class ShipObjectServerWorld @Inject constructor(
         UPDATE_DIMENSIONS,
         UPDATE_BLOCKS,
         UPDATE_CHUNKS,
+        UPDATE_PLAYERS,
         CLEAR_FOR_RESET
     }
 
@@ -88,12 +95,11 @@ class ShipObjectServerWorld @Inject constructor(
             single(POST_TICK_GENERATED)
             single(POST_TICK_FINISH)
             single(CLEAR_FOR_RESET)
+            single(UPDATE_PLAYERS)
         }
 
         requireOrder(POST_TICK_GENERATED, GET_CURRENT_TICK_CHANGES, CLEAR_FOR_RESET)
         requireStages(PRE_TICK, POST_TICK_START, POST_TICK_GENERATED, POST_TICK_FINISH, CLEAR_FOR_RESET)
-
-        requireFinal(CLEAR_FOR_RESET)
     }
 
     var lastTickPlayers: Set<IPlayer> = setOf()
@@ -101,6 +107,7 @@ class ShipObjectServerWorld @Inject constructor(
 
     override var players: Set<IPlayer> = setOf()
         set(value) {
+            enforcer.stage(UPDATE_PLAYERS)
             lastTickPlayers = field
             field = value
         }
@@ -115,12 +122,18 @@ class ShipObjectServerWorld @Inject constructor(
     private val dimensionToGroundBodyId: MutableMap<DimensionId, ShipId> = HashMap()
 
     // An immutable view of [dimensionToGroundBodyId]
-    val dimensionToGroundBodyIdImmutable: Map<DimensionId, ShipId>
+    override val dimensionToGroundBodyIdImmutable: Map<DimensionId, ShipId>
         get() = dimensionToGroundBodyId
 
     private val dimensionsAddedThisTick = ArrayList<DimensionId>()
     private val dimensionsRemovedThisTick = ArrayList<DimensionId>()
     private val voxelShapeUpdatesList = ArrayList<LevelVoxelUpdates>()
+
+    // Map constraint ids to constraints. The positions of constraints are stored in the local coordinate system of the
+    // ship.
+    private val constraints: MutableMap<VSConstraintId, VSConstraint> = HashMap()
+    private val shipIdToConstraints: MutableMap<ShipId, MutableSet<VSConstraintId>> = HashMap()
+    private var nextConstraintId: VSConstraintId = 0
 
     // These fields are used to generate [VSGameFrame]
     private val newShipObjects: MutableList<ShipObjectServer> = ArrayList()
@@ -128,6 +141,9 @@ class ShipObjectServerWorld @Inject constructor(
     private val deletedShipObjects: MutableList<ShipData> = ArrayList()
     private var lastTickDeletedShipObjects: List<ShipData> = listOf()
         get() = enforcer.stage(GET_LAST_TICK_CHANGES).run { field }
+    private var constraintsCreatedThisTick: MutableList<VSConstraintAndId> = ArrayList()
+    private var constraintsUpdatedThisTick: MutableList<VSConstraintAndId> = ArrayList()
+    private var constraintsDeletedThisTick: MutableList<VSConstraintId> = ArrayList()
 
     private val udpServer = networking.tryUdpServer()
 
@@ -155,7 +171,10 @@ class ShipObjectServerWorld @Inject constructor(
         val deletedShipObjects: Collection<ShipData>,
         val shipToVoxelUpdates: ShipVoxelUpdates,
         val dimensionsAddedThisTick: Collection<DimensionId>,
-        val dimensionsRemovedThisTick: Collection<DimensionId>
+        val dimensionsRemovedThisTick: Collection<DimensionId>,
+        val constraintsCreatedThisTick: Collection<VSConstraintAndId>,
+        val constraintsUpdatedThisTick: Collection<VSConstraintAndId>,
+        val constraintsDeletedThisTick: Collection<VSConstraintId>
     ) {
         fun getNewGroundRigidBodyObjects(): List<Pair<DimensionId, ShipId>> {
             return dimensionsAddedThisTick.map { dimensionId: DimensionId ->
@@ -255,7 +274,7 @@ class ShipObjectServerWorld @Inject constructor(
         }
     }
 
-    fun getShipObject(ship: org.valkyrienskies.core.impl.api.ServerShipInternal): ShipObjectServer? {
+    fun getShipObject(ship: ServerShipInternal): ShipObjectServer? {
         return loadedShips.getById(ship.id)
     }
 
@@ -283,6 +302,24 @@ class ShipObjectServerWorld @Inject constructor(
         // For now just update very ship object every tick
         shipObjects.forEach { (_, shipObjectServer) ->
             updatedShipObjects.add(shipObjectServer)
+        }
+
+        // Remove constraints from deleted ships
+        deletedShipObjects.forEach { deletedShipObject ->
+            val constraintIds = shipIdToConstraints[deletedShipObject.id] ?: return@forEach
+            // Copy these constraint ids to avoid ConcurrentModificationException
+            val constraintIdsCopy: List<VSConstraintId> = ArrayList(constraintIds)
+            constraintIdsCopy.forEach { constraintId ->
+                removeConstraint(constraintId)
+            }
+        }
+
+        // For now just update every [VSForceConstraint] every tick
+        // TODO: Only do this when the center of mass of the ship has changed
+        constraints.forEach { (constraintId, constraint) ->
+            if (constraint is VSForceConstraint) {
+                constraintsUpdatedThisTick.add(VSConstraintAndId(constraintId, constraint))
+            }
         }
 
         // For now, just make a [ShipObject] for every [ShipData]
@@ -409,6 +446,80 @@ class ShipObjectServerWorld @Inject constructor(
         return newShipData
     }
 
+    // region [rigidBodyIdToConstraints] helpers
+    private fun addConstraintIdToRigidBodyIdToConstraintsHelper(
+        shipId: ShipId, newConstraintId: VSConstraintId
+    ) = shipIdToConstraints.getOrPut(shipId) { HashSet() }.add(newConstraintId)
+
+    private fun removeConstraintIdFromRigidBodyIdToConstraintsHelper(
+        rigidBodyId: ShipId, oldConstraintId: VSConstraintId
+    ) {
+        val constraintIds = shipIdToConstraints[rigidBodyId] ?: return
+        constraintIds.remove(oldConstraintId)
+        if (constraintIds.isEmpty()) shipIdToConstraints.remove(rigidBodyId)
+    }
+    // endregion
+
+    private fun isShipLoaded(shipId: ShipId): Boolean {
+        return allShips.contains(shipId) || dimensionToGroundBodyIdImmutable.containsValue(shipId)
+    }
+
+    override fun createNewConstraint(vsConstraint: VSConstraint): VSConstraintId? {
+        if (!isShipLoaded(vsConstraint.shipId0) || !isShipLoaded(vsConstraint.shipId1))
+            return null
+
+        val constraintId = nextConstraintId++
+        constraints[constraintId] = vsConstraint
+
+        addConstraintIdToRigidBodyIdToConstraintsHelper(vsConstraint.shipId0, constraintId)
+        addConstraintIdToRigidBodyIdToConstraintsHelper(vsConstraint.shipId1, constraintId)
+
+        // Send a constraint CREATE to the physics engine
+        constraintsCreatedThisTick.add(VSConstraintAndId(constraintId, vsConstraint))
+
+        return constraintId
+    }
+
+    override fun updateConstraint(constraintId: VSConstraintId, updatedVSConstraint: VSConstraint): Boolean {
+        val oldConstraint = constraints[constraintId] ?: return false
+
+        if (!isShipLoaded(updatedVSConstraint.shipId0)
+            || !isShipLoaded(updatedVSConstraint.shipId1)
+        ) {
+            return false
+        }
+
+        // Update [rigidBodyIdToConstraints] if necessary
+        if (oldConstraint.shipId0 != updatedVSConstraint.shipId0
+            || oldConstraint.shipId1 != updatedVSConstraint.shipId1
+        ) {
+            removeConstraintIdFromRigidBodyIdToConstraintsHelper(oldConstraint.shipId0, constraintId)
+            removeConstraintIdFromRigidBodyIdToConstraintsHelper(oldConstraint.shipId1, constraintId)
+            addConstraintIdToRigidBodyIdToConstraintsHelper(updatedVSConstraint.shipId0, constraintId)
+            addConstraintIdToRigidBodyIdToConstraintsHelper(updatedVSConstraint.shipId1, constraintId)
+        }
+
+        // Send a constraint UPDATE to the physics engine
+        constraintsUpdatedThisTick.add(VSConstraintAndId(constraintId, updatedVSConstraint))
+
+        return true
+    }
+
+    override fun removeConstraint(constraintId: VSConstraintId): Boolean {
+        val oldConstraint = constraints[constraintId] ?: return false
+
+        removeConstraintIdFromRigidBodyIdToConstraintsHelper(oldConstraint.shipId0, constraintId)
+        removeConstraintIdFromRigidBodyIdToConstraintsHelper(oldConstraint.shipId1, constraintId)
+
+        // Send a constraint DELETE to the physics engine
+        constraintsDeletedThisTick.add(constraintId)
+
+        // Actually remove the constraint
+        constraints.remove(constraintId)
+
+        return true
+    }
+
     fun getYRange(dimensionId: DimensionId) = dimensionInfo.getValue(dimensionId).yRange
 
     override fun destroyWorld() {
@@ -423,7 +534,10 @@ class ShipObjectServerWorld @Inject constructor(
             deletedShipObjects,
             shipToVoxelUpdates,
             dimensionsAddedThisTick,
-            dimensionsRemovedThisTick
+            dimensionsRemovedThisTick,
+            constraintsCreatedThisTick,
+            constraintsUpdatedThisTick,
+            constraintsDeletedThisTick
         )
     }
 
@@ -441,6 +555,9 @@ class ShipObjectServerWorld @Inject constructor(
             check(removedSuccessfully)
         }
         dimensionsRemovedThisTick.clear()
+        constraintsCreatedThisTick = ArrayList()
+        constraintsUpdatedThisTick = ArrayList()
+        constraintsDeletedThisTick = ArrayList()
     }
 
     override fun addDimension(dimensionId: DimensionId, yRange: IntRange) {
