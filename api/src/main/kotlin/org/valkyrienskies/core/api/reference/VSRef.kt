@@ -2,7 +2,7 @@ package org.valkyrienskies.core.api.reference
 
 import java.util.*
 
-interface VSReference<out T : Any> {
+interface VSRef<out T : Any> {
 
     val type: Class<out T>
 

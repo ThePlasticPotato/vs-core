@@ -1,9 +1,14 @@
 package org.valkyrienskies.core.impl.program
 
+import org.joml.Vector3dc
+import org.valkyrienskies.core.api.attachment.AttachmentSerializationStrategy
+import org.valkyrienskies.core.api.bodies.properties.BodyCollisionShape
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.apigame.world.VSPipeline
 import org.valkyrienskies.core.apigame.world.chunks.BlockTypes
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
+import org.valkyrienskies.core.impl.attachment.meta.AttachmentMetaRegistry
+import org.valkyrienskies.core.impl.bodies.BodyCollisionShapeImpl
 import org.valkyrienskies.core.impl.game.ChunkClaimImpl
 import org.valkyrienskies.core.impl.game.ships.modules.ShipWorldModule
 import org.valkyrienskies.core.impl.game.ships.serialization.vspipeline.VSPipelineSerializer
@@ -29,7 +34,8 @@ class VSCoreImpl @Inject constructor(
     @TCP tcp: NetworkChannel,
     override val pipelineComponentFactory: VSPipelineComponent.Factory,
     private val pipelineSerializer: VSPipelineSerializer,
-    override val blockTypes: BlockTypes
+    override val blockTypes: BlockTypes,
+    val attachmentMeta: AttachmentMetaRegistry
 ) : VSCoreInternal {
     init {
         configurator.configure(tcp)
@@ -81,6 +87,36 @@ class VSCoreImpl @Inject constructor(
 
     @Deprecated("Surely we can do better than this")
     override var clientUsesUDP: Boolean by networking::clientUsesUDP
+    override fun createSphereCollisionShape(radius: Double): BodyCollisionShape.Sphere {
+        return BodyCollisionShapeImpl.Sphere(radius)
+    }
+
+    override fun createBoxCollisionShape(lengths: Vector3dc): BodyCollisionShape.Box {
+        return BodyCollisionShapeImpl.Box(lengths)
+    }
+
+    override fun createWheelCollisionShape(radius: Double, halfThickness: Double): BodyCollisionShape.Wheel {
+        return BodyCollisionShapeImpl.Wheel(radius, halfThickness)
+    }
+
+    override fun createCapsuleCollisionShape(radius: Double, halfLength: Double): BodyCollisionShape.Capsule {
+        return BodyCollisionShapeImpl.Capsule(radius, halfLength)
+    }
+
+    override fun <T> registerAttachmentSerializationStrategy(
+        name: String,
+        strategy: Class<out AttachmentSerializationStrategy>
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun registerAttachments(vararg classes: Class<*>) {
+        classes.forEach(attachmentMeta::registerAttachment)
+    }
+
+    override fun registerAttachmentsInPackage(packageName: String) {
+        TODO("Not yet implemented")
+    }
 
     private fun fromModule(module: ShipWorldModule): VSPipelineImpl {
         try {

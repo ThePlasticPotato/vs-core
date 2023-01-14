@@ -1,6 +1,8 @@
 package org.valkyrienskies.core.api.ships
 
 import org.joml.Matrix4dc
+import org.joml.Vector3dc
+import org.joml.primitives.AABBdc
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet
@@ -13,18 +15,22 @@ import org.valkyrienskies.core.api.world.properties.DimensionId
  * Abstraction of a ship, there are many types such as offline ships
  *  or loaded ships so this is the generic interface for all ships.
  */
-interface Ship : VSBody {
+interface Ship {
 
-    override val id: ShipId
+    val id: ShipId
 
-    override val transform: ShipTransform
-    override val prevTickTransform: ShipTransform
+    val transform: ShipTransform
+    val prevTickTransform: ShipTransform
 
     val chunkClaim: ChunkClaim
     val chunkClaimDimension: DimensionId
     val shipAABB: AABBic?
+    val worldAABB: AABBdc
 
     val activeChunksSet: IShipActiveChunksSet
+
+    val velocity: Vector3dc
+    val omega: Vector3dc
 
     val shipToWorld: Matrix4dc get() = transform.toWorld
     val worldToShip: Matrix4dc get() = transform.toModel

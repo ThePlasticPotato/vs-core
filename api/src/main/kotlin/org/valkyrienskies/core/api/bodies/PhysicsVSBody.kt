@@ -1,13 +1,26 @@
-package org.valkyrienskies.core.api.ships
+package org.valkyrienskies.core.api.bodies
 
+import org.joml.Matrix3dc
+import org.joml.Matrix4dc
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.VSBeta
-import org.valkyrienskies.core.api.ships.properties.ShipId
 
-@VSBeta
-interface PhysShip {
+interface PhysicsVSBody : BaseVSBody {
 
-    val id: ShipId
+    /**
+     * The mass of this body, in kg
+     */
+    var mass: Double
+
+    /**
+     * The center of mass of this body, in world-space
+     */
+    var centerOfMass: Vector3dc
+
+    /**
+     * The moment of inertia tensor for this body, in world-space
+     */
+    var momentOfInertia: Matrix3dc
 
     var isStatic: Boolean
 
@@ -17,29 +30,16 @@ interface PhysShip {
     @VSBeta
     var doFluidDrag: Boolean
 
-    /**
-     * Apply a rotation dependent force in world-space
-     */
+    fun setTransform(modelToWorld: Matrix4dc)
+
     fun applyRotDependentForce(force: Vector3dc)
 
-    /**
-     * Apply a force in world-space
-     */
     fun applyInvariantForce(force: Vector3dc)
 
-    /**
-     * Apply a [force] in local-space to a [pos] in local-space
-     */
     fun applyInvariantForceToPos(force: Vector3dc, pos: Vector3dc)
 
-    /**
-     * Apply a rotation dependent torque in world-space
-     */
     fun applyRotDependentTorque(torque: Vector3dc)
 
-    /**
-     * Apply a torque in world-space
-     */
     fun applyInvariantTorque(torque: Vector3dc)
 
     /**
@@ -52,4 +52,5 @@ interface PhysShip {
      *                       coordinates
      */
     fun applyRotDependentForceToPos(force: Vector3dc, pos: Vector3dc)
+
 }

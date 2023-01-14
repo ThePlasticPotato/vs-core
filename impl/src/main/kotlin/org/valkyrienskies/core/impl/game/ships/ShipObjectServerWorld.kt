@@ -4,14 +4,12 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.Vector3i
 import org.joml.Vector3ic
-import org.valkyrienskies.core.api.VSBeta
 import org.valkyrienskies.core.api.physics.constraints.VSConstraint
 import org.valkyrienskies.core.api.physics.constraints.VSConstraintAndId
 import org.valkyrienskies.core.api.physics.constraints.VSConstraintId
 import org.valkyrienskies.core.api.physics.constraints.VSForceConstraint
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.properties.ShipId
-import org.valkyrienskies.core.api.world.PhysicsWorld
 import org.valkyrienskies.core.apigame.world.IPlayer
 import org.valkyrienskies.core.apigame.world.ServerShipWorldCore
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
@@ -120,11 +118,6 @@ class ShipObjectServerWorld @Inject constructor(
     override val loadedShips: QueryableShipData<ShipObjectServer>
         get() = _loadedShips
 
-    @VSBeta
-    override fun onPhysicsTick(lambda: (PhysicsWorld) -> Boolean) {
-        runOnPhysicsTick.add(lambda)
-    }
-
     private val dimensionToGroundBodyId: MutableMap<DimensionId, ShipId> = HashMap()
 
     // An immutable view of [dimensionToGroundBodyId]
@@ -152,8 +145,6 @@ class ShipObjectServerWorld @Inject constructor(
     private var constraintsDeletedThisTick: MutableList<VSConstraintId> = ArrayList()
 
     private val udpServer = networking.tryUdpServer()
-
-    private val runOnPhysicsTick = mutableListOf<(PhysicsWorld) -> Boolean>()
 
     /**
      * A map of voxel updates pending to be applied to ships.

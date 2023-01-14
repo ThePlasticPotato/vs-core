@@ -1,9 +1,23 @@
 package org.valkyrienskies.core.api.bodies
 
-import org.valkyrienskies.core.api.bodies.properties.BodyInertiaData
+import org.joml.Matrix3dc
+import org.joml.Vector3dc
 
 interface ServerVSBody : VSBody {
 
-    val inertia: BodyInertiaData
+    /**
+     * The mass of this body, in kg
+     */
+    val mass: Double
+
+    /**
+     * The center of mass of this body, in world-space
+     */
+    val centerOfMass: Vector3dc
+
+    /**
+     * The moment of inertia tensor for this body, in world-space
+     */
+    val momentOfInertia: Matrix3dc
 
 }
