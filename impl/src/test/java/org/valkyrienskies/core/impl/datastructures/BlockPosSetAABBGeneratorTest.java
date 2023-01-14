@@ -29,8 +29,8 @@ public class BlockPosSetAABBGeneratorTest {
     }
 
     private void testBlockPosSetAABB(final IBlockPosSetAABB toTest) {
-        final org.valkyrienskies.core.impl.datastructures.ExtremelyNaiveVoxelFieldAABBMaker
-            aabbMaker = new org.valkyrienskies.core.impl.datastructures.ExtremelyNaiveVoxelFieldAABBMaker(0, 0);
+        final ExtremelyNaiveVoxelFieldAABBMaker
+            aabbMaker = new ExtremelyNaiveVoxelFieldAABBMaker(0, 0);
 
         // Test adding new positions
         final Vector3ic pos0 = new Vector3i(5, 10, 3);

@@ -8,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.valkyrienskies.core.impl.VSRandomUtils;
+import org.valkyrienskies.core.impl.datastructures.SmallBlockPosSet;
 import org.valkyrienskies.core.impl.util.serialization.VSJacksonUtil;
 
 import java.io.IOException;

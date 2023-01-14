@@ -27,7 +27,10 @@ class BlockPosSetAABBGeneratorTest2 : StringSpec({
                 zSize
             )
             val testGen =
-                org.valkyrienskies.core.impl.datastructures.ExtremelyNaiveVoxelFieldAABBMaker(centerX, centerZ)
+                ExtremelyNaiveVoxelFieldAABBMaker(
+                    centerX,
+                    centerZ
+                )
 
             checkAll(
                 iterations = 200,
@@ -53,7 +56,11 @@ class BlockPosSetAABBGeneratorTest2 : StringSpec({
 
     "dynamic generator add-only property test" {
         val gen = DynamicBlockPosSetAABB()
-        val testGen = org.valkyrienskies.core.impl.datastructures.ExtremelyNaiveVoxelFieldAABBMaker(0, 0)
+        val testGen =
+            ExtremelyNaiveVoxelFieldAABBMaker(
+                0,
+                0
+            )
         checkAll(Arb.int(), Arb.int(), Arb.int()) { x, y, z ->
             gen.add(x, y, z)
             testGen.addVoxel(x, y, z)
