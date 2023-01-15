@@ -3,6 +3,7 @@ package org.valkyrienskies.core.apigame.world
 import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.world.LevelYRange
 import org.valkyrienskies.core.api.world.ServerShipWorld
 import org.valkyrienskies.core.apigame.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
@@ -63,7 +64,7 @@ interface ServerShipWorldCore : ShipWorldCore, ServerShipWorld {
      * Adds a newly loaded dimension with [dimensionId]. [yRange] specifies the range of valid y values for this dimension.
      * In older versions of Minecraft, this should be `[0, 255]`
      */
-    fun addDimension(dimensionId: DimensionId, yRange: IntRange)
+    fun addDimension(dimensionId: DimensionId, yRange: LevelYRange)
     fun removeDimension(dimensionId: DimensionId)
     fun onDisconnect(player: IPlayer)
 
