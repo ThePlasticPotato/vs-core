@@ -13,7 +13,7 @@ import javax.inject.Inject
 @Suppress("UNCHECKED_CAST")
 class PersistentAttachmentHolderImpl private constructor(
     private val meta: AttachmentMetaRegistry,
-    val attachments: MutableMap<Class<*>, Any>
+    private val attachments: MutableMap<Class<*>, Any>
 ) : AttachmentHolder {
     override fun <T : Any> getAttachment(clazz: Class<T>): T? {
         return attachments[clazz] as T?

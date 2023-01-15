@@ -4,6 +4,7 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.Vector3i
 import org.joml.Vector3ic
+import org.valkyrienskies.core.api.bodies.shape.VoxelUpdate
 import org.valkyrienskies.core.api.physics.constraints.VSConstraint
 import org.valkyrienskies.core.api.physics.constraints.VSConstraintAndId
 import org.valkyrienskies.core.api.physics.constraints.VSConstraintId
@@ -17,7 +18,6 @@ import org.valkyrienskies.core.apigame.world.chunks.BlockTypes
 import org.valkyrienskies.core.apigame.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTasks
-import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
@@ -38,7 +38,7 @@ import org.valkyrienskies.core.impl.game.ships.loading.ShipLoadManagerServer
 import org.valkyrienskies.core.impl.game.ships.modules.AllShips
 import org.valkyrienskies.core.impl.game.ships.types.MutableShipVoxelUpdates
 import org.valkyrienskies.core.impl.game.ships.types.ShipVoxelUpdates
-import org.valkyrienskies.core.impl.game.ships.types.TerrainUpdateImpl
+import org.valkyrienskies.core.impl.game.ships.types.VoxelUpdateImpl
 import org.valkyrienskies.core.impl.hooks.VSEvents
 import org.valkyrienskies.core.impl.hooks.VSEvents.ShipLoadEvent
 import org.valkyrienskies.core.impl.hooks.VSEvents.TickEndEvent
@@ -248,10 +248,10 @@ class ShipObjectServerWorld @Inject constructor(
         }
     }
 
-    override fun addTerrainUpdates(dimensionId: DimensionId, terrainUpdates: List<TerrainUpdate>) {
+    override fun addTerrainUpdates(dimensionId: DimensionId, terrainUpdates: List<VoxelUpdate>) {
         enforcer.stage(UPDATE_CHUNKS)
 
-        val voxelShapeUpdates = terrainUpdates.map { (it as TerrainUpdateImpl).update }
+        val voxelShapeUpdates = terrainUpdates.map { (it as VoxelUpdateImpl).update }
         voxelShapeUpdatesList.add(LevelVoxelUpdates(dimensionId, voxelShapeUpdates))
 
         voxelShapeUpdates.forEach {

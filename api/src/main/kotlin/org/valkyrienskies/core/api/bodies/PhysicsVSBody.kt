@@ -4,8 +4,11 @@ import org.joml.Matrix3dc
 import org.joml.Matrix4dc
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.VSBeta
+import org.valkyrienskies.core.api.bodies.shape.BodyShape
 
 interface PhysicsVSBody : BaseVSBody {
+
+    val shape: BodyShape
 
     /**
      * The mass of this body, in kg

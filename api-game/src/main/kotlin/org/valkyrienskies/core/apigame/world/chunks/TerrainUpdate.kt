@@ -1,16 +1,10 @@
 package org.valkyrienskies.core.apigame.world.chunks
 
-interface TerrainUpdate {
+import org.valkyrienskies.core.api.bodies.shape.VoxelUpdate
 
-    val chunkX: Int
-    val chunkY: Int
-    val chunkZ: Int
+@Deprecated("moved to api", ReplaceWith("VoxelUpdate", "org.valkyrienskies.core.api.bodies.shape.VoxelUpdate"))
+interface TerrainUpdate : VoxelUpdate {
 
-    interface Builder {
-        /**
-         * Add a block to the terrain update.
-         */
-        fun addBlock(x: Int, y: Int, z: Int, block: BlockType)
-        fun build(): TerrainUpdate
-    }
+    @Deprecated("moved to api", ReplaceWith("VoxelUpdater.Builder", "org.valkyrienskies.core.api.bodies.shape.VoxelUpdate"))
+    interface Builder : VoxelUpdate.Builder
 }

@@ -3,7 +3,7 @@ package org.valkyrienskies.core.impl.game.ships.types
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
 
-data class TerrainUpdateImpl(
+data class VoxelUpdateImpl(
     val update: IVoxelShapeUpdate,
 ) : TerrainUpdate {
     override val chunkX: Int

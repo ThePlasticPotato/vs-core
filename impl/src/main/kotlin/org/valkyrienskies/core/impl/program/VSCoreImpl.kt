@@ -2,7 +2,7 @@ package org.valkyrienskies.core.impl.program
 
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.attachment.AttachmentSerializationStrategy
-import org.valkyrienskies.core.api.bodies.properties.BodyCollisionShape
+import org.valkyrienskies.core.api.bodies.shape.BodyShape
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.apigame.world.VSPipeline
 import org.valkyrienskies.core.apigame.world.chunks.BlockTypes
@@ -14,7 +14,7 @@ import org.valkyrienskies.core.impl.game.ships.modules.ShipWorldModule
 import org.valkyrienskies.core.impl.game.ships.serialization.vspipeline.VSPipelineSerializer
 import org.valkyrienskies.core.impl.game.ships.types.DenseTerrainUpdateBuilderImpl
 import org.valkyrienskies.core.impl.game.ships.types.SparseTerrainUpdateBuilderImpl
-import org.valkyrienskies.core.impl.game.ships.types.TerrainUpdateImpl
+import org.valkyrienskies.core.impl.game.ships.types.VoxelUpdateImpl
 import org.valkyrienskies.core.impl.hooks.CoreHooksImpl
 import org.valkyrienskies.core.impl.networking.NetworkChannel
 import org.valkyrienskies.core.impl.networking.VSNetworking
@@ -42,19 +42,19 @@ class VSCoreImpl @Inject constructor(
         networking.init()
     }
 
-    override fun newEmptyVoxelShapeUpdate(chunkX: Int, chunkY: Int, chunkZ: Int, overwrite: Boolean): TerrainUpdate {
-        return TerrainUpdateImpl(EmptyVoxelShapeUpdate(chunkX, chunkY, chunkZ, false, overwrite))
+    override fun newEmptyVoxelUpdate(chunkX: Int, chunkY: Int, chunkZ: Int, overwrite: Boolean): TerrainUpdate {
+        return VoxelUpdateImpl(EmptyVoxelShapeUpdate(chunkX, chunkY, chunkZ, false, overwrite))
     }
 
-    override fun newDeleteTerrainUpdate(chunkX: Int, chunkY: Int, chunkZ: Int): TerrainUpdate {
-        return TerrainUpdateImpl(DeleteVoxelShapeUpdate(chunkX, chunkY, chunkZ))
+    override fun newDeleteVoxelUpdate(chunkX: Int, chunkY: Int, chunkZ: Int): TerrainUpdate {
+        return VoxelUpdateImpl(DeleteVoxelShapeUpdate(chunkX, chunkY, chunkZ))
     }
 
-    override fun newDenseTerrainUpdateBuilder(chunkX: Int, chunkY: Int, chunkZ: Int): TerrainUpdate.Builder {
+    override fun newDenseVoxelUpdateBuilder(chunkX: Int, chunkY: Int, chunkZ: Int): TerrainUpdate.Builder {
         return DenseTerrainUpdateBuilderImpl(chunkX, chunkY, chunkZ)
     }
 
-    override fun newSparseTerrainUpdateBuilder(chunkX: Int, chunkY: Int, chunkZ: Int): TerrainUpdate.Builder {
+    override fun newSparseVoxelUpdateBuilder(chunkX: Int, chunkY: Int, chunkZ: Int): TerrainUpdate.Builder {
         return SparseTerrainUpdateBuilderImpl(chunkX, chunkY, chunkZ)
     }
 
@@ -87,19 +87,19 @@ class VSCoreImpl @Inject constructor(
 
     @Deprecated("Surely we can do better than this")
     override var clientUsesUDP: Boolean by networking::clientUsesUDP
-    override fun createSphereCollisionShape(radius: Double): BodyCollisionShape.Sphere {
+    override fun createSphereCollisionShape(radius: Double): BodyShape.Sphere {
         return BodyCollisionShapeImpl.Sphere(radius)
     }
 
-    override fun createBoxCollisionShape(lengths: Vector3dc): BodyCollisionShape.Box {
+    override fun createBoxCollisionShape(lengths: Vector3dc): BodyShape.Box {
         return BodyCollisionShapeImpl.Box(lengths)
     }
 
-    override fun createWheelCollisionShape(radius: Double, halfThickness: Double): BodyCollisionShape.Wheel {
+    override fun createWheelCollisionShape(radius: Double, halfThickness: Double): BodyShape.Wheel {
         return BodyCollisionShapeImpl.Wheel(radius, halfThickness)
     }
 
-    override fun createCapsuleCollisionShape(radius: Double, halfLength: Double): BodyCollisionShape.Capsule {
+    override fun createCapsuleCollisionShape(radius: Double, halfLength: Double): BodyShape.Capsule {
         return BodyCollisionShapeImpl.Capsule(radius, halfLength)
     }
 

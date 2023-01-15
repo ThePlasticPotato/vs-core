@@ -24,6 +24,6 @@ class SparseTerrainUpdateBuilderImpl(
         require(!isBuilt) { "This builder has already been used!" }
         isBuilt = true
 
-        return TerrainUpdateImpl(update)
+        return VoxelUpdateImpl(update)
     }
 }

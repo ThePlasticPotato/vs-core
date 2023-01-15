@@ -3,6 +3,7 @@ package org.valkyrienskies.core.impl.game.ships
 import org.joml.*
 import org.joml.primitives.AABBd
 import org.joml.primitives.AABBdc
+import org.valkyrienskies.core.api.bodies.properties.BodyTransform
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
 
 /**
@@ -19,31 +20,25 @@ data class ShipTransformImpl(
     override val position: Vector3dc,
     override val positionInModel: Vector3dc,
     override val rotation: Quaterniondc,
-    override val scaling: Vector3dc
-) : ShipTransform {
-
+    override val scaling: Vector3dc,
     /**
      * Transforms positions and directions from ship coordinates to world coordinates
      */
-    override val toWorld: Matrix4dc
+    override val toWorld: Matrix4dc = Matrix4d()
+        .translate(position)
+        .rotate(rotation)
+        .scale(scaling)
+        .translate(
+            -positionInModel.x(),
+            -positionInModel.y(),
+            -positionInModel.z()
+        ),
 
     /**
      * Transforms positions and directions from world coordinates to ships coordinates
      */
-    override val toModel: Matrix4dc
-
-    init {
-        toWorld = Matrix4d()
-            .translate(position)
-            .rotate(rotation)
-            .scale(scaling)
-            .translate(
-                -positionInModel.x(),
-                -positionInModel.y(),
-                -positionInModel.z()
-            )
-        toModel = toWorld.invert(Matrix4d())
-    }
+    override val toModel: Matrix4dc = toWorld.invert(Matrix4d())
+) : ShipTransform {
 
     override fun transformDirectionNoScalingFromShipToWorld(directionInShip: Vector3dc, dest: Vector3d): Vector3d {
         return rotation.transform(directionInShip, dest)
@@ -69,6 +64,15 @@ data class ShipTransformImpl(
         val UNIT_SCALING: Vector3dc = Vector3d(1.0, 1.0, 1.0)
 
         val ZERO: Vector3dc = Vector3d()
+
+        fun create(previous: BodyTransform, toWorld: Matrix4dc): ShipTransform {
+            val positionInModel = previous.positionInModel
+            val position = toWorld.transformPosition(Vector3d(positionInModel))
+            val rotation = toWorld.getNormalizedRotation(Quaterniond())
+            val scaling = toWorld.getScale(Vector3d())
+
+            return ShipTransformImpl(position, positionInModel, rotation, scaling, toWorld)
+        }
 
         fun createEmpty(): ShipTransform {
             return create(ZERO, ZERO)

@@ -3,6 +3,7 @@ package org.valkyrienskies.core.impl.program
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import org.valkyrienskies.core.api.bodies.shape.VoxelTypes
 import org.valkyrienskies.core.apigame.hooks.CoreHooksOut
 import org.valkyrienskies.core.apigame.world.chunks.BlockTypes
 import org.valkyrienskies.core.impl.config.VSCoreConfig.ServerConfigModule
@@ -32,5 +33,8 @@ class VSCoreModule(
     interface Declarations {
         @Binds
         fun blockTypes(impl: BlockTypesImpl): BlockTypes
+
+        @Binds
+        fun voxelTypes(impl: BlockTypesImpl): VoxelTypes
     }
 }

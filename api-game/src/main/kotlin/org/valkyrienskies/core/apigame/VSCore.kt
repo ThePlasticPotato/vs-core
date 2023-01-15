@@ -13,23 +13,27 @@ interface VSCore : VSCoreApi {
 
     val blockTypes: BlockTypes
 
+    @Deprecated("moved to api", ReplaceWith("newEmptyVoxelUpdate"))
     fun newEmptyVoxelShapeUpdate(chunkX: Int, chunkY: Int, chunkZ: Int, overwrite: Boolean): TerrainUpdate
 
     /**
      * Creates a new terrain update that deletes the specified chunk
      */
+    @Deprecated("moved to api", ReplaceWith("newDeleteVoxelUpdate"))
     fun newDeleteTerrainUpdate(chunkX: Int, chunkY: Int, chunkZ: Int): TerrainUpdate
 
     /**
      * Creates a new dense terrain update builder. A dense terrain update will
      * update every single block in the chunk, and by default contains only air.
      */
+    @Deprecated("moved to api", ReplaceWith("newDenseVoxelUpdate"))
     fun newDenseTerrainUpdateBuilder(chunkX: Int, chunkY: Int, chunkZ: Int): TerrainUpdate.Builder
 
     /**
      * Creates a new sparse terrain update builder. A sparse terrain update will
      * only update blocks that are added to it.
      */
+    @Deprecated("moved to api", ReplaceWith("newSparseVoxelUpdate"))
     fun newSparseTerrainUpdateBuilder(chunkX: Int, chunkY: Int, chunkZ: Int): TerrainUpdate.Builder
 
     /**

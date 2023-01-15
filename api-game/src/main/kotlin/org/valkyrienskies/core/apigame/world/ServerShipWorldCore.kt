@@ -1,6 +1,7 @@
 package org.valkyrienskies.core.apigame.world
 
 import org.joml.Vector3ic
+import org.valkyrienskies.core.api.bodies.shape.VoxelUpdate
 import org.valkyrienskies.core.api.physics.constraints.VSConstraint
 import org.valkyrienskies.core.api.physics.constraints.VSConstraintId
 import org.valkyrienskies.core.api.ships.ServerShip
@@ -16,7 +17,7 @@ interface ServerShipWorldCore : ShipWorldCore, ServerShipWorld {
 
     var players: Set<IPlayer>
 
-    fun addTerrainUpdates(dimensionId: DimensionId, terrainUpdates: List<TerrainUpdate>)
+    fun addTerrainUpdates(dimensionId: DimensionId, terrainUpdates: List<VoxelUpdate>)
 
     /**
      * If the chunk at [chunkX], [chunkZ] is a ship chunk, then this returns the [IPlayer]s that are watching that ship chunk.

@@ -4,13 +4,13 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
 
 class HashIdIndex<T> : MutableIdIndexed<T> {
 
-    private val map = Long2ObjectOpenHashMap<T>()
+    val map = Long2ObjectOpenHashMap<T>()
 
     override fun add(id: Long, value: T) {
         require(map.put(id, value) == null) { "Tried to add object already in index (ID: $id)" }
     }
 
-    override fun remove(id: Long, value: T): T {
+    override fun remove(id: Long): T {
         return requireNotNull(map.remove(id)) { "Tried to remove object not in index (ID: $id)" }
     }
 

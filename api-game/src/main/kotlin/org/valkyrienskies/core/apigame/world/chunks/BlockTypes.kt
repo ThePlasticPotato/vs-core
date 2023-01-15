@@ -1,9 +1,12 @@
 package org.valkyrienskies.core.apigame.world.chunks
 
-interface BlockTypes {
+import org.valkyrienskies.core.api.bodies.shape.VoxelTypes
 
-    val air: BlockType
-    val solid: BlockType
-    val lava: BlockType
-    val water: BlockType
+@Deprecated("moved to api", ReplaceWith("VoxelTypes", "org.valkyrienskies.core.api.bodies.shape.VoxelTypes"))
+interface BlockTypes : VoxelTypes {
+
+    override val air: BlockType
+    override val solid: BlockType
+    override val lava: BlockType
+    override val water: BlockType
 }
