@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.maps.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import org.valkyrienskies.core.api.world.LevelYRange
 import org.valkyrienskies.core.impl.config.VSCoreConfig
 import org.valkyrienskies.core.impl.game.DimensionInfo
 import org.valkyrienskies.test_utils.VSBlankUtils
@@ -24,7 +25,7 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
         config.shipLoadDistance = 50.0
         config.shipUnloadDistance = 100.0
 
-        val tracker = ShipObjectServerWorldChunkTracker(config, mapOf(dimension to DimensionInfo(dimension, 0..255)))
+        val tracker = ShipObjectServerWorldChunkTracker(config, mapOf(dimension to DimensionInfo(dimension, LevelYRange(0, 255))))
 
         // Single player at same coordinate as chunk should watch it
         run {
@@ -125,7 +126,7 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
         config.shipLoadDistance = 50.0
         config.shipUnloadDistance = 100.0
 
-        val tracker = ShipObjectServerWorldChunkTracker(config, mapOf(dimension to DimensionInfo(dimension, 0..255)))
+        val tracker = ShipObjectServerWorldChunkTracker(config, mapOf(dimension to DimensionInfo(dimension, LevelYRange(0, 255))))
 
         // Single player at same coordinate as chunk should watch it
         run {
@@ -265,7 +266,7 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
         config.shipLoadDistance = 50.0
         config.shipUnloadDistance = 100.0
 
-        val tracker = ShipObjectServerWorldChunkTracker(config, mapOf(dimension to DimensionInfo(dimension, 0..255)))
+        val tracker = ShipObjectServerWorldChunkTracker(config, mapOf(dimension to DimensionInfo(dimension, LevelYRange(0, 255))))
 
         // Both players at the same coordinate should watch the first chunk
         run {

@@ -117,11 +117,11 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
                     .set(
                         (chunkX shl 4).toDouble(),
                         // start at the minY of the ship if available
-                        voxelAABB?.minY()?.toDouble() ?: worldHeight.first.toDouble(),
+                        voxelAABB?.minY()?.toDouble() ?: worldHeight.minY.toDouble(),
                         (chunkZ shl 4).toDouble(),
                         (chunkX shl 4).toDouble() + 16.0,
                         // end at the maxY of the ship if available
-                        (voxelAABB?.maxY()?.toDouble() ?: worldHeight.last.toDouble()) + 1.0,
+                        (voxelAABB?.maxY()?.toDouble() ?: worldHeight.maxY.toDouble()) + 1.0,
                         (chunkZ shl 4).toDouble() + 16.0
                     )
                     .transform(shipTransform.shipToWorld)

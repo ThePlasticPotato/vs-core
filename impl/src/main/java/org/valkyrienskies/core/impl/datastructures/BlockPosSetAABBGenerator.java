@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import kotlin.ranges.IntRange;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 import org.joml.primitives.AABBi;
@@ -21,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Iterator;
+import org.valkyrienskies.core.api.world.LevelYRange;
 
 /**
  * A wrapper around SmallBlockPosSet that can make create tight AxisAlignedBB containing all BlockPos in the Set. All
@@ -41,11 +41,11 @@ public class BlockPosSetAABBGenerator implements IBlockPosSetAABB {
     private final FastMinMaxMap yMap;
     private final FastMinMaxMap zMap; // Only non-final so we can clear() quickly.
 
-    public BlockPosSetAABBGenerator(final ChunkClaim chunkClaim, final IntRange yRange) {
+    public BlockPosSetAABBGenerator(final ChunkClaim chunkClaim, final LevelYRange yRange) {
         this(chunkClaim, yRange, new DenseBlockPosSet());
     }
 
-    public BlockPosSetAABBGenerator(final ChunkClaim chunkClaim, final IntRange yRange, final IBlockPosSet backingSet) {
+    public BlockPosSetAABBGenerator(final ChunkClaim chunkClaim, final LevelYRange yRange, final IBlockPosSet backingSet) {
         final Vector3ic centerCoordinates = chunkClaim.getCenterBlockCoordinates(yRange, new Vector3i());
         final Vector3ic claimSize = chunkClaim.getBlockSize(yRange, new Vector3i());
 
