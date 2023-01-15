@@ -1,7 +1,7 @@
 package org.valkyrienskies.core.impl.game.ships
 
 import com.google.common.collect.MutableClassToInstanceMap
-import org.joml.Vector3d
+import org.valkyrienskies.core.api.ships.WingManager
 import org.valkyrienskies.core.impl.api.LoadedServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipUser
@@ -28,6 +28,9 @@ class ShipObjectServer(
         for (data in shipData.persistentAttachedData) {
             applyAttachmentInterfaces(data.key, data.value)
         }
+        val wingManager = WingManagerImpl()
+        wingManager.createWingGroup()
+        setAttachment(WingManager::class.java, wingManager)
     }
 
     override fun <T> setAttachment(clazz: Class<T>, value: T?) {
@@ -66,8 +69,4 @@ class ShipObjectServer(
         }
     }
 
-    /**
-     * This will be implemented in the future for portals, but for now we just return 0 for all positions
-     */
-    fun getSegmentId(localPos: Vector3d): Int = 0
 }

@@ -37,6 +37,7 @@ import org.valkyrienskies.core.impl.config.PhysicsConfig
 import org.valkyrienskies.core.impl.config.VSCoreConfig
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl
+import org.valkyrienskies.core.impl.game.ships.WingPhysicsSolver
 import org.valkyrienskies.core.impl.util.logger
 import org.valkyrienskies.physics_api.ConstraintId
 import org.valkyrienskies.physics_api.PhysicsWorldReference
@@ -132,6 +133,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
         // Compute and apply forces/torques for ships
         shipIdToPhysShip.values.forEach { ship ->
             ship.forceInducers.forEach { it.applyForces(ship) }
+            WingPhysicsSolver.applyWingForces(ship)
             ship.applyQueuedForces()
         }
 
@@ -179,6 +181,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val segments = newShipInGameFrameData.segments
             val isStatic = newShipInGameFrameData.isStatic
             val shipVoxelsFullyLoaded = newShipInGameFrameData.shipVoxelsFullyLoaded
+            val wingManagerChanges = newShipInGameFrameData.wingManagerChanges
 
             val newRigidBodyReference =
                 physicsEngine.createVoxelRigidBody(
@@ -192,7 +195,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             // TODO: This will need to be changed when we have multiple segments
             newRigidBodyReference.setSegmentDisplacement(0, segments.segments.values.first().segmentDisplacement)
 
-            shipIdToPhysShip[shipId] =
+            val physShip =
                 PhysShipImpl(
                     shipId,
                     newRigidBodyReference,
@@ -201,6 +204,10 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     poseVel,
                     segments
                 )
+            if (wingManagerChanges != null) {
+                physShip.wingManager.applyChanges(wingManagerChanges)
+            }
+            shipIdToPhysShip[shipId] = physShip
         }
 
         // Update existing ships
@@ -218,6 +225,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val deltaVoxelOffset = oldPoseVel.rot.transform(newVoxelOffset.sub(oldVoxelOffset, Vector3d()))
             val isStatic = shipUpdate.isStatic
             val shipVoxelsFullyLoaded = shipUpdate.shipVoxelsFullyLoaded
+            val wingManagerChanges = shipUpdate.wingManagerChanges
 
             val newShipPoseVel = PoseVel(
                 oldPoseVel.pos.sub(deltaVoxelOffset, Vector3d()), oldPoseVel.rot, oldPoseVel.vel, oldPoseVel.omega
@@ -225,12 +233,17 @@ class VSPhysicsPipelineStage @Inject constructor() {
 
             physShip._inertia = shipUpdate.inertiaData
             physShip.forceInducers = shipUpdate.forcesInducers
+            physShip.poseVel = newShipPoseVel
 
             shipRigidBody.collisionShapeOffset = newVoxelOffset
             shipRigidBody.poseVel = newShipPoseVel
             shipRigidBody.inertiaData = physInertiaToRigidBodyInertiaData(shipUpdate.inertiaData)
             shipRigidBody.isStatic = isStatic
             shipRigidBody.isVoxelTerrainFullyLoaded = shipVoxelsFullyLoaded
+
+            if (wingManagerChanges != null) {
+                physShip.wingManager.applyChanges(wingManagerChanges)
+            }
         }
 
         // Send voxel updates

@@ -3,8 +3,8 @@ package org.valkyrienskies.core.impl.pipelines
 import org.joml.Vector3dc
 import org.joml.Vector3ic
 import org.joml.primitives.AABBic
+import org.valkyrienskies.core.api.ships.WingManagerChanges
 import org.valkyrienskies.core.api.ships.properties.ShipId
-import org.valkyrienskies.core.apigame.constraints.VSConstraint
 import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintId
 import org.valkyrienskies.core.impl.api.ShipForcesInducer
@@ -43,7 +43,8 @@ data class NewShipInGameFrameData(
     val voxelOffset: Vector3dc,
     val isStatic: Boolean,
     val shipVoxelsFullyLoaded: Boolean,
-    val forcesInducers: List<ShipForcesInducer>
+    val forcesInducers: List<ShipForcesInducer>,
+    val wingManagerChanges: WingManagerChanges?
 )
 
 data class UpdateShipInGameFrameData(
@@ -53,7 +54,8 @@ data class UpdateShipInGameFrameData(
     val physicsData: ShipPhysicsData,
     val isStatic: Boolean,
     val shipVoxelsFullyLoaded: Boolean,
-    val forcesInducers: List<ShipForcesInducer>
+    val forcesInducers: List<ShipForcesInducer>,
+    val wingManagerChanges: WingManagerChanges?
 )
 
 enum class ConstraintUpdateTypeInGameFrame {
