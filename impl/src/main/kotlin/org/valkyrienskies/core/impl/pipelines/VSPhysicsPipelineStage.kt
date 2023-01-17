@@ -133,7 +133,16 @@ class VSPhysicsPipelineStage @Inject constructor() {
         // Compute and apply forces/torques for ships
         shipIdToPhysShip.values.forEach { ship ->
             ship.forceInducers.forEach { it.applyForces(ship) }
-            WingPhysicsSolver.applyWingForces(ship)
+            // region Wing physics
+            val shipTransform = ship.transform
+            val poseVel = ship.poseVel
+            val wingManager = ship.wingManager
+            val momentOfInertia = ship._inertia.momentOfInertiaTensor
+
+            val (force, torque) = WingPhysicsSolver.applyWingForces(shipTransform, poseVel, wingManager, momentOfInertia)
+            ship.applyInvariantForce(force)
+            ship.applyInvariantTorque(torque)
+            // endregion
             ship.applyQueuedForces()
         }
 

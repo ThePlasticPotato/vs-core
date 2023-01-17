@@ -10,7 +10,10 @@ data class Wing(
     /**
      * Null if infinite
      */
-    val wingBreakingForce: Double?
+    val wingBreakingForce: Double?,
+
+    // Angle of airfoil bias in radians, typically zero for symmetric airfoils, and non-zero for cambered airfoils
+    val wingCamberedBiasAngle: Double
 )
 
 data class PositionedWing(val posX: Int, val posY: Int, val posZ: Int, val wing: Wing?)
