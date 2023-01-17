@@ -42,7 +42,7 @@ object WingPhysicsSolver {
                 // Angle of attack, in radians
                 val angleOfAttack = (liftVelDirection.angle(velAtWingGlobal) * -sign(
                     wingNormalGlobal.dot(velAtWingGlobal)
-                )) + wing.wingCamberedBiasAngle
+                )) + wing.wingCamberAttackAngleBias
 
                 val dragDirection = velAtWingGlobal.mul(-1.0, Vector3d())
                 if (dragDirection.lengthSquared() < 1e-12) {
