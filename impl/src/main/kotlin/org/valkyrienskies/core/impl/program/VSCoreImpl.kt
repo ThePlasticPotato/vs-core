@@ -58,6 +58,22 @@ class VSCoreImpl @Inject constructor(
         return SparseTerrainUpdateBuilderImpl(chunkX, chunkY, chunkZ)
     }
 
+    @Deprecated("moved to api", replaceWith = ReplaceWith("newEmptyVoxelUpdate"))
+    override fun newEmptyVoxelShapeUpdate(chunkX: Int, chunkY: Int, chunkZ: Int, overwrite: Boolean): TerrainUpdate =
+        newEmptyVoxelUpdate(chunkX, chunkY, chunkZ, overwrite)
+
+    @Deprecated("moved to api", replaceWith = ReplaceWith("newDeleteVoxelUpdate"))
+    override fun newDeleteTerrainUpdate(chunkX: Int, chunkY: Int, chunkZ: Int): TerrainUpdate =
+        newDeleteVoxelUpdate(chunkX, chunkY, chunkZ)
+
+    @Deprecated("moved to api", replaceWith = ReplaceWith("newDenseVoxelUpdate"))
+    override fun newDenseTerrainUpdateBuilder(chunkX: Int, chunkY: Int, chunkZ: Int): TerrainUpdate.Builder =
+        newDenseVoxelUpdateBuilder(chunkX, chunkY, chunkZ)
+
+    @Deprecated("moved to api", replaceWith = ReplaceWith("newSparseVoxelUpdate"))
+    override fun newSparseTerrainUpdateBuilder(chunkX: Int, chunkY: Int, chunkZ: Int): TerrainUpdate.Builder =
+        newSparseVoxelUpdateBuilder(chunkX, chunkY, chunkZ)
+
     override fun newPipelineLegacyData(
         queryableShipDataBytes: ByteArray, chunkAllocatorBytes: ByteArray
     ): VSPipelineImpl {
