@@ -71,8 +71,8 @@ object WingPhysicsSolver {
 
                 val torque = tDir.cross(totalForce, Vector3d())
 
-                netShipTorque.add(torque)
                 netShipForce.add(totalForce)
+                netShipTorque.add(torque)
             } else {
                 // TODO: Do nothing?
             }
@@ -82,7 +82,7 @@ object WingPhysicsSolver {
 
         // Compute the change in omega, in the ship's local coordinate system
         val deltaOmegaInLocal =
-            invMOI.transform(shipTransform.worldToShip.transformDirection(netShipTorque), Vector3d())
+            invMOI.transform(shipTransform.worldToShip.transformDirection(netShipTorque, Vector3d()))
 
         // Clamp the rotation from [netShipTorque] to be up to 720 degrees per second
         val maxRotation = 4.0 * PI
