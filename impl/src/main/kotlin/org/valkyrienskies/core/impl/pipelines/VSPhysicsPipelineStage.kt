@@ -368,7 +368,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
         // Only use 10 sub-steps
         settings.subSteps = 10
         settings.solverType = GAUSS_SEIDEL
-        settings.iterations = 1
+        // Use 2 iterations
+        settings.iterations = 2
 
         // Decrease max de-penetration speed so that rigid bodies don't go
         // flying apart when they overlap
