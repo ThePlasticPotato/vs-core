@@ -68,7 +68,7 @@ publishing {
 tasks {
     compileKotlin {
         kotlinOptions {
-            freeCompilerArgs += listOf("-Xjvm-default=all")
+            freeCompilerArgs += listOf("-Xjvm-default=all", "-opt-in=org.valkyrienskies.core.api.VSBeta")
         }
 
         kotlinOptions.jvmTarget = "1.8"

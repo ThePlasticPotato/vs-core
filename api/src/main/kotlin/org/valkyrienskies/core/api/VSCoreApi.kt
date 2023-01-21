@@ -1,8 +1,6 @@
 package org.valkyrienskies.core.api
 
-import org.joml.Vector3dc
 import org.valkyrienskies.core.api.attachment.AttachmentSerializationStrategy
-import org.valkyrienskies.core.api.bodies.shape.BodyShape
 import org.valkyrienskies.core.api.bodies.shape.VoxelUpdate
 
 interface VSCoreApi {
@@ -24,15 +22,6 @@ interface VSCoreApi {
      * only update blocks that are added to it.
      */
     fun newSparseVoxelUpdateBuilder(chunkX: Int, chunkY: Int, chunkZ: Int): VoxelUpdate.Builder
-
-
-    fun createSphereCollisionShape(radius: Double): BodyShape.Sphere
-
-    fun createBoxCollisionShape(lengths: Vector3dc): BodyShape.Box
-
-    fun createWheelCollisionShape(radius: Double, halfThickness: Double): BodyShape.Wheel
-
-    fun createCapsuleCollisionShape(radius: Double, halfLength: Double): BodyShape.Capsule
 
     fun <T> registerAttachmentSerializationStrategy(name: String, strategy: Class<out AttachmentSerializationStrategy>)
 

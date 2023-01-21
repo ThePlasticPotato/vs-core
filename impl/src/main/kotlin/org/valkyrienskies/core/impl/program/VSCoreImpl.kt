@@ -1,14 +1,11 @@
 package org.valkyrienskies.core.impl.program
 
-import org.joml.Vector3dc
 import org.valkyrienskies.core.api.attachment.AttachmentSerializationStrategy
-import org.valkyrienskies.core.api.bodies.shape.BodyShape
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.apigame.world.VSPipeline
 import org.valkyrienskies.core.apigame.world.chunks.BlockTypes
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.impl.attachment.meta.AttachmentMetaRegistry
-import org.valkyrienskies.core.impl.bodies.BodyCollisionShapeImpl
 import org.valkyrienskies.core.impl.game.ChunkClaimImpl
 import org.valkyrienskies.core.impl.game.ships.modules.ShipWorldModule
 import org.valkyrienskies.core.impl.game.ships.serialization.vspipeline.VSPipelineSerializer
@@ -103,21 +100,6 @@ class VSCoreImpl @Inject constructor(
 
     @Deprecated("Surely we can do better than this")
     override var clientUsesUDP: Boolean by networking::clientUsesUDP
-    override fun createSphereCollisionShape(radius: Double): BodyShape.Sphere {
-        return BodyCollisionShapeImpl.Sphere(radius)
-    }
-
-    override fun createBoxCollisionShape(lengths: Vector3dc): BodyShape.Box {
-        return BodyCollisionShapeImpl.Box(lengths)
-    }
-
-    override fun createWheelCollisionShape(radius: Double, halfThickness: Double): BodyShape.Wheel {
-        return BodyCollisionShapeImpl.Wheel(radius, halfThickness)
-    }
-
-    override fun createCapsuleCollisionShape(radius: Double, halfLength: Double): BodyShape.Capsule {
-        return BodyCollisionShapeImpl.Capsule(radius, halfLength)
-    }
 
     override fun <T> registerAttachmentSerializationStrategy(
         name: String,

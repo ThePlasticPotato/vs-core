@@ -1,59 +1,52 @@
 package org.valkyrienskies.core.api.bodies
 
-import org.joml.Matrix3dc
-import org.joml.Matrix4dc
+import org.joml.Quaterniondc
 import org.joml.Vector3dc
-import org.valkyrienskies.core.api.VSBeta
-import org.valkyrienskies.core.api.bodies.shape.BodyShape
 
-interface PhysicsVSBody : BaseVSBody {
+interface PhysicsVSBody : ServerBaseVSBody {
 
-    val shape: BodyShape
+    companion object {
+        const val REASON_UNKNOWN = "unspecified"
+    }
 
-    /**
-     * The mass of this body, in kg
-     */
-    var mass: Double
+    fun setTransform(position: Vector3dc, rotation: Quaterniondc, scaling: Vector3dc)
 
-    /**
-     * The center of mass of this body, in world-space
-     */
-    var centerOfMass: Vector3dc
+    fun setPosition(position: Vector3dc) = setTransform(position, transform.rotation, transform.scaling)
 
-    /**
-     * The moment of inertia tensor for this body, in world-space
-     */
-    var momentOfInertia: Matrix3dc
+    fun setRotation(rotation: Quaterniondc) = setTransform(transform.position, rotation, transform.scaling)
 
-    var isStatic: Boolean
+    fun setScaling(scaling: Vector3dc) = setTransform(transform.position, transform.rotation, scaling)
 
-    @VSBeta
-    var buoyantFactor: Double
 
-    @VSBeta
-    var doFluidDrag: Boolean
+    fun applyForceInWorld(force: Vector3dc) = applyForceInWorld(REASON_UNKNOWN, force)
+    fun applyForceInLocal(force: Vector3dc) = applyForceInLocal(REASON_UNKNOWN, force)
+    fun applyForceInWorld(force: Vector3dc, pos: Vector3dc) = applyForceInWorld(REASON_UNKNOWN, force)
+    fun applyForceInLocal(force: Vector3dc, pos: Vector3dc) = applyForceInLocal(REASON_UNKNOWN, force)
 
-    fun setTransform(modelToWorld: Matrix4dc)
+    fun applyRotatingForceInWorld(force: Vector3dc) = applyRotatingForceInWorld(REASON_UNKNOWN, force)
+    fun applyRotatingForceInLocal(force: Vector3dc) = applyRotatingForceInLocal(REASON_UNKNOWN, force)
+    fun applyRotatingForceInWorld(force: Vector3dc, pos: Vector3dc) = applyRotatingForceInWorld(REASON_UNKNOWN, force)
+    fun applyRotatingForceInLocal(force: Vector3dc, pos: Vector3dc) = applyRotatingForceInLocal(REASON_UNKNOWN, force)
 
-    fun applyRotDependentForce(force: Vector3dc)
+    fun applyTorqueInWorld(torque: Vector3dc) = applyTorqueInWorld(REASON_UNKNOWN, torque)
+    fun applyTorqueInLocal(torque: Vector3dc) = applyTorqueInLocal(REASON_UNKNOWN, torque)
+    fun applyRotatingTorqueInWorld(torque: Vector3dc) = applyRotatingTorqueInWorld(REASON_UNKNOWN, torque)
+    fun applyRotatingTorqueInLocal(torque: Vector3dc) = applyRotatingTorqueInLocal(REASON_UNKNOWN, torque)
 
-    fun applyInvariantForce(force: Vector3dc)
 
-    fun applyInvariantForceToPos(force: Vector3dc, pos: Vector3dc)
+    fun applyForceInWorld(reason: String, force: Vector3dc)
+    fun applyForceInLocal(reason: String, force: Vector3dc)
+    fun applyForceInWorld(reason: String, force: Vector3dc, pos: Vector3dc)
+    fun applyForceInLocal(reason: String, force: Vector3dc, pos: Vector3dc)
 
-    fun applyRotDependentTorque(torque: Vector3dc)
+    fun applyRotatingForceInWorld(reason: String, force: Vector3dc)
+    fun applyRotatingForceInLocal(reason: String, force: Vector3dc)
+    fun applyRotatingForceInWorld(reason: String, force: Vector3dc, pos: Vector3dc)
+    fun applyRotatingForceInLocal(reason: String, force: Vector3dc, pos: Vector3dc)
 
-    fun applyInvariantTorque(torque: Vector3dc)
-
-    /**
-     * Use this for blocks whose force direction and force position both depend on the ship's rotation.
-     *
-     * For example, the old propeller blocks in VS1 would use this function.
-     *
-     * @param force is the force the block makes in world coordinates will be transformed based on ship rotation.
-     * @param pos is the position the force is applied to relative to the ship's center of mass, in world
-     *                       coordinates
-     */
-    fun applyRotDependentForceToPos(force: Vector3dc, pos: Vector3dc)
+    fun applyTorqueInWorld(reason: String, torque: Vector3dc)
+    fun applyTorqueInLocal(reason: String, torque: Vector3dc)
+    fun applyRotatingTorqueInWorld(reason: String, torque: Vector3dc)
+    fun applyRotatingTorqueInLocal(reason: String, torque: Vector3dc)
 
 }

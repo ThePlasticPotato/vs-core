@@ -3,6 +3,7 @@ package org.valkyrienskies.core.impl.pipelines
 import org.joml.Vector3dc
 import org.joml.Vector3ic
 import org.joml.primitives.AABBic
+import org.valkyrienskies.core.api.bodies.VSBody
 import org.valkyrienskies.core.api.physics.constraints.VSConstraintAndId
 import org.valkyrienskies.core.api.physics.constraints.VSConstraintId
 import org.valkyrienskies.core.api.ships.properties.ShipId
@@ -11,6 +12,11 @@ import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.ShipPhysicsData
 import org.valkyrienskies.physics_api.PoseVel
 import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
+
+
+data class NGameFrame(
+    val newBodies: List<VSBody>
+)
 
 /**
  * A [VSGameFrame] represents the change of state of the game that occurred over 1 tick

@@ -11,29 +11,15 @@ import org.valkyrienskies.core.api.physics.constraints.VSConstraintId
 import org.valkyrienskies.core.api.physics.constraints.VSForceConstraint
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.apigame.world.IPlayer
 import org.valkyrienskies.core.apigame.world.ServerShipWorldCore
-import org.valkyrienskies.core.apigame.world.chunks.BlockType
-import org.valkyrienskies.core.apigame.world.chunks.BlockTypes
-import org.valkyrienskies.core.apigame.world.chunks.ChunkUnwatchTask
-import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
-import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTasks
-import org.valkyrienskies.core.api.world.properties.DimensionId
+import org.valkyrienskies.core.apigame.world.chunks.*
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
 import org.valkyrienskies.core.impl.game.ChunkAllocatorProvider
 import org.valkyrienskies.core.impl.game.DimensionInfo
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.CLEAR_FOR_RESET
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.GET_CURRENT_TICK_CHANGES
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.GET_LAST_TICK_CHANGES
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.POST_TICK_FINISH
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.POST_TICK_GENERATED
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.POST_TICK_START
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.PRE_TICK
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_BLOCKS
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_CHUNKS
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_DIMENSIONS
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.UPDATE_PLAYERS
+import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld.Stages.*
 import org.valkyrienskies.core.impl.game.ships.loading.ShipLoadManagerServer
 import org.valkyrienskies.core.impl.game.ships.modules.AllShips
 import org.valkyrienskies.core.impl.game.ships.types.MutableShipVoxelUpdates
@@ -47,11 +33,7 @@ import org.valkyrienskies.core.impl.networking.VSNetworking
 import org.valkyrienskies.core.impl.util.WorldScoped
 import org.valkyrienskies.core.impl.util.assertions.stages.TickStageEnforcer
 import org.valkyrienskies.core.impl.util.names.NounListNameGenerator
-import org.valkyrienskies.physics_api.voxel.updates.DeleteVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel.updates.DenseVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel.updates.EmptyVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel.updates.SparseVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.*
 import java.util.concurrent.CompletableFuture
 import javax.inject.Inject
 import javax.inject.Named
@@ -469,14 +451,14 @@ class ShipObjectServerWorld @Inject constructor(
     }
 
     override fun createNewConstraint(vsConstraint: VSConstraint): VSConstraintId? {
-        if (!isShipLoaded(vsConstraint.shipId0) || !isShipLoaded(vsConstraint.shipId1))
+        if (!isShipLoaded(vsConstraint.bodyId0) || !isShipLoaded(vsConstraint.bodyId1))
             return null
 
         val constraintId = nextConstraintId++
         constraints[constraintId] = vsConstraint
 
-        addConstraintIdToRigidBodyIdToConstraintsHelper(vsConstraint.shipId0, constraintId)
-        addConstraintIdToRigidBodyIdToConstraintsHelper(vsConstraint.shipId1, constraintId)
+        addConstraintIdToRigidBodyIdToConstraintsHelper(vsConstraint.bodyId0, constraintId)
+        addConstraintIdToRigidBodyIdToConstraintsHelper(vsConstraint.bodyId1, constraintId)
 
         // Send a constraint CREATE to the physics engine
         constraintsCreatedThisTick.add(VSConstraintAndId(constraintId, vsConstraint))
@@ -487,20 +469,20 @@ class ShipObjectServerWorld @Inject constructor(
     override fun updateConstraint(constraintId: VSConstraintId, updatedVSConstraint: VSConstraint): Boolean {
         val oldConstraint = constraints[constraintId] ?: return false
 
-        if (!isShipLoaded(updatedVSConstraint.shipId0)
-            || !isShipLoaded(updatedVSConstraint.shipId1)
+        if (!isShipLoaded(updatedVSConstraint.bodyId0)
+            || !isShipLoaded(updatedVSConstraint.bodyId1)
         ) {
             return false
         }
 
         // Update [rigidBodyIdToConstraints] if necessary
-        if (oldConstraint.shipId0 != updatedVSConstraint.shipId0
-            || oldConstraint.shipId1 != updatedVSConstraint.shipId1
+        if (oldConstraint.bodyId0 != updatedVSConstraint.bodyId0
+            || oldConstraint.bodyId1 != updatedVSConstraint.bodyId1
         ) {
-            removeConstraintIdFromRigidBodyIdToConstraintsHelper(oldConstraint.shipId0, constraintId)
-            removeConstraintIdFromRigidBodyIdToConstraintsHelper(oldConstraint.shipId1, constraintId)
-            addConstraintIdToRigidBodyIdToConstraintsHelper(updatedVSConstraint.shipId0, constraintId)
-            addConstraintIdToRigidBodyIdToConstraintsHelper(updatedVSConstraint.shipId1, constraintId)
+            removeConstraintIdFromRigidBodyIdToConstraintsHelper(oldConstraint.bodyId0, constraintId)
+            removeConstraintIdFromRigidBodyIdToConstraintsHelper(oldConstraint.bodyId1, constraintId)
+            addConstraintIdToRigidBodyIdToConstraintsHelper(updatedVSConstraint.bodyId0, constraintId)
+            addConstraintIdToRigidBodyIdToConstraintsHelper(updatedVSConstraint.bodyId1, constraintId)
         }
 
         // Send a constraint UPDATE to the physics engine
@@ -512,8 +494,8 @@ class ShipObjectServerWorld @Inject constructor(
     override fun removeConstraint(constraintId: VSConstraintId): Boolean {
         val oldConstraint = constraints[constraintId] ?: return false
 
-        removeConstraintIdFromRigidBodyIdToConstraintsHelper(oldConstraint.shipId0, constraintId)
-        removeConstraintIdFromRigidBodyIdToConstraintsHelper(oldConstraint.shipId1, constraintId)
+        removeConstraintIdFromRigidBodyIdToConstraintsHelper(oldConstraint.bodyId0, constraintId)
+        removeConstraintIdFromRigidBodyIdToConstraintsHelper(oldConstraint.bodyId1, constraintId)
 
         // Send a constraint DELETE to the physics engine
         constraintsDeletedThisTick.add(constraintId)

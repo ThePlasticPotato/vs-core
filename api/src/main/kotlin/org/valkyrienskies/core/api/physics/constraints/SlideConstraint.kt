@@ -2,8 +2,7 @@ package org.valkyrienskies.core.api.physics.constraints
 
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.VSBeta
-import org.valkyrienskies.core.api.physics.constraints.VSConstraintType.SLIDE
-import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.bodies.properties.BodyId
 
 /**
  * Force two positions of two bodies to slide along an axis, with a max distance of [maxDistBetweenPoints] between them.
@@ -15,8 +14,8 @@ import org.valkyrienskies.core.api.ships.properties.ShipId
  */
 @VSBeta
 data class SlideConstraint(
-    override val shipId0: ShipId,
-    override val shipId1: ShipId,
+    override val bodyId0: BodyId,
+    override val bodyId1: BodyId,
     override val compliance: Double,
     override val localPos0: Vector3dc,
     override val localPos1: Vector3dc,
@@ -26,11 +25,9 @@ data class SlideConstraint(
     // The max distance the two points can differ along the slide axis
     val maxDistBetweenPoints: Double
 ) : VSForceConstraint {
-    override fun setLocalPositions(pos0: Vector3dc, pos1: Vector3dc): SlideConstraint {
+    override fun withLocalPositions(pos0: Vector3dc, pos1: Vector3dc): SlideConstraint {
         return SlideConstraint(
-            shipId0, shipId1, compliance, pos0, pos1, maxForce, localSlideAxis0, maxDistBetweenPoints
+            bodyId0, bodyId1, compliance, pos0, pos1, maxForce, localSlideAxis0, maxDistBetweenPoints
         )
     }
-
-    override val constraintType: VSConstraintType = SLIDE
 }

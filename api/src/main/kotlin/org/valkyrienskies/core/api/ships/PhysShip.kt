@@ -20,16 +20,19 @@ interface PhysShip {
     /**
      * Apply a rotation dependent force in world-space
      */
+    @Deprecated("renamed", replaceWith = ReplaceWith("applyRotatingForceInWorld"))
     fun applyRotDependentForce(force: Vector3dc)
 
     /**
      * Apply a force in world-space
      */
+    @Deprecated("renamed", ReplaceWith("applyForceInWorld"))
     fun applyInvariantForce(force: Vector3dc)
 
     /**
-     * Apply a [force] in local-space to a [pos] in local-space
+     * Apply a [force] in inertia-local-space to a [pos] in inertia-local-space
      */
+    @Deprecated("renamed", ReplaceWith(""))
     fun applyInvariantForceToPos(force: Vector3dc, pos: Vector3dc)
 
     /**

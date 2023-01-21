@@ -1,11 +1,7 @@
 package org.valkyrienskies.core.impl.pipelines
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
-import org.joml.Matrix3d
-import org.joml.Quaterniond
-import org.joml.Vector3d
-import org.joml.Vector3dc
-import org.joml.Vector3i
+import org.joml.*
 import org.valkyrienskies.core.api.physics.constraints.VSConstraint
 import org.valkyrienskies.core.api.physics.constraints.VSConstraintAndId
 import org.valkyrienskies.core.api.physics.constraints.VSConstraintId
@@ -16,12 +12,7 @@ import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.Ticked
-import org.valkyrienskies.core.impl.game.ships.PhysInertia
-import org.valkyrienskies.core.impl.game.ships.ShipData
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServer
-import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld
-import org.valkyrienskies.core.impl.game.ships.ShipPhysicsData
-import org.valkyrienskies.core.impl.game.ships.ShipTransformImpl
+import org.valkyrienskies.core.impl.game.ships.*
 import org.valkyrienskies.core.impl.util.logger
 import org.valkyrienskies.physics_api.PhysicsWorldReference
 import org.valkyrienskies.physics_api.PoseVel
@@ -273,10 +264,10 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
      * the center of mass.
      */
     private fun adjustConstraintLocalPositions(vsConstraint: VSForceConstraint): VSConstraint? {
-        val ship0 = shipWorld.loadedShips.getById(vsConstraint.shipId0)
-        val ship1 = shipWorld.loadedShips.getById(vsConstraint.shipId1)
+        val ship0 = shipWorld.loadedShips.getById(vsConstraint.bodyId0)
+        val ship1 = shipWorld.loadedShips.getById(vsConstraint.bodyId1)
 
-        val cm0: Vector3dc = if (!shipWorld.dimensionToGroundBodyIdImmutable.containsValue(vsConstraint.shipId0)) {
+        val cm0: Vector3dc = if (!shipWorld.dimensionToGroundBodyIdImmutable.containsValue(vsConstraint.bodyId0)) {
             if (ship0 == null) return null
             ship0.shipData.inertiaData.centerOfMassInShip
         } else {
@@ -284,7 +275,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             Vector3d(-0.5, -0.5, -0.5)
         }
 
-        val cm1: Vector3dc = if (!shipWorld.dimensionToGroundBodyIdImmutable.containsValue(vsConstraint.shipId1)) {
+        val cm1: Vector3dc = if (!shipWorld.dimensionToGroundBodyIdImmutable.containsValue(vsConstraint.bodyId1)) {
             if (ship1 == null) return null
             ship1.shipData.inertiaData.centerOfMassInShip
         } else {
@@ -298,7 +289,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
 
         // Offset force constraints by the center of mass before sending them to the physics pipeline
         // TODO: I'm not entirely sure why I have to subtract 0.5 here, but it works
-        return vsConstraint.setLocalPositions(
+        return vsConstraint.withLocalPositions(
             cm0.mul(-1.0, Vector3d()).sub(0.5, 0.5, 0.5).add(vsConstraint.localPos0).mul(ship0Scaling),
             cm1.mul(-1.0, Vector3d()).sub(0.5, 0.5, 0.5).add(vsConstraint.localPos1).mul(ship1Scaling),
         )

@@ -66,12 +66,25 @@ data class ShipTransformImpl(
         val ZERO: Vector3dc = Vector3d()
 
         fun create(previous: BodyTransform, toWorld: Matrix4dc): ShipTransform {
+            val toWorld = Matrix4d(toWorld)
+            toWorld.determineProperties()
+
+            require(toWorld.isAffine) { "Body transform must be an affine matrix - no skew!" }
+
             val positionInModel = previous.positionInModel
             val position = toWorld.transformPosition(Vector3d(positionInModel))
             val rotation = toWorld.getNormalizedRotation(Quaterniond())
             val scaling = toWorld.getScale(Vector3d())
 
             return ShipTransformImpl(position, positionInModel, rotation, scaling, toWorld)
+        }
+
+        fun createWithPositionInModel(previous: BodyTransform, positionInModel: Vector3dc): ShipTransform {
+            val newPosition = Vector3d(previous.positionInModel)
+                .sub(positionInModel)
+                .add(previous.position)
+
+            return ShipTransformImpl(newPosition, positionInModel, previous.rotation, previous.scaling)
         }
 
         fun createEmpty(): ShipTransform {

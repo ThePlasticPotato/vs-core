@@ -8,16 +8,16 @@ import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
-import org.valkyrienskies.core.api.bodies.VSBody
+import org.valkyrienskies.core.api.util.HasId
 import org.valkyrienskies.core.api.world.properties.DimensionId
 
 /**
  * Abstraction of a ship, there are many types such as offline ships
  *  or loaded ships so this is the generic interface for all ships.
  */
-interface Ship {
+interface Ship : HasId {
 
-    val id: ShipId
+    override val id: ShipId
 
     val transform: ShipTransform
     val prevTickTransform: ShipTransform

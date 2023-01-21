@@ -49,6 +49,9 @@ dependencies {
     // FastUtil for Fast Primitive Collections
     implementation("it.unimi.dsi", "fastutil", "8.2.1")
 
+    // high-scale-lib for NonBlockingHashmap
+    implementation("com.boundary", "high-scale-lib", "1.0.6")
+
     // Netty for networking (ByteBuf)
     implementation("io.netty", "netty-buffer", nettyVersion)
 
