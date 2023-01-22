@@ -6,10 +6,12 @@ import org.joml.Vector3dc
 import org.joml.primitives.AABBd
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint
+import org.valkyrienskies.core.apigame.constraints.VSAttachmentOrientationConstraint
 import org.valkyrienskies.core.apigame.constraints.VSConstraint
 import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintType.ATTACHMENT
+import org.valkyrienskies.core.apigame.constraints.VSConstraintType.FIXED_ATTACHMENT_ORIENTATION
 import org.valkyrienskies.core.apigame.constraints.VSConstraintType.FIXED_ORIENTATION
 import org.valkyrienskies.core.apigame.constraints.VSConstraintType.HINGE_ORIENTATION
 import org.valkyrienskies.core.apigame.constraints.VSConstraintType.HINGE_SWING_LIMITS
@@ -49,6 +51,7 @@ import org.valkyrienskies.physics_api.SegmentTracker
 import org.valkyrienskies.physics_api.constraints.AttachmentConstraint
 import org.valkyrienskies.physics_api.constraints.Constraint
 import org.valkyrienskies.physics_api.constraints.ConstraintAndId
+import org.valkyrienskies.physics_api.constraints.FixedAttachmentOrientationConstraint
 import org.valkyrienskies.physics_api.constraints.FixedOrientationConstraint
 import org.valkyrienskies.physics_api.constraints.HingeOrientationConstraint
 import org.valkyrienskies.physics_api.constraints.HingeSwingLimitsConstraint
@@ -391,6 +394,15 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     body0Id, body1Id, segment0Id, segment1Id, attachmentConstraint.compliance,
                     attachmentConstraint.localPos0, attachmentConstraint.localPos1, attachmentConstraint.maxForce,
                     attachmentConstraint.fixedDistance
+                )
+            }
+            FIXED_ATTACHMENT_ORIENTATION -> {
+                val fixedAttachmentOrientationConstraint = vsConstraint as VSAttachmentOrientationConstraint
+                FixedAttachmentOrientationConstraint(
+                    body0Id, body1Id, segment0Id, segment1Id, fixedAttachmentOrientationConstraint.compliance,
+                    fixedAttachmentOrientationConstraint.localRot0, fixedAttachmentOrientationConstraint.localRot1,
+                    fixedAttachmentOrientationConstraint.maxTorque, fixedAttachmentOrientationConstraint.localPos0,
+                    fixedAttachmentOrientationConstraint.localPos1, fixedAttachmentOrientationConstraint.maxForce
                 )
             }
             FIXED_ORIENTATION -> {
