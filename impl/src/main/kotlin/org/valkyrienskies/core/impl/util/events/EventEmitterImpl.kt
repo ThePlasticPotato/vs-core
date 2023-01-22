@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class EventEmitterImpl<T> : EventEmitter<T> {
 
-    private val listeners = ConcurrentHashMap.newKeySet<EventListener<T>>()
+    private val listeners: MutableSet<EventListener<T>> = ConcurrentHashMap.newKeySet()
 
     fun emit(value: T) {
         listeners.forEach { it.accept(value) }

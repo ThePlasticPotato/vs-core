@@ -1,6 +1,6 @@
 package org.valkyrienskies.core.impl.game.ships.types
 
-import org.valkyrienskies.core.apigame.world.chunks.BlockType
+import org.valkyrienskies.core.api.bodies.shape.VoxelType
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
 import org.valkyrienskies.physics_api.voxel.updates.DenseVoxelShapeUpdate
@@ -14,7 +14,7 @@ class DenseTerrainUpdateBuilderImpl(
 
     private var isBuilt = false
 
-    override fun addBlock(x: Int, y: Int, z: Int, block: BlockType) {
+    override fun addBlock(x: Int, y: Int, z: Int, block: VoxelType) {
         block as BlockTypeImpl
 
         update.setVoxel(x, y, z, block.state)

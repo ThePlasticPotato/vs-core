@@ -56,7 +56,7 @@ class ValkyrienServerWorldImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override fun createNewConstraint(vsConstraint: VSConstraint): VSConstraintId? {
+    override fun createConstraint(constraint: VSConstraint): VSConstraintId? {
         TODO("Not yet implemented")
     }
 

@@ -1,6 +1,5 @@
 package org.valkyrienskies.core.impl.bodies.storage
 
-import org.joml.primitives.AABBdc
 import org.valkyrienskies.core.api.bodies.BaseVSBody
 import org.valkyrienskies.core.api.bodies.properties.BodyId
 import org.valkyrienskies.core.impl.datastructures.queryable.aabb.BoundingBoxIndexed
@@ -17,12 +16,12 @@ class BodyIndexedStorageImpl<B : BaseVSBody>(
 
     override fun add(body: B) {
         hashIndex.add(body.id, body)
-        bbIndex.add(body.worldAABB, body.id, body)
+        bbIndex.add(body.aabb, body.id, body)
     }
 
     override fun remove(id: BodyId) {
         val body = hashIndex.remove(id)
-        bbIndex.remove(body.worldAABB, id)
+        bbIndex.remove(body.aabb, id)
     }
 }
 

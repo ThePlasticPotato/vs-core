@@ -1,6 +1,6 @@
 package org.valkyrienskies.core.impl.util
 
-import org.cliffc.high_scale_lib.NonBlockingHashMapLong
+import org.jctools.maps.NonBlockingHashMapLong
 import org.valkyrienskies.core.api.util.HasId
 
 /**
@@ -19,6 +19,7 @@ class CUDQueue<C : HasId, U : HasId>(
     private val combiner: ((U, U) -> U?)? = null
 ) : Iterable<Action<C, U>> {
 
+    // note: NonBlockingHashMapLong seems to have a bug where the iterator remove() function doesn't actually work!
     private val actionQueue = NonBlockingHashMapLong<ActionInternal<C, U>>()
 
     /**

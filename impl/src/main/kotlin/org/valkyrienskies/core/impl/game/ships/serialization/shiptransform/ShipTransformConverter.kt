@@ -12,18 +12,18 @@ import org.valkyrienskies.core.impl.game.ships.serialization.shiptransform.dto.S
 interface ShipTransformConverter {
 
     @Mappings(
-        Mapping(target = "positionInShip", source = "shipPositionInShipCoordinates"),
-        Mapping(target = "positionInWorld", source = "shipPositionInWorldCoordinates"),
-        Mapping(target = "shipToWorldRotation", source = "shipCoordinatesToWorldCoordinatesRotation"),
-        Mapping(target = "shipToWorldScaling", source = "shipCoordinatesToWorldCoordinatesScaling")
+        Mapping(target = "positionInModel", source = "shipPositionInShipCoordinates"),
+        Mapping(target = "position", source = "shipPositionInWorldCoordinates"),
+        Mapping(target = "rotation", source = "shipCoordinatesToWorldCoordinatesRotation"),
+        Mapping(target = "scaling", source = "shipCoordinatesToWorldCoordinatesScaling")
     )
     fun convertToModel(data: ShipTransformDataV0): ShipTransformImpl
 
     @Mappings(
-        Mapping(source = "positionInShip", target = "shipPositionInShipCoordinates"),
-        Mapping(source = "positionInWorld", target = "shipPositionInWorldCoordinates"),
-        Mapping(source = "shipToWorldRotation", target = "shipCoordinatesToWorldCoordinatesRotation"),
-        Mapping(source = "shipToWorldScaling", target = "shipCoordinatesToWorldCoordinatesScaling")
+        Mapping(source = "positionInModel", target = "shipPositionInShipCoordinates"),
+        Mapping(source = "position", target = "shipPositionInWorldCoordinates"),
+        Mapping(source = "rotation", target = "shipCoordinatesToWorldCoordinatesRotation"),
+        Mapping(source = "scaling", target = "shipCoordinatesToWorldCoordinatesScaling")
     )
     fun convertToDto(model: ShipTransform): ShipTransformDataV0
 }
