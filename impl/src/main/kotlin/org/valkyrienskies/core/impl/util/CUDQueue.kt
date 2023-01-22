@@ -1,4 +1,4 @@
-package org.valkyrienskies.core.impl.bodies
+package org.valkyrienskies.core.impl.util
 
 import org.cliffc.high_scale_lib.NonBlockingHashMapLong
 import org.valkyrienskies.core.api.util.HasId

@@ -1,9 +1,9 @@
 package org.valkyrienskies.core.impl.bodies.physics.world
 
 import org.valkyrienskies.core.api.physics.constraints.VSConstraintAndId
-import org.valkyrienskies.core.impl.bodies.CUDQueue
 import org.valkyrienskies.core.impl.bodies.ServerBaseVSBodyData
 import org.valkyrienskies.core.impl.bodies.VSBodyUpdateToPhysics
+import org.valkyrienskies.core.impl.util.CUDQueue
 import org.valkyrienskies.core.impl.util.WorldScoped
 import javax.inject.Inject
 

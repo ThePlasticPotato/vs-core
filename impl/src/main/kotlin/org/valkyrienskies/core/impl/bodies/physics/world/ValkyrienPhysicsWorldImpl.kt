@@ -15,6 +15,7 @@ import org.valkyrienskies.core.impl.bodies.*
 import org.valkyrienskies.core.impl.bodies.storage.QueryableBodiesImpl
 import org.valkyrienskies.core.impl.config.PhysicsConfig
 import org.valkyrienskies.core.impl.config.VSCoreConfig
+import org.valkyrienskies.core.impl.util.Action
 import org.valkyrienskies.core.impl.util.TickableExecutor
 import org.valkyrienskies.core.impl.util.WorldScoped
 import org.valkyrienskies.core.impl.util.assertions.assertIsPhysicsThread
