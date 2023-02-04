@@ -1,11 +1,14 @@
 package org.valkyrienskies.core.api.bodies
 
 import org.joml.Matrix3dc
+import org.joml.Quaterniondc
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.VSBeta
 import org.valkyrienskies.core.api.bodies.shape.BodyShape
 
 interface ServerBaseVSBody : BaseVSBody {
+
+    // val segments: List<BodySegment>
     val shape: BodyShape
 
     /**
@@ -29,4 +32,12 @@ interface ServerBaseVSBody : BaseVSBody {
 
     @VSBeta
     var doFluidDrag: Boolean
+
+    fun setTransform(position: Vector3dc, rotation: Quaterniondc, scaling: Vector3dc)
+
+    fun setPosition(position: Vector3dc) = setTransform(position, transform.rotation, transform.scaling)
+
+    fun setRotation(rotation: Quaterniondc) = setTransform(transform.position, rotation, transform.scaling)
+
+    fun setScaling(scaling: Vector3dc) = setTransform(transform.position, transform.rotation, scaling)
 }

@@ -1,6 +1,5 @@
 package org.valkyrienskies.core.api.bodies
 
-import org.joml.Quaterniondc
 import org.joml.Vector3dc
 
 interface PhysicsVSBody : ServerBaseVSBody {
@@ -9,13 +8,7 @@ interface PhysicsVSBody : ServerBaseVSBody {
         const val REASON_UNKNOWN = "unspecified"
     }
 
-    fun setTransform(position: Vector3dc, rotation: Quaterniondc, scaling: Vector3dc)
-
-    fun setPosition(position: Vector3dc) = setTransform(position, transform.rotation, transform.scaling)
-
-    fun setRotation(rotation: Quaterniondc) = setTransform(transform.position, rotation, transform.scaling)
-
-    fun setScaling(scaling: Vector3dc) = setTransform(transform.position, transform.rotation, scaling)
+    // override val segments: List<PhysicsBodySegment>
 
 
     fun applyForceInWorld(force: Vector3dc) = applyForceInWorld(REASON_UNKNOWN, force)

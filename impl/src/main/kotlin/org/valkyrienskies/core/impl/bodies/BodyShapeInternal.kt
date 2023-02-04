@@ -17,7 +17,12 @@ sealed interface BodyShapeInternal : BodyShape {
     val ref: CollisionShapeReference
     fun createRef(world: PhysicsWorldReference)
 
-    data class Sphere(override val radius: Double) : BodyShape.Sphere, BodyShapeInternal {
+    /**
+     * Return an immutable snapshot of the body to be used by the game thread
+     */
+    fun snapshot(): BodyShape
+
+    class Sphere(override val radius: Double) : BodyShape.Sphere, BodyShapeInternal {
         override lateinit var ref: SphereShapeReference
 
         constructor(radius: Double, world: PhysicsWorldReference) : this(radius) {
@@ -29,9 +34,11 @@ sealed interface BodyShapeInternal : BodyShape {
         }
 
         override val aabb: AABBdc = AABBd(-radius, -radius, -radius, radius, radius, radius)
+
+        override fun snapshot(): BodyShape = this
     }
 
-    data class Box(override val halfLengths: Vector3dc) : BodyShape.Box, BodyShapeInternal {
+    class Box(override val halfLengths: Vector3dc) : BodyShape.Box, BodyShapeInternal {
         override lateinit var ref: BoxShapeReference
 
         constructor(halfLengths: Vector3dc, world: PhysicsWorldReference) : this(halfLengths) {
@@ -46,9 +53,11 @@ sealed interface BodyShapeInternal : BodyShape {
             -halfLengths.x(), -halfLengths.y(), -halfLengths.z(),
             halfLengths.x(), halfLengths.y(), halfLengths.z()
         )
+
+        override fun snapshot(): BodyShape = this
     }
 
-    data class Wheel(override val radius: Double, override val halfThickness: Double) :
+    class Wheel(override val radius: Double, override val halfThickness: Double) :
         BodyShape.Wheel, BodyShapeInternal {
 
         override lateinit var ref: WheelShapeReference
@@ -62,9 +71,11 @@ sealed interface BodyShapeInternal : BodyShape {
         }
 
         override val aabb: AABBdc = AABBd(-halfThickness, -radius, -radius, halfThickness, radius, radius)
+
+        override fun snapshot(): BodyShape = this
     }
 
-    data class Capsule(override val radius: Double, override val halfLength: Double) :
+    class Capsule(override val radius: Double, override val halfLength: Double) :
         BodyShape.Capsule, BodyShapeInternal {
         override lateinit var ref: CapsuleShapeReference
 
@@ -77,9 +88,11 @@ sealed interface BodyShapeInternal : BodyShape {
         }
 
         override val aabb: AABBdc = AABBd(-halfLength, -radius, -radius, halfLength, radius, radius)
+
+        override fun snapshot(): BodyShape = this
     }
 
-    data class Voxel(override val definedArea: AABBic, val voxelRegion: AABBic) : BodyShape.Voxel, BodyShapeInternal {
+    class Voxel(override val definedArea: AABBic, private val voxelRegion: AABBic) : BodyShape.Voxel, BodyShapeInternal {
         override lateinit var ref: VoxelShapeReference
 
         constructor(
@@ -120,6 +133,22 @@ sealed interface BodyShapeInternal : BodyShape {
                     tmp.maxZ.toDouble()
                 )
             }
+
+        override fun snapshot(): BodyShape = VoxelSnapshot(definedArea, aabb, this)
+    }
+
+
+    /// ---
+
+    class VoxelSnapshot(override val definedArea: AABBic, override val aabb: AABBdc, private val linked: Voxel) : BodyShape.Voxel {
+        override fun applyUpdateAsync(update: VoxelUpdate) {
+            linked.applyUpdateAsync(update)
+        }
+
+        override fun applyUpdateSync(update: VoxelUpdate) {
+            throw UnsupportedOperationException("Cannot synchronously update VoxelShape on game thread")
+        }
+
     }
 }
 

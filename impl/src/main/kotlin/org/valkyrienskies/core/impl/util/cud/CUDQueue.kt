@@ -1,6 +1,5 @@
-package org.valkyrienskies.core.impl.util
+package org.valkyrienskies.core.impl.util.cud
 
-import org.jctools.maps.NonBlockingHashMapLong
 import org.valkyrienskies.core.api.util.HasId
 
 /**
@@ -20,12 +19,12 @@ class CUDQueue<C : HasId, U : HasId>(
 ) : Iterable<Action<C, U>> {
 
     // note: NonBlockingHashMapLong seems to have a bug where the iterator remove() function doesn't actually work!
-    private val actionQueue = NonBlockingHashMapLong<ActionInternal<C, U>>()
+    private val updateQueue: IdUpdateQueue<ActionInternal<C, U>> = IdUpdateQueue(::combineInternal)
 
     /**
      * Iterated from the reading thread - calling next REMOVES elements!
      */
-    override fun iterator(): Iterator<Action<C, U>> = ActionInternalIterator(actionQueue.values.iterator())
+    override fun iterator(): Iterator<Action<C, U>> = ActionInternalIterator(updateQueue.iterator())
 
     /**
      * Called from the writing thread
@@ -49,29 +48,7 @@ class CUDQueue<C : HasId, U : HasId>(
      * Called from the writing thread
      */
     private fun queueActionInternal(newUpdate: ActionInternal<C, U>) {
-        val id = newUpdate.id
-
-        // Only put the new update if a previous update doesn't exist
-        val oldUpdate = actionQueue.putIfAbsent(id, newUpdate)
-
-        if (oldUpdate != null) {
-            // the new update has not yet been put into the map, let's create a combined update
-            val combinedUpdate = combineInternal(oldUpdate, newUpdate)
-
-            // this is true if the reading thread has not yet polled
-            val success = if (combinedUpdate == null) {
-                // if the updates cancel each other out, remove it from the queue
-                actionQueue.remove(id) != null
-            } else {
-                // put the combined update into the queue iff the old update has not been polled yet
-                actionQueue.replace(id, oldUpdate, combinedUpdate)
-            }
-
-            // if the other thread polled the old update while we were combining, add just the new update into the queue
-            if (!success) {
-                actionQueue.put(id, newUpdate)
-            }
-        }
+        updateQueue.update(newUpdate)
     }
 
     private fun <A> combine(oldUpdate: U, newUpdate: U, constructor: (U) -> A): A? {
@@ -144,7 +121,7 @@ private data class CreateThenUpdate<out C : HasId, out U : HasId>(
  * Removes elements whenever calling next(), and converts ActionInternal to Action
  */
 private class ActionInternalIterator<out C : HasId, out U : HasId>(
-    private val backing: MutableIterator<ActionInternal<C, U>>
+    private val backing: Iterator<ActionInternal<C, U>>
 ) : Iterator<Action<C, U>> {
 
     private var nextUpdate: U? = null
@@ -161,7 +138,6 @@ private class ActionInternalIterator<out C : HasId, out U : HasId>(
         }
 
         val next = backing.next()
-        backing.remove()
 
         // Convert CreateThenUpdate to two separate updates if we have one
         if (next is CreateThenUpdate<C, U>) {

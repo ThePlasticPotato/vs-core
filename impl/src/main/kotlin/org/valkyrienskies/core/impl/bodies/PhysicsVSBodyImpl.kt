@@ -40,7 +40,7 @@ class PhysicsVSBodyImpl(
         }
     }
 
-    constructor(body: ServerBaseVSBodyData, phys: PhysicsBodyReference<*>) : this(
+    constructor(body: VSBodyCreateDataToPhysics, phys: PhysicsBodyReference<*>) : this(
         body.id,
         body.dimension,
         body.transform,
@@ -75,7 +75,7 @@ class PhysicsVSBodyImpl(
     }
 
     fun updateFrom(data: VSBodyUpdateToPhysics) {
-        lastServerTickNumber = data.serverTickNumber
+        lastServerTickNumber = data.clock
         data.velocity?.let { this.velocity = it }
         data.omega?.let { this.omega = it }
         data.mass?.let { this.mass = it }

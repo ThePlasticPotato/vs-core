@@ -15,10 +15,10 @@ import org.valkyrienskies.core.impl.bodies.*
 import org.valkyrienskies.core.impl.bodies.storage.QueryableBodiesImpl
 import org.valkyrienskies.core.impl.config.PhysicsConfig
 import org.valkyrienskies.core.impl.config.VSCoreConfig
-import org.valkyrienskies.core.impl.util.Action
 import org.valkyrienskies.core.impl.util.TickableExecutor
 import org.valkyrienskies.core.impl.util.WorldScoped
 import org.valkyrienskies.core.impl.util.assertions.assertIsPhysicsThread
+import org.valkyrienskies.core.impl.util.cud.Action
 import org.valkyrienskies.physics_api.ConstraintId
 import org.valkyrienskies.physics_api.PhysicsBodyId
 import org.valkyrienskies.physics_api.PhysicsWorldReference
@@ -52,11 +52,19 @@ class ValkyrienPhysicsWorldImpl @Inject constructor(
     private val gravity = Vector3d(0.0, -9.8, 0.0)
 
     fun tick(timeStep: Double) {
+        preTickExecutor.tick()
+
         queues.bodiesToPhysics.forEach { applyBodyAction(it) }
         queues.constraintsToPhysics.forEach { applyConstraintAction(it) }
+
+        dumbForceExecutor.tick()
+        smartForceExecutor.tick()
+
         bodies.forEach { it.preTickPhysics() }
 
         worlds.values.parallelStream().forEach { it.tick(gravity, timeStep, true) }
+
+        postTickExecutor.tick()
     }
 
     override fun createSphereBody(radius: Double, dimension: DimensionId): PhysicsVSBody {
@@ -91,18 +99,19 @@ class ValkyrienPhysicsWorldImpl @Inject constructor(
 
     private fun createBodyFromPhysics(shape: BodyShapeInternal, dimension: DimensionId): PhysicsVSBodyImpl {
         val id = idAllocator.nextBodyId.getAndIncrement()
-        val data = ServerBaseVSBodyData.createEmpty(id, dimension, shape)
-        val body = createBodyInternal(data)
-        queues.bodiesToServer.create(data)
+        val data = VSBodyCreateDataToPhysics.createEmpty(id, dimension, shape)
+        val body = createBodyInternal(data, shape)
+        queues.bodiesToServer.create(data.toServer())
 
         return body
     }
 
-    private fun createBodyInternal(data: ServerBaseVSBodyData): PhysicsVSBodyImpl {
+    private fun createBodyInternal(data: VSBodyCreateDataToPhysics, shape: BodyShapeInternal): PhysicsVSBodyImpl {
         val physicsWorld = getPhysicsWorld(data.dimension)
-        data.shape.createRef(physicsWorld)
 
-        val phys = physicsWorld.createRigidBody(data.shape.ref)
+        shape.createRef(physicsWorld)
+
+        val phys = physicsWorld.createRigidBody(shape.ref)
         val body = PhysicsVSBodyImpl(data, phys)
 
         bodies.add(body)
@@ -110,7 +119,7 @@ class ValkyrienPhysicsWorldImpl @Inject constructor(
         return body
     }
 
-    private fun applyBodyAction(action: Action<ServerBaseVSBodyData, VSBodyUpdateToPhysics>) {
+    private fun applyBodyAction(action: Action<VSBodyCreateDataToPhysics, VSBodyUpdateToPhysics>) {
         when (action) {
             is Action.Delete -> removeBodyInternal(action.id)
             is Action.Create -> createBodyInternal(action.create)

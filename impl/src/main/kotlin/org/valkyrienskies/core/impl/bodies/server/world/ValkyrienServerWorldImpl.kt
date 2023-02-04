@@ -10,46 +10,89 @@ import org.valkyrienskies.core.api.physics.constraints.VSConstraintId
 import org.valkyrienskies.core.api.reference.VSRef
 import org.valkyrienskies.core.api.world.ValkyrienServerWorld
 import org.valkyrienskies.core.api.world.properties.DimensionId
+import org.valkyrienskies.core.impl.bodies.BodyShapeInternal
+import org.valkyrienskies.core.impl.bodies.ServerVSBodyImpl
+import org.valkyrienskies.core.impl.bodies.VSBodyCreateDataToPhysics
+import org.valkyrienskies.core.impl.bodies.VSBodyUpdateToServer
+import org.valkyrienskies.core.impl.bodies.physics.world.PhysicsIdAllocator
 import org.valkyrienskies.core.impl.bodies.physics.world.PipelineQueues
+import org.valkyrienskies.core.impl.bodies.storage.QueryableBodiesImpl
+import org.valkyrienskies.core.impl.util.assertions.assertIsGameThread
 import java.util.function.Supplier
 import javax.inject.Inject
 
 class ValkyrienServerWorldImpl @Inject constructor(
     private val queues: PipelineQueues,
-    private val attachments: AttachmentHolder
+    private val attachments: AttachmentHolder,
+    private val idAllocator: PhysicsIdAllocator
 ) : ValkyrienServerWorld {
 
+    private val bodies = QueryableBodiesImpl<ServerVSBody>()
+
+    fun tick() {
+
+    }
 
     override fun createSphereBody(radius: Double, dimension: DimensionId): ServerVSBody {
-        TODO("Not yet implemented")
+        assertIsGameThread()
+
+        return createBodyFromGame(BodyShapeInternal.Sphere(radius), dimension)
     }
 
     override fun createBoxBody(lengths: Vector3dc, dimension: DimensionId): ServerVSBody {
-        TODO("Not yet implemented")
+        assertIsGameThread()
+
+        return createBodyFromGame(BodyShapeInternal.Box(lengths), dimension)
     }
 
     override fun createWheelBody(radius: Double, halfThickness: Double, dimension: DimensionId): ServerVSBody {
-        TODO("Not yet implemented")
+        assertIsGameThread()
+
+        return createBodyFromGame(BodyShapeInternal.Wheel(radius, halfThickness), dimension)
     }
 
     override fun createCapsuleBody(radius: Double, halfLength: Double, dimension: DimensionId): ServerVSBody {
-        TODO("Not yet implemented")
+        assertIsGameThread()
+
+        return createBodyFromGame(BodyShapeInternal.Capsule(radius, halfLength), dimension)
     }
 
     override fun createVoxelBody(definedArea: AABBic, totalVoxelRegion: AABBic, dimension: DimensionId): ServerVSBody {
-        TODO("Not yet implemented")
+        assertIsGameThread()
+
+        return createBodyFromGame(BodyShapeInternal.Voxel(definedArea, totalVoxelRegion), dimension)
     }
 
-    private fun createBodyFromGame() {
+    private fun createBodyInternal(data: VSBodyCreateDataToPhysics): ServerVSBodyImpl {
+        val body = ServerVSBodyImpl(data)
+        bodies.add(body)
+        return body
+    }
 
+    private fun removeBodyInternal(id: BodyId) {
+        bodies.remove(id)
+    }
+
+    private fun updateBodyInternal(update: VSBodyUpdateToServer) {
+
+    }
+
+    private fun createBodyFromGame(shape: BodyShapeInternal, dimension: DimensionId): ServerVSBodyImpl {
+        val id = idAllocator.nextBodyId.getAndIncrement()
+        val data = VSBodyCreateDataToPhysics.createEmpty(id, dimension, shape)
+        val body = createBodyInternal(data)
+        queues.bodiesToPhysics.create(data)
+
+        return body
     }
 
     override fun removeBody(id: BodyId) {
-        TODO("Not yet implemented")
+        removeBodyInternal(id)
+        queues.bodiesToPhysics.delete(id)
     }
 
     override fun getBody(id: BodyId): ServerVSBody? {
-        TODO("Not yet implemented")
+        return bodies.getById(id)
     }
 
     override fun getBodyReference(id: BodyId): VSRef<ServerVSBody> {

@@ -5,10 +5,10 @@ import org.valkyrienskies.core.api.bodies.BaseVSBody
 import org.valkyrienskies.core.api.bodies.properties.BodyId
 import org.valkyrienskies.core.api.reference.VSRef
 
-interface ValkyrienBaseWorld : AttachmentHolder {
+interface ValkyrienBaseWorld<out B: BaseVSBody> : AttachmentHolder {
 
-    fun getBody(id: BodyId): BaseVSBody?
+    fun getBody(id: BodyId): B?
 
-    fun getBodyReference(id: BodyId): VSRef<BaseVSBody>
+    fun getBodyReference(id: BodyId): VSRef<B>
 
 }

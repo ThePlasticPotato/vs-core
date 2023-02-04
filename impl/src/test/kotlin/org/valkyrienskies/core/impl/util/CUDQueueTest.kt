@@ -4,6 +4,8 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.valkyrienskies.core.api.util.HasId
+import org.valkyrienskies.core.impl.util.cud.Action
+import org.valkyrienskies.core.impl.util.cud.CUDQueue
 
 class CUDQueueTest : StringSpec({
 
