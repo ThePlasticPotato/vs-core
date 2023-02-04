@@ -12,6 +12,7 @@ import org.valkyrienskies.core.impl.config.PhysicsConfig
 import org.valkyrienskies.core.impl.config.VSCoreConfig
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl
+import org.valkyrienskies.core.impl.game.ships.WingPhysicsSolver
 import org.valkyrienskies.core.impl.util.logger
 import org.valkyrienskies.physics_api.*
 import org.valkyrienskies.physics_api.constraints.*
@@ -93,9 +94,19 @@ class VSPhysicsPipelineStage @Inject constructor() {
         shipIdToPhysShip.values.forEach { ship ->
             // TODO replace with better api
             ship.forceInducers.forEach { it.applyForces(ship) }
+            // region Wing physics
+            val shipTransform = ship.transform
+            val poseVel = ship.poseVel
+            val wingManager = ship.wingManager
+            val momentOfInertia = ship._inertia.momentOfInertiaTensor
+
+            val (force, torque) = WingPhysicsSolver.applyWingForces(shipTransform, poseVel, wingManager, momentOfInertia)
+            ship.applyInvariantForce(force)
+            ship.applyInvariantTorque(torque)
+            // endregion
             ship.applyQueuedForces()
         }
-        
+
         // TODO Tick physics tick hooks
 
         // Run the physics engines in parallel
@@ -147,6 +158,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val poseVel = newShipInGameFrameData.poseVel
             val isStatic = newShipInGameFrameData.isStatic
             val shipVoxelsFullyLoaded = newShipInGameFrameData.shipVoxelsFullyLoaded
+            val wingManagerChanges = newShipInGameFrameData.wingManagerChanges
 
             val physicsEngine = getOrCreatePhysicsWorld(dimension)
             val voxelShape = physicsEngine.makeVoxelShapeReference(minDefined, maxDefined, totalVoxelRegion)
@@ -159,7 +171,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             newRigidBodyReference.isStatic = isStatic
             voxelShape.isVoxelTerrainFullyLoaded = shipVoxelsFullyLoaded
 
-            shipIdToPhysShip[shipId] =
+            val physShip =
                 PhysShipImpl(
                     shipId,
                     newRigidBodyReference,
@@ -168,6 +180,10 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     poseVel,
                     dimension
                 )
+            if (wingManagerChanges != null) {
+                physShip.wingManager.applyChanges(wingManagerChanges)
+            }
+            shipIdToPhysShip[shipId] = physShip
         }
 
         // Update existing ships
@@ -187,6 +203,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val deltaVoxelOffset = oldPoseVel.rot.transform(Vector3d(newVoxelOffset).mul(newScaling).sub(Vector3d(oldVoxelOffset).mul(oldScaling)))
             val isStatic = shipUpdate.isStatic
             val shipVoxelsFullyLoaded = shipUpdate.shipVoxelsFullyLoaded
+            val wingManagerChanges = shipUpdate.wingManagerChanges
 
             val newShipPoseVel = PoseVel(
                 oldPoseVel.pos.sub(deltaVoxelOffset, Vector3d()), oldPoseVel.rot, oldPoseVel.vel, oldPoseVel.omega
@@ -194,6 +211,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
 
             physShip._inertia = shipUpdate.inertiaData
             physShip.forceInducers = shipUpdate.forcesInducers
+            physShip.poseVel = newShipPoseVel
 
             shipRigidBody.collisionShapeOffset = newVoxelOffset
             shipRigidBody.collisionShapeScaling = newScaling
@@ -202,6 +220,10 @@ class VSPhysicsPipelineStage @Inject constructor() {
             shipRigidBody.inertiaData = physInertiaToRigidBodyInertiaData(shipUpdate.inertiaData)
             shipRigidBody.isStatic = isStatic
             shipRigidBody.collisionShape.isVoxelTerrainFullyLoaded = shipVoxelsFullyLoaded
+
+            if (wingManagerChanges != null) {
+                physShip.wingManager.applyChanges(wingManagerChanges)
+            }
         }
 
         // Send voxel updates
@@ -321,7 +343,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
         // Only use 10 sub-steps
         settings.subSteps = 10
         settings.solverType = GAUSS_SEIDEL
-        settings.iterations = 1
+        // Use 2 iterations
+        settings.iterations = 2
 
         // Decrease max de-penetration speed so that rigid bodies don't go
         // flying apart when they overlap
@@ -330,7 +353,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
         settings.maxVoxelShapeCollisionPoints = lodDetail
         return settings
     }
-    
+
     private fun VSConstraint.convertToPhysics(): ConstraintData {
         val body0Id: PhysicsBodyId = shipIdToPhysShip[this.bodyId0]!!.rigidBodyReference.physicsBodyId
         val body1Id: PhysicsBodyId = shipIdToPhysShip[this.bodyId1]!!.rigidBodyReference.physicsBodyId
@@ -423,7 +446,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
 
     private fun VSConstraintAndId.convertToPhysics() =
         ConstraintAndId(this.id.convertToPhysics(), this.vsConstraint.convertToPhysics())
-    
+
     companion object {
         private fun physInertiaToRigidBodyInertiaData(inertia: PhysInertia): PhysicsBodyInertiaData {
             val invMass = 1.0 / inertia.shipMass

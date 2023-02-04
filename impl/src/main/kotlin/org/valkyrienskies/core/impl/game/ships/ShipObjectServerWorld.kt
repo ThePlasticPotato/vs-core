@@ -11,6 +11,7 @@ import org.valkyrienskies.core.api.physics.constraints.VSConstraintId
 import org.valkyrienskies.core.api.physics.constraints.VSForceConstraint
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.world.LevelYRange
 import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.apigame.world.IPlayer
 import org.valkyrienskies.core.apigame.world.ServerShipWorldCore
@@ -546,7 +547,7 @@ class ShipObjectServerWorld @Inject constructor(
         constraintsDeletedThisTick = ArrayList()
     }
 
-    override fun addDimension(dimensionId: DimensionId, yRange: IntRange) {
+    override fun addDimension(dimensionId: DimensionId, yRange: LevelYRange) {
         enforcer.stage(UPDATE_DIMENSIONS)
         require(!dimensionInfo.contains(dimensionId))
         require(!dimensionToGroundBodyId.contains(dimensionId))

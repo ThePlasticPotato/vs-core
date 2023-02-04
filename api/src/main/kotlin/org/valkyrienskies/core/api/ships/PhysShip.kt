@@ -3,6 +3,7 @@ package org.valkyrienskies.core.api.ships
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.VSBeta
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
 
 @VSBeta
 interface PhysShip {
@@ -16,6 +17,8 @@ interface PhysShip {
 
     @VSBeta
     var doFluidDrag: Boolean
+
+    val transform: ShipTransform
 
     /**
      * Apply a rotation dependent force in world-space

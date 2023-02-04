@@ -7,6 +7,7 @@ import org.joml.primitives.AABBi
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim.Companion.DIAMETER
 import org.valkyrienskies.core.api.ships.properties.ChunkClaim.Companion.claimToLong
+import org.valkyrienskies.core.api.world.LevelYRange
 
 /**
  * Each ChunkClaim claims all chunks between the coordinates
@@ -63,7 +64,7 @@ data class ChunkClaimImpl(override val xIndex: Int, override val zIndex: Int) : 
     override fun contains(x: Int, z: Int) =
         (x in xStart..xEnd) and (z in zStart..zEnd)
 
-    override fun getCenterBlockCoordinates(yRange: IntRange, destination: Vector3i): Vector3i {
+    override fun getCenterBlockCoordinates(yRange: LevelYRange, destination: Vector3i): Vector3i {
         val minBlockX = xStart shl 4
         val maxBlockX = (xEnd shl 4) + 15
         val minBlockZ = zStart shl 4
@@ -75,7 +76,7 @@ data class ChunkClaimImpl(override val xIndex: Int, override val zIndex: Int) : 
         return destination.set(centerX, centerY, centerZ)
     }
 
-    override fun getBlockSize(yRange: IntRange, destination: Vector3i): Vector3i {
+    override fun getBlockSize(yRange: LevelYRange, destination: Vector3i): Vector3i {
         val xSize = (xEnd - xStart + 1) * 16
         val ySize = 256
         val zSize = (zEnd - zStart + 1) * 16
@@ -85,16 +86,13 @@ data class ChunkClaimImpl(override val xIndex: Int, override val zIndex: Int) : 
     /**
      * The region of all blocks contained in this [ChunkClaim].
      */
-    override fun getTotalVoxelRegion(yRange: IntRange, destination: AABBi): AABBi {
+    override fun getTotalVoxelRegion(yRange: LevelYRange, destination: AABBi): AABBi {
         destination.minX = xStart shl 4
-        destination.minY = yRange.first
+        destination.minY = yRange.minY
         destination.minZ = zStart shl 4
         destination.maxX = (xEnd shl 4) + 15
-        destination.maxY = yRange.last
+        destination.maxY = yRange.maxY
         destination.maxZ = (zEnd shl 4) + 15
         return destination
     }
 }
-
-private val IntRange.size get() = last - first + 1
-private val IntRange.center get() = (last + first + 1) / 2

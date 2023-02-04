@@ -1,6 +1,12 @@
 package org.valkyrienskies.core.impl.pipelines
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
+import org.joml.Matrix3d
+import org.joml.Quaterniond
+import org.joml.Vector3d
+import org.joml.Vector3dc
+import org.joml.Vector3i
+import org.valkyrienskies.core.api.ships.WingManager
 import org.joml.*
 import org.valkyrienskies.core.api.physics.constraints.VSConstraint
 import org.valkyrienskies.core.api.physics.constraints.VSConstraintAndId
@@ -65,8 +71,14 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
         }
 
         shipWorld.postTick()
+        val gameFrame = createGameFrame()
+
+        shipWorld.shipObjects.forEach {
+            val shipAsWingManager: WingManager = it.value.getAttachment(WingManager::class.java)!!
+            shipAsWingManager.clearWingChanges()
+        }
         // Finally, return the game frame
-        return createGameFrame()
+        return gameFrame
     }
 
     private fun applyPhysicsFrame(physicsFrame: VSPhysicsFrame) {
@@ -146,7 +158,8 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 voxelOffset,
                 isStatic,
                 isVoxelsFullyLoaded,
-                emptyList()
+                emptyList(),
+                null
             )
             newShips.add(newVoxelRigidBodyFrameData)
         }
@@ -169,6 +182,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val voxelOffset = getShipVoxelOffset(it.shipData.inertiaData)
             val isStatic = it.shipData.isStatic
             val isVoxelsFullyLoaded = it.shipData.areVoxelsFullyLoaded()
+            val shipAsWingManager: WingManager = it.getAttachment(WingManager::class.java)!!
             // Deep copy objects from ShipData, since we don't want VSGameFrame to be modified
             val newVoxelRigidBodyFrameData = NewVoxelRigidBodyFrameData(
                 uuid,
@@ -183,7 +197,8 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 voxelOffset,
                 isStatic,
                 isVoxelsFullyLoaded,
-                it.forceInducers.toMutableList() //Copy the list
+                it.forceInducers.toMutableList(), //Copy the list
+                shipAsWingManager.getWingChanges()
             )
             newShips.add(newVoxelRigidBodyFrameData)
         }
@@ -194,6 +209,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val newScaling = it.shipData.transform.scaling.x()
             val isStatic = it.shipData.isStatic
             val isVoxelsFullyLoaded = it.shipData.areVoxelsFullyLoaded()
+            val shipAsWingManager: WingManager = it.getAttachment(WingManager::class.java)!!
             // Deep copy objects from ShipData, since we don't want VSGameFrame to be modified
             val updateRigidBodyFrameData = UpdateRigidBodyFrameData(
                 uuid,
@@ -203,7 +219,8 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 it.shipData.physicsData.copy(),
                 isStatic,
                 isVoxelsFullyLoaded,
-                it.forceInducers.toMutableList() //Copy the list
+                it.forceInducers.toMutableList(), //Copy the list
+                shipAsWingManager.getWingChanges()
             )
             updatedShips[uuid] = updateRigidBodyFrameData
         }

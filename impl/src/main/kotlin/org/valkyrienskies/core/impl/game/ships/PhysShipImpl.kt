@@ -5,6 +5,7 @@ import org.joml.Vector3dc
 import org.valkyrienskies.core.api.VSBeta
 import org.valkyrienskies.core.api.ships.PhysShip
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.impl.api.ShipForcesInducer
 import org.valkyrienskies.core.impl.util.assertions.assertIsPhysicsThread
 import org.valkyrienskies.core.impl.util.assertions.requireIsFinite
@@ -21,11 +22,26 @@ data class PhysShipImpl constructor(
 
     var forceInducers: List<ShipForcesInducer>,
     var _inertia: PhysInertia,
-
-    // TODO transformation matrix
-    var poseVel: PoseVel,
-    internal val dimension: Int
+    private var _poseVel: PoseVel,
+    internal val dimension: Int,
+    internal val wingManager: WingManagerImpl = WingManagerImpl()
 ) : PhysShip {
+    var poseVel: PoseVel
+        get() {
+            return _poseVel
+        }
+        set(poseVel) {
+            _poseVel = poseVel
+            updatePhysTransform()
+        }
+
+    override lateinit var transform: ShipTransform
+        private set
+
+    init {
+        updatePhysTransform()
+    }
+
     @VSBeta
     override var buoyantFactor by rigidBodyReference::buoyantFactor
 
@@ -105,5 +121,13 @@ data class PhysShipImpl constructor(
 
         invPosForces.add(poseVel.rot.transform(force, Vector3d()))
         invPosPositions.add(pos)
+    }
+
+    private fun updatePhysTransform() {
+        // TODO: In the future we'll need to change the scaling of this for ventities
+        transform = ShipTransformImpl(
+            poseVel.pos, Vector3d(rigidBodyReference.collisionShapeOffset).mul(-1.0).add(0.5, 0.5, 0.5),
+            poseVel.rot, Vector3d(1.0, 1.0, 1.0)
+        )
     }
 }
