@@ -15,7 +15,7 @@ import org.valkyrienskies.physics_api.*
 sealed interface BodyShapeInternal : BodyShape {
 
     val ref: CollisionShapeReference
-    fun createRef(world: PhysicsWorldReference)
+    fun createRef(world: CollisionShapeFactory)
 
     /**
      * Return an immutable snapshot of the body to be used by the game thread
@@ -25,11 +25,11 @@ sealed interface BodyShapeInternal : BodyShape {
     class Sphere(override val radius: Double) : BodyShape.Sphere, BodyShapeInternal {
         override lateinit var ref: SphereShapeReference
 
-        constructor(radius: Double, world: PhysicsWorldReference) : this(radius) {
+        constructor(radius: Double, world: CollisionShapeFactory) : this(radius) {
             createRef(world)
         }
 
-        override fun createRef(world: PhysicsWorldReference) {
+        override fun createRef(world: CollisionShapeFactory) {
             ref = world.makeSphereShapeReference(radius)
         }
 
@@ -41,11 +41,11 @@ sealed interface BodyShapeInternal : BodyShape {
     class Box(override val halfLengths: Vector3dc) : BodyShape.Box, BodyShapeInternal {
         override lateinit var ref: BoxShapeReference
 
-        constructor(halfLengths: Vector3dc, world: PhysicsWorldReference) : this(halfLengths) {
+        constructor(halfLengths: Vector3dc, world: CollisionShapeFactory) : this(halfLengths) {
             createRef(world)
         }
 
-        override fun createRef(world: PhysicsWorldReference) {
+        override fun createRef(world: CollisionShapeFactory) {
             ref = world.makeBoxShapeReference(halfLengths)
         }
 
@@ -62,11 +62,11 @@ sealed interface BodyShapeInternal : BodyShape {
 
         override lateinit var ref: WheelShapeReference
 
-        constructor(radius: Double, halfThickness: Double, world: PhysicsWorldReference) : this(radius, halfThickness) {
+        constructor(radius: Double, halfThickness: Double, world: CollisionShapeFactory) : this(radius, halfThickness) {
             createRef(world)
         }
 
-        override fun createRef(world: PhysicsWorldReference) {
+        override fun createRef(world: CollisionShapeFactory) {
             ref = world.makeWheelShapeReference(radius, halfThickness)
         }
 
@@ -79,11 +79,11 @@ sealed interface BodyShapeInternal : BodyShape {
         BodyShape.Capsule, BodyShapeInternal {
         override lateinit var ref: CapsuleShapeReference
 
-        constructor(radius: Double, halfLength: Double, world: PhysicsWorldReference) : this(radius, halfLength) {
+        constructor(radius: Double, halfLength: Double, world: CollisionShapeFactory) : this(radius, halfLength) {
             createRef(world)
         }
 
-        override fun createRef(world: PhysicsWorldReference) {
+        override fun createRef(world: CollisionShapeFactory) {
             ref = world.makeCapsuleShapeReference(radius, halfLength)
         }
 
@@ -98,12 +98,12 @@ sealed interface BodyShapeInternal : BodyShape {
         constructor(
             definedArea: AABBic,
             voxelRegion: AABBic,
-            world: PhysicsWorldReference
+            world: CollisionShapeFactory
         ) : this(definedArea, voxelRegion) {
             createRef(world)
         }
 
-        override fun createRef(world: PhysicsWorldReference) {
+        override fun createRef(world: CollisionShapeFactory) {
             ref = world.makeVoxelShapeReference(
                 Vector3i(definedArea.minX(), definedArea.minY(), definedArea.minZ()),
                 Vector3i(definedArea.maxX(), definedArea.maxY(), definedArea.maxZ()),

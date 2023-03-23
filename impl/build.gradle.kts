@@ -19,7 +19,7 @@ dependencies {
     val kotestVersion = "5.4.1"
 
     // VS Physics
-    api("org.valkyrienskies:physics_api_krunch:1.0.0+eb3ae45554")
+    api("org.valkyrienskies:physics_api_krunch:1.0.0+999eb4b60c")
 
     implementation("ch.ethz.globis.phtree:phtree:2.5.0")
 

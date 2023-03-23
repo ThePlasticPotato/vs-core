@@ -7,6 +7,6 @@ import org.valkyrienskies.core.api.util.HasId
 data class VSConstraintAndId(
     override val id: VSConstraintId,
     val vsConstraint: VSConstraint
-) : HasId {
+) : VSConstraint by vsConstraint, HasId {
     val constraintId: VSConstraintId get() = id
 }

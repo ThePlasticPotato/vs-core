@@ -16,7 +16,7 @@ import org.valkyrienskies.core.api.ships.properties.ShipTransform
  * after that it is rotated by [rotation],
  * finally it is translated by [position].
  */
-data class ShipTransformImpl(
+open class ShipTransformImpl(
     override val position: Vector3dc,
     override val positionInModel: Vector3dc,
     override val rotation: Quaterniondc,
@@ -53,6 +53,32 @@ data class ShipTransformImpl(
      */
     override fun createEmptyAABB(): AABBdc {
         return AABBd(position, position)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ShipTransformImpl
+
+        if (position != other.position) return false
+        if (positionInModel != other.positionInModel) return false
+        if (rotation != other.rotation) return false
+        if (scaling != other.scaling) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = position.hashCode()
+        result = 31 * result + positionInModel.hashCode()
+        result = 31 * result + rotation.hashCode()
+        result = 31 * result + scaling.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "ShipTransformImpl(position=$position, positionInModel=$positionInModel, rotation=$rotation, scaling=$scaling)"
     }
 
     companion object {

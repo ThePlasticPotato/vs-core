@@ -64,7 +64,7 @@ class ValkyrienServerWorldImpl @Inject constructor(
     }
 
     private fun createBodyInternal(data: VSBodyCreateDataToPhysics): ServerVSBodyImpl {
-        val body = ServerVSBodyImpl(data)
+        val body = TODO()
         bodies.add(body)
         return body
     }

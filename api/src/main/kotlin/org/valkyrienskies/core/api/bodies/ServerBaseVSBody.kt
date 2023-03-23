@@ -4,11 +4,15 @@ import org.joml.Matrix3dc
 import org.joml.Quaterniondc
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.VSBeta
+import org.valkyrienskies.core.api.bodies.shape.BodySegment
 import org.valkyrienskies.core.api.bodies.shape.BodyShape
 
 interface ServerBaseVSBody : BaseVSBody {
 
-    // val segments: List<BodySegment>
+    val primarySegment: BodySegment get() = requireNotNull(getSegment(0))
+    val segments: Collection<BodySegment>
+    fun getSegment(id: Long): BodySegment?
+
     val shape: BodyShape
 
     /**
@@ -17,12 +21,12 @@ interface ServerBaseVSBody : BaseVSBody {
     val mass: Double
 
     /**
-     * The center of mass of this body, in world-space
+     * The center of mass of this body, in model-space
      */
     val centerOfMass: Vector3dc get() = transform.positionInModel
 
     /**
-     * The moment of inertia tensor for this body, in world-space
+     * The moment of inertia tensor for this body, in model-space
      */
     val momentOfInertia: Matrix3dc
 

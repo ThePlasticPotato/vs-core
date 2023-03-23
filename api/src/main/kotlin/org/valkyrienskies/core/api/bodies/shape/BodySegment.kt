@@ -1,27 +1,42 @@
 package org.valkyrienskies.core.api.bodies.shape
 
-import org.joml.Vector3dc
-import org.valkyrienskies.core.api.bodies.properties.BodyTransform
+import org.valkyrienskies.core.api.bodies.properties.BodyId
+import org.valkyrienskies.core.api.bodies.properties.BodyInertiaData
+import org.valkyrienskies.core.api.bodies.properties.BodyTransformVelocity
 import org.valkyrienskies.core.api.bodies.properties.PoseVelocity
+import org.valkyrienskies.core.api.util.HasId
 import java.util.function.DoubleFunction
 
 interface PhysicsBodySegment : BodySegment {
     override var shape: BodyShape
-    override var transform: BodyTransform
-    override var velocity: Vector3dc
-    override var omega: Vector3dc
-
+    override var inertia: BodyInertiaData
     /**
-     * Takes a partial physics tick in the interval [0, 1] and returns the pose/velocity of this segment at that
-     * partial tick
-     *
-     * This will be called during the physics tick, but not necessarily on the physics thread.
+     * Given a physics partial tick between 0 and 1, returns a [PoseVelocity] in world-space
      */
     var poseVelocitySupplier: DoubleFunction<PoseVelocity>
 }
-interface BodySegment {
+
+interface BodySegment : HasId {
+    val owner: BodyId
+
     val shape: BodyShape
-    val transform: BodyTransform
-    val velocity: Vector3dc
-    val omega: Vector3dc
+
+    /**
+     * The transform of this segment
+     *
+     * position, velocity, omega are in world-space, NOT relative to the body owning this segment
+     */
+    val transform: BodyTransformVelocity
+
+    /**
+     * The transform of this segment
+     *
+     * position, velocity, omega are relative to the body owning this segment
+     */
+    val transformInOwner: BodyTransformVelocity
+
+    /**
+     * The inertia data for this segment, in model-space
+     */
+    val inertia: BodyInertiaData
 }

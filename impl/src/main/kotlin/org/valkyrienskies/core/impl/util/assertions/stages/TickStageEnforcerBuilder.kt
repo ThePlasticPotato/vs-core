@@ -4,6 +4,11 @@ class TickStageEnforcerBuilder<S>(private val resetStage: S) : StageConstraintsB
 
     private var ignoreUntilFirstReset = false
     private var ignoreRepeatFailures = true
+    private var synchronized = false
+
+    fun synchronized() {
+        synchronized = true
+    }
 
     fun dontIgnoreRepeatFailures() {
         ignoreRepeatFailures = false
@@ -17,6 +22,13 @@ class TickStageEnforcerBuilder<S>(private val resetStage: S) : StageConstraintsB
     }
 
     fun buildEnforcer(): TickStageEnforcer<S> {
-        return TickStageEnforcerImpl(resetStage, buildConstraints(), ignoreUntilFirstReset, ignoreRepeatFailures)
+        val enforcer = TickStageEnforcerImpl(
+            resetStage,
+            buildConstraints(),
+            ignoreUntilFirstReset,
+            ignoreRepeatFailures
+        )
+
+        return if (synchronized) enforcer.synchronized() else enforcer
     }
 }

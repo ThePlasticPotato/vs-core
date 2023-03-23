@@ -4,6 +4,7 @@ import org.joml.Matrix3d
 import org.joml.Matrix3dc
 import org.joml.Vector3d
 import org.joml.Vector3dc
+import org.valkyrienskies.core.api.bodies.properties.BodyInertiaData
 import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
 import kotlin.math.abs
 
@@ -16,12 +17,26 @@ data class ShipInertiaDataImpl constructor(
     private val _momentOfInertiaTensor: Matrix3d
 ) : ShipInertiaData {
 
+    override val momentOfInertia: Matrix3dc
+        get() = momentOfInertiaTensor
+
+    override val centerOfMass: Vector3dc
+        get() = centerOfMassInShip
+
     override val momentOfInertiaTensor: Matrix3dc
         get() = _momentOfInertiaTensor
 
     override val centerOfMassInShip: Vector3dc get() = _centerOfMassInShip
 
     override val mass get() = _mass
+    override fun copy(): BodyInertiaData {
+        return ShipInertiaDataImpl(
+            Vector3d(_centerOfMassInShip),
+            _mass,
+            Matrix3d(_momentOfInertiaTensor)
+        )
+    }
+
 
     fun onSetBlock(posX: Int, posY: Int, posZ: Int, oldBlockMass: Double, newBlockMass: Double) {
         val deltaBlockMass = newBlockMass - oldBlockMass

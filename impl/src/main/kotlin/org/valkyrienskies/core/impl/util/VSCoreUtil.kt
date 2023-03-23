@@ -2,6 +2,7 @@ package org.valkyrienskies.core.impl.util
 
 import com.google.common.collect.ImmutableSet
 import io.netty.buffer.ByteBuf
+import it.unimi.dsi.fastutil.longs.LongIterable
 import org.apache.commons.lang3.StringUtils
 import org.joml.*
 import java.nio.ByteBuffer
@@ -16,6 +17,16 @@ fun Double.squared(): Double = this * this
 fun String.splitCamelCaseAndCapitalize(): String {
     return StringUtils.capitalize(StringUtils.join(StringUtils.splitByCharacterTypeCamelCase(this), " "))
 }
+
+/**
+ * [forEach] without autoboxing
+ */
+inline fun LongIterable.fastForEach(block: (Long) -> Unit) =
+    with(iterator()) {
+        while (hasNext()) {
+            block(nextLong())
+        }
+    }
 
 /**
  * If this is a `Consumer<Animal>`, for example, then it should be assignable to

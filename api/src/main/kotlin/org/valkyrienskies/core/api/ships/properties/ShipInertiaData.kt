@@ -2,12 +2,12 @@ package org.valkyrienskies.core.api.ships.properties
 
 import org.joml.Matrix3dc
 import org.joml.Vector3dc
+import org.valkyrienskies.core.api.bodies.properties.BodyInertiaData
 
-interface ShipInertiaData {
+interface ShipInertiaData : BodyInertiaData {
     val momentOfInertiaTensor: Matrix3dc
 
     val centerOfMassInShip: Vector3dc
-    val mass: Double
 
     @Deprecated("renamed", ReplaceWith("mass"))
     val shipMass: Double get() = mass
