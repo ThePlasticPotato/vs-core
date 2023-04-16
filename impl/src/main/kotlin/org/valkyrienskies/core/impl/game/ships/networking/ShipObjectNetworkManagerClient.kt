@@ -22,6 +22,7 @@ import org.valkyrienskies.core.impl.networking.unregisterAll
 import org.valkyrienskies.core.impl.pipelines.VSNetworkPipelineStage
 import org.valkyrienskies.core.impl.util.logger
 import org.valkyrienskies.core.impl.util.read3FAsNormQuatd
+import org.valkyrienskies.core.impl.util.readAABBi
 import org.valkyrienskies.core.impl.util.readVec3d
 import org.valkyrienskies.core.impl.util.readVec3fAsDouble
 import org.valkyrienskies.core.impl.util.serialization.VSJacksonUtil
@@ -157,6 +158,7 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
                         val position = buf.readVec3d()
                         val velocity = buf.readVec3fAsDouble()
                         val omega = buf.readVec3fAsDouble()
+                        val shipAABB = buf.readAABBi()
 
                         ship.latestNetworkTransform = ShipTransformImpl.create(
                             position, centerOfMass, rotation, scaling
@@ -164,6 +166,7 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
                         ship.latestNetworkTTick = tickNum
                         ship.shipData.physicsData.angularVelocity = omega
                         ship.shipData.physicsData.linearVelocity = velocity
+                        ship.shipData.shipAABB = shipAABB
                     }
                 }
             } catch (e: Exception) {

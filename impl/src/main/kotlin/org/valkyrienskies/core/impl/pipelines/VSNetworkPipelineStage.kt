@@ -7,6 +7,7 @@ import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld
 import org.valkyrienskies.core.impl.networking.Packets
 import org.valkyrienskies.core.impl.networking.VSNetworking
 import org.valkyrienskies.core.impl.util.logger
+import org.valkyrienskies.core.impl.util.writeAABBi
 import org.valkyrienskies.core.impl.util.writeNormQuatdAs3F
 import org.valkyrienskies.core.impl.util.writeVec3AsFloat
 import org.valkyrienskies.core.impl.util.writeVec3d
@@ -71,6 +72,10 @@ class VSNetworkPipelineStage @Inject constructor(
                 buf.writeVec3AsFloat(shipData.velocity)
                 buf.writeVec3AsFloat(shipData.omega)
                 // 80 + 12 + 12 = 104
+
+                // This shouldn't be necessary, but send the ShipAABB to fix the strange bug of Ship AABBs not updating
+                // in multiplayer
+                buf.writeAABBi(shipData.shipAABB!!)
             }
         }
 

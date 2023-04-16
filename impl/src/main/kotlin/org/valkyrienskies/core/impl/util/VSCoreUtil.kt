@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableSet
 import io.netty.buffer.ByteBuf
 import org.apache.commons.lang3.StringUtils
 import org.joml.*
+import org.joml.primitives.AABBi
+import org.joml.primitives.AABBic
 import java.nio.ByteBuffer
 import java.util.*
 import java.util.function.Consumer
@@ -115,6 +117,19 @@ fun ByteBuf.writeVec3d(v: Vector3dc) {
 
 fun ByteBuf.readVec3d(): Vector3d {
     return Vector3d(readDouble(), readDouble(), readDouble())
+}
+
+fun ByteBuf.writeAABBi(a: AABBic) {
+    writeInt(a.minX())
+    writeInt(a.minY())
+    writeInt(a.minZ())
+    writeInt(a.maxX())
+    writeInt(a.maxY())
+    writeInt(a.maxZ())
+}
+
+fun ByteBuf.readAABBi(): AABBi {
+    return AABBi(readInt(), readInt(), readInt(), readInt(), readInt(), readInt())
 }
 
 /**
