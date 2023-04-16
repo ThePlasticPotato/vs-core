@@ -42,6 +42,13 @@ data class ShipInertiaDataImpl constructor(
         addMassAt(posX - INERTIA_OFFSET, posY - INERTIA_OFFSET, posZ - INERTIA_OFFSET, addedMassAtEachPoint)
     }
 
+    // Use sphere MOI because its more stable
+    fun onSetBlockUseSphereMOI(posX: Int, posY: Int, posZ: Int, oldBlockMass: Double, newBlockMass: Double, radius: Double) {
+        onSetBlock(posX, posY, posZ, oldBlockMass, newBlockMass)
+        val sphereMOI: Double = (2.0 / 5.0) * mass * radius * radius
+        _momentOfInertiaTensor.identity().scale(sphereMOI)
+    }
+
     /**
      * Updates the center of mass and rotation inertia tensor matrix of the ShipInertiaData, using the rigid body
      * inertia tensor equations.

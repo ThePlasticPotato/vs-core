@@ -96,8 +96,10 @@ class ShipData(
     ) {
         super.onSetBlock(posX, posY, posZ, oldBlockType, newBlockType, oldBlockMass, newBlockMass)
 
+        val avgRadius =
+            ((shipAABB!!.maxX() - shipAABB!!.minX() + 1) + (shipAABB!!.maxY() - shipAABB!!.minY() + 1) + (shipAABB!!.maxZ() - shipAABB!!.minZ() + 1)) / 6.0
         // Update [inertiaData]
-        inertiaData.onSetBlock(posX, posY, posZ, oldBlockMass, newBlockMass)
+        inertiaData.onSetBlockUseSphereMOI(posX, posY, posZ, oldBlockMass, newBlockMass, avgRadius)
 
         // Update [shipVoxelAABB]
         updateShipAABBGenerator(posX, posY, posZ, newBlockType != BlockTypeImpl.AIR)
