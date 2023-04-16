@@ -2,6 +2,8 @@ package org.valkyrienskies.core.impl.pipelines
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
+import org.joml.primitives.AABBi
+import org.joml.primitives.AABBic
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld
 import org.valkyrienskies.core.impl.networking.Packets
@@ -75,11 +77,17 @@ class VSNetworkPipelineStage @Inject constructor(
 
                 // This shouldn't be necessary, but send the ShipAABB to fix the strange bug of Ship AABBs not updating
                 // in multiplayer
-                buf.writeAABBi(shipData.shipAABB!!)
+                // 104 + 24 = 128
+
+                // If shipData.shipAABB is null then send an invalid AABB to tell the client to ignore it
+                val shipAABB: AABBic = shipData.shipAABB ?: AABBi(
+                    Int.MAX_VALUE, Int.MAX_VALUE, Int.MAX_VALUE, Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE
+                )
+                buf.writeAABBi(shipAABB)
             }
         }
 
-        const val TRANSFORM_SIZE = 104
+        const val TRANSFORM_SIZE = 128
         private val logger by logger()
     }
 }

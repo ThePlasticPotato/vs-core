@@ -15,5 +15,5 @@ class ShipInertiaConverter @Inject constructor() {
         ShipInertiaDataImpl(data.centerOfMassInShipSpace, data.shipMass, data.momentOfInertiaTensor)
 
     fun convertToDto(model: ShipInertiaData): ShipInertiaDataV0 =
-        ShipInertiaDataV0(Vector3d(model.centerOfMassInShip), model.mass, Matrix3d(model.momentOfInertiaTensor))
+        ShipInertiaDataV0(Vector3d(model.centerOfMassInShip), model.mass, Matrix3d(model.momentOfInertiaTensorToSave))
 }

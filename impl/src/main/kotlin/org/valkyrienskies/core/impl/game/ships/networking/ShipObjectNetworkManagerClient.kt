@@ -166,7 +166,11 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
                         ship.latestNetworkTTick = tickNum
                         ship.shipData.physicsData.angularVelocity = omega
                         ship.shipData.physicsData.linearVelocity = velocity
-                        ship.shipData.shipAABB = shipAABB
+
+                        // Ignore invalid shipAABB
+                        if (shipAABB.isValid) {
+                            ship.shipData.shipAABB = shipAABB
+                        }
                     }
                 }
             } catch (e: Exception) {

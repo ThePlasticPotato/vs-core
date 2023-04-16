@@ -14,4 +14,7 @@ interface ShipInertiaData {
 
     @Deprecated("renamed", ReplaceWith("centerOfMassInShip"))
     val centerOfMassInShipSpace: Vector3dc get() = centerOfMassInShip
+
+    // The moment of inertia tensor unmodified, as we should save it
+    val momentOfInertiaTensorToSave: Matrix3dc
 }

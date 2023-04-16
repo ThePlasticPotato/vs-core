@@ -15,13 +15,22 @@ data class ShipInertiaDataImpl constructor(
     private var _mass: Double,
     private val _momentOfInertiaTensor: Matrix3d
 ) : ShipInertiaData {
+    // Approximate the moment of inertia as a sphere with some value
+    private var momentOfInertiaSpherical: Matrix3d = Matrix3d(_momentOfInertiaTensor)
 
     override val momentOfInertiaTensor: Matrix3dc
+        get() = momentOfInertiaSpherical
+
+    override val momentOfInertiaTensorToSave: Matrix3dc
         get() = _momentOfInertiaTensor
 
     override val centerOfMassInShip: Vector3dc get() = _centerOfMassInShip
 
     override val mass get() = _mass
+
+    init {
+        updateSphericalMOI()
+    }
 
     fun onSetBlock(posX: Int, posY: Int, posZ: Int, oldBlockMass: Double, newBlockMass: Double) {
         val deltaBlockMass = newBlockMass - oldBlockMass
@@ -43,10 +52,19 @@ data class ShipInertiaDataImpl constructor(
     }
 
     // Use sphere MOI because its more stable
-    fun onSetBlockUseSphereMOI(posX: Int, posY: Int, posZ: Int, oldBlockMass: Double, newBlockMass: Double, radius: Double) {
+    fun onSetBlockUseSphereMOI(posX: Int, posY: Int, posZ: Int, oldBlockMass: Double, newBlockMass: Double) {
         onSetBlock(posX, posY, posZ, oldBlockMass, newBlockMass)
-        val sphereMOI: Double = (2.0 / 5.0) * mass * radius * radius
-        _momentOfInertiaTensor.identity().scale(sphereMOI)
+        updateSphericalMOI()
+    }
+
+    private fun updateSphericalMOI() {
+        val inertiaAlongX = _momentOfInertiaTensor.transform(Vector3d(1.0, 0.0, 0.0)).length()
+        val inertiaAlongY = _momentOfInertiaTensor.transform(Vector3d(0.0, 1.0, 0.0)).length()
+        val inertiaAlongZ = _momentOfInertiaTensor.transform(Vector3d(0.0, 0.0, 1.0)).length()
+
+        val avgInertia = (inertiaAlongX + inertiaAlongY + inertiaAlongZ) / 3.0
+        // TODO: Maybe instead diagonalize the matrix, find its axes, and take the avg along that instead?
+        momentOfInertiaSpherical.identity().scale(avgInertia)
     }
 
     /**
