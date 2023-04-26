@@ -9,6 +9,7 @@ import org.valkyrienskies.core.api.ships.Wing
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.physics_api.PoseVel
 import kotlin.math.PI
+import kotlin.math.cos
 import kotlin.math.sign
 import kotlin.math.sin
 
@@ -57,8 +58,7 @@ object WingPhysicsSolver {
                 val liftForceVector: Vector3dc =
                     wingNormalGlobal.mul(liftForce, Vector3d())
 
-                // TODO: Need to compute [dragCoefficient] more effectively
-                val dragCoefficient = liftCoefficient * liftCoefficient
+                val dragCoefficient = 1.0 - cos(2.0 * angleOfAttack)
                 val dragForceMagnitude = wing.wingDragPower * dragCoefficient * velAtWingGlobal.lengthSquared()
                 val dragForceVector: Vector3dc = dragDirection.mul(dragForceMagnitude, Vector3d())
 
