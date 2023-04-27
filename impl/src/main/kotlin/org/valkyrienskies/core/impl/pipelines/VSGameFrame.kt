@@ -1,5 +1,6 @@
 package org.valkyrienskies.core.impl.pipelines
 
+import org.joml.Quaterniondc
 import org.joml.Vector3dc
 import org.joml.Vector3ic
 import org.joml.primitives.AABBic
@@ -44,7 +45,8 @@ data class NewShipInGameFrameData(
     val isStatic: Boolean,
     val shipVoxelsFullyLoaded: Boolean,
     val forcesInducers: List<ShipForcesInducer>,
-    val wingManagerChanges: WingManagerChanges?
+    val wingManagerChanges: WingManagerChanges?,
+    val shipTeleportId: Int,
 )
 
 data class UpdateShipInGameFrameData(
@@ -55,7 +57,10 @@ data class UpdateShipInGameFrameData(
     val isStatic: Boolean,
     val shipVoxelsFullyLoaded: Boolean,
     val forcesInducers: List<ShipForcesInducer>,
-    val wingManagerChanges: WingManagerChanges?
+    val wingManagerChanges: WingManagerChanges?,
+    val shipTeleportId: Int,
+    val currentShipPos: Vector3dc,
+    val currentShipRot: Quaterniondc,
 )
 
 enum class ConstraintUpdateTypeInGameFrame {

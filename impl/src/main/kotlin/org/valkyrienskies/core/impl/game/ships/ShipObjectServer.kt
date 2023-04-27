@@ -2,6 +2,7 @@ package org.valkyrienskies.core.impl.game.ships
 
 import com.google.common.collect.MutableClassToInstanceMap
 import org.valkyrienskies.core.api.ships.WingManager
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.impl.api.LoadedServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipUser
@@ -11,8 +12,18 @@ import org.valkyrienskies.core.impl.networking.delta.DeltaEncodedChannelServerTC
 import org.valkyrienskies.core.impl.util.serialization.VSJacksonUtil
 
 class ShipObjectServer(
-    override val shipData: ShipData
+    override val shipData: ShipData,
 ) : ShipObject(shipData), LoadedServerShipInternal, ServerShipInternal by shipData {
+    // @Volatile
+    //
+    // Technically, this should be volatile to prevent a race condition where this is updated, the physics pipeline
+    // consumes this, and the physics pipeline produces another update before the transform is updated. In this case
+    // the teleport would fail.
+    //
+    // However, in practice the physics pipeline will never do this because it takes significantly longer to produce the
+    // next physics frame than we take to update our transform reference.
+    override var shipTeleportId: Int = 0
+        private set
 
     val shipDataChannel = DeltaEncodedChannelServerTCP(
         jsonDiffDeltaAlgorithm,
@@ -69,4 +80,9 @@ class ShipObjectServer(
         }
     }
 
+    override fun teleportShip(newTransform: ShipTransform) {
+        // Before anything else, increment shipTeleportId to avoid race conditions
+        shipTeleportId++ // Only increment this to avoid reusing old values
+        shipData.transform = newTransform
+    }
 }

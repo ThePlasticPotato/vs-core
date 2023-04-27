@@ -17,6 +17,7 @@ import org.valkyrienskies.core.api.ships.properties.IShipActiveChunksSet
 interface Ship {
 
     val id: ShipId
+    val slug: String? // Unique string identifier for the ship, nullable
 
     val transform: ShipTransform
     val prevTickTransform: ShipTransform

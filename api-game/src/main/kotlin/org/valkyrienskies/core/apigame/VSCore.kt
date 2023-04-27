@@ -6,7 +6,7 @@ import org.valkyrienskies.core.apigame.world.VSPipeline
 import org.valkyrienskies.core.apigame.world.chunks.BlockTypes
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 
-interface VSCore {
+interface VSCore : VSCoreCommands {
 
     val hooks: CoreHooks
 

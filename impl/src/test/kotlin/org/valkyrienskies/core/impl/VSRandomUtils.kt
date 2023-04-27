@@ -208,7 +208,7 @@ object VSRandomUtils {
     fun randomShipData(random: Random = defaultRandom): ShipData {
         return ShipData(
             id = randomShipId(),
-            name = randomString(random, random.nextInt(10)),
+            slug = randomString(random, 5 + random.nextInt(10)),
             chunkClaim = randomChunkClaim(random),
             chunkClaimDimension = randomString(random, random.nextInt(10)),
             physicsData = randomShipPhysicsData(random),
@@ -258,7 +258,8 @@ object VSRandomUtils {
             ),
             SingleSegmentTracker(Segment(0, SegmentDisplacement(PoseVel.NULL_POSE_VEL, 1.0, 0))),
             randomVector3d(),
-            randomAABBd()
+            randomAABBd(),
+            defaultRandom.nextInt()
         )
 
     fun Random.nextGaussian(): Double {

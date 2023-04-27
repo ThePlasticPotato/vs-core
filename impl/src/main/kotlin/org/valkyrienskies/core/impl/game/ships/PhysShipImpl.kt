@@ -23,7 +23,8 @@ data class PhysShipImpl constructor(
     var _inertia: PhysInertia,
     private var _poseVel: PoseVel,
     var segments: SegmentTracker,
-    internal val wingManager: WingManagerImpl = WingManagerImpl()
+    internal var lastShipTeleportId: Int,
+    internal val wingManager: WingManagerImpl = WingManagerImpl(),
 ) : PhysShip {
     var poseVel: PoseVel
         get() {

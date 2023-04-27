@@ -3,6 +3,7 @@ package org.valkyrienskies.core.impl.pipelines
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import org.joml.Matrix3d
 import org.joml.Quaterniond
+import org.joml.Quaterniondc
 import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.Vector3i
@@ -92,7 +93,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val shipData: ShipData? = shipObject?.shipData
             if (shipData != null) {
                 // TODO: Don't apply the transform if we are forcing the ship to move somewhere else
-                val applyTransform = true // For now just set [applyTransform] to always be true
+                val applyTransform = (shipObject.shipTeleportId == shipInPhysicsFrameData.lastShipTeleportId)
                 if (applyTransform) {
                     val newShipTransform = generateTransformFromPhysicsFrameData(shipInPhysicsFrameData, shipData)
 
@@ -162,7 +163,8 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 isStatic,
                 isVoxelsFullyLoaded,
                 emptyList(),
-                null
+                null,
+                0,
             )
             newShips.add(newShipInGameFrameData)
         }
@@ -188,6 +190,8 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val isStatic = it.shipData.isStatic
             val isVoxelsFullyLoaded = it.shipData.areVoxelsFullyLoaded()
             val shipAsWingManager: WingManager = it.getAttachment(WingManager::class.java)!!
+            val shipTeleportId: Int = it.shipTeleportId
+
             // Deep copy objects from ShipData, since we don't want VSGameFrame to be modified
             val newShipInGameFrameData = NewShipInGameFrameData(
                 uuid,
@@ -203,7 +207,8 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 isStatic,
                 isVoxelsFullyLoaded,
                 it.forceInducers.toMutableList(), //Copy the list
-                shipAsWingManager.getWingChanges()
+                shipAsWingManager.getWingChanges(),
+                shipTeleportId,
             )
             newShips.add(newShipInGameFrameData)
         }
@@ -214,6 +219,10 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val isStatic = it.shipData.isStatic
             val isVoxelsFullyLoaded = it.shipData.areVoxelsFullyLoaded()
             val shipAsWingManager: WingManager = it.getAttachment(WingManager::class.java)!!
+            val shipTeleportId: Int = it.shipTeleportId
+            val currentShipPos: Vector3dc = it.shipData.transform.positionInWorld
+            val currentShipRot: Quaterniondc = it.shipData.transform.shipToWorldRotation
+
             // Deep copy objects from ShipData, since we don't want VSGameFrame to be modified
             val updateShipInGameFrameData = UpdateShipInGameFrameData(
                 uuid,
@@ -223,7 +232,10 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 isStatic,
                 isVoxelsFullyLoaded,
                 it.forceInducers.toMutableList(), //Copy the list
-                shipAsWingManager.getWingChanges()
+                shipAsWingManager.getWingChanges(),
+                shipTeleportId,
+                currentShipPos,
+                currentShipRot,
             )
             updatedShips[uuid] = updateShipInGameFrameData
         }

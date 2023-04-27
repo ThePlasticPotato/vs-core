@@ -24,5 +24,7 @@ data class ShipInPhysicsFrameData(
     val poseVel: PoseVel,
     val segments: SegmentTracker,
     val shipVoxelOffset: Vector3dc, // The voxel offset of the ship at this physics frame
-    val aabb: AABBdc
+    val aabb: AABBdc,
+    // The last teleport id consumed by the physics pipeline. Used to avoid overwriting ship teleport commands.
+    val lastShipTeleportId: Int,
 )

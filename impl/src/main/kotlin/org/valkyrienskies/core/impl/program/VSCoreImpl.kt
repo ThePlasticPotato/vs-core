@@ -21,6 +21,8 @@ import org.valkyrienskies.physics_api.voxel_updates.DeleteVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.EmptyVoxelShapeUpdate
 import org.valkyrienskies.physics_api_krunch.KrunchBootstrap
 import javax.inject.Inject
+import org.valkyrienskies.core.apigame.VSCoreCommands
+import org.valkyrienskies.core.impl.game.VSCoreCommandsImpl
 
 class VSCoreImpl @Inject constructor(
     override val networking: VSNetworking,
@@ -30,7 +32,7 @@ class VSCoreImpl @Inject constructor(
     override val pipelineComponentFactory: VSPipelineComponent.Factory,
     private val pipelineSerializer: VSPipelineSerializer,
     override val blockTypes: BlockTypes
-) : VSCoreInternal {
+) : VSCoreInternal, VSCoreCommands by VSCoreCommandsImpl {
     init {
         configurator.configure(tcp)
         networking.init()

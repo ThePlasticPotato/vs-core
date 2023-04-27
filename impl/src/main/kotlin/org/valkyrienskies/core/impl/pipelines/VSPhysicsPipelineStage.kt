@@ -194,6 +194,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val isStatic = newShipInGameFrameData.isStatic
             val shipVoxelsFullyLoaded = newShipInGameFrameData.shipVoxelsFullyLoaded
             val wingManagerChanges = newShipInGameFrameData.wingManagerChanges
+            val shipTeleportId = newShipInGameFrameData.shipTeleportId
 
             val newRigidBodyReference =
                 physicsEngine.createVoxelRigidBody(
@@ -214,7 +215,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     newShipInGameFrameData.forcesInducers,
                     inertiaData,
                     poseVel,
-                    segments
+                    segments,
+                    shipTeleportId
                 )
             if (wingManagerChanges != null) {
                 physShip.wingManager.applyChanges(wingManagerChanges)
@@ -238,9 +240,25 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val isStatic = shipUpdate.isStatic
             val shipVoxelsFullyLoaded = shipUpdate.shipVoxelsFullyLoaded
             val wingManagerChanges = shipUpdate.wingManagerChanges
+            val shipTeleportId = shipUpdate.shipTeleportId
+            val currentShipPos = shipUpdate.currentShipPos
+            val currentShipRot = shipUpdate.currentShipRot
+            val updatePoseVelFromGame = physShip.lastShipTeleportId != shipTeleportId
+
+            val newShipPos = if (!updatePoseVelFromGame) {
+                oldPoseVel.pos.sub(deltaVoxelOffset, Vector3d())
+            } else {
+                currentShipPos
+            }
+
+            val newShipRot = if (!updatePoseVelFromGame) {
+                oldPoseVel.rot
+            } else {
+                currentShipRot
+            }
 
             val newShipPoseVel = PoseVel(
-                oldPoseVel.pos.sub(deltaVoxelOffset, Vector3d()), oldPoseVel.rot, oldPoseVel.vel, oldPoseVel.omega
+                newShipPos, newShipRot, oldPoseVel.vel, oldPoseVel.omega
             )
 
             physShip._inertia = shipUpdate.inertiaData
@@ -256,6 +274,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
             if (wingManagerChanges != null) {
                 physShip.wingManager.applyChanges(wingManagerChanges)
             }
+
+            physShip.lastShipTeleportId = shipTeleportId
         }
 
         // Send voxel updates
@@ -357,10 +377,11 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val shipVoxelOffset: Vector3dc = rigidBodyReference.collisionShapeOffset
             val aabb = AABBd()
             rigidBodyReference.getAABB(aabb)
+            val lastShipTeleportId: Int = shipIdAndRigidBodyReference.lastShipTeleportId
 
             shipDataMap[shipId] =
                 ShipInPhysicsFrameData(
-                    shipId, inertiaData, poseVel, segments, shipVoxelOffset, aabb
+                    shipId, inertiaData, poseVel, segments, shipVoxelOffset, aabb, lastShipTeleportId
                 )
         }
         return VSPhysicsFrame(shipDataMap, voxelUpdatesMap, physTick++)

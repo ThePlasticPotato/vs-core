@@ -1,11 +1,14 @@
 package org.valkyrienskies.core.impl.game.ships
 
+import org.joml.Quaterniondc
 import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.Vector3i
 import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ships.QueryableShipData
+import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.api.world.LevelYRange
 import org.valkyrienskies.core.apigame.constraints.VSConstraint
 import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
@@ -20,6 +23,7 @@ import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTasks
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
+import org.valkyrienskies.core.impl.api.LoadedServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
 import org.valkyrienskies.core.impl.game.ChunkAllocatorProvider
@@ -288,18 +292,8 @@ class ShipObjectServerWorld @Inject constructor(
     fun postTick() {
         enforcer.stage(POST_TICK_START)
 
-        val shipsLoadedThisTick = mutableListOf<ShipObjectServer>()
-        val it = _loadedShips.iterator()
-        while (it.hasNext()) {
-            val shipObjectServer = it.next()
-            if (shipObjectServer.shipData.inertiaData.mass < 1e-8) {
-                // Delete this ship
-                deletedShipObjects.add(shipObjectServer.shipData)
-                allShips.removeShipData(shipObjectServer.shipData)
-                shipToVoxelUpdates.remove(shipObjectServer.shipData.id)
-                it.remove()
-            }
-        }
+        // Delete any ships with a mass less 1e-8
+        _loadedShips.filter { it.shipData.inertiaData.mass < 1e-8 }.forEach { deleteShip(it) }
 
         // For now just update very ship object every tick
         shipObjects.forEach { (_, shipObjectServer) ->
@@ -323,6 +317,8 @@ class ShipObjectServerWorld @Inject constructor(
                 constraintsUpdatedThisTick.add(VSConstraintAndId(constraintId, constraint))
             }
         }
+
+        val shipsLoadedThisTick = mutableListOf<ShipObjectServer>()
 
         // For now, just make a [ShipObject] for every [ShipData]
         for (shipData in allShips) {
@@ -430,7 +426,7 @@ class ShipObjectServerWorld @Inject constructor(
         val blockPosInShipCoordinates: Vector3ic = chunkClaim.getCenterBlockCoordinates(getYRange(dimensionId))
         val shipCenterInShipCoordinates: Vector3dc = Vector3d(blockPosInShipCoordinates).add(0.5, 0.5, 0.5)
         val newShipData = ShipData.createEmpty(
-            name = shipName,
+            slug = shipName,
             shipId = chunkAllocator.allocateShipId(),
             chunkClaim = chunkClaim,
             chunkClaimDimension = dimensionId,
@@ -583,6 +579,41 @@ class ShipObjectServerWorld @Inject constructor(
 
     override fun onDisconnect(player: IPlayer) {
         udpServer?.disconnect(player)
+    }
+
+    override fun deleteShip(ship: ServerShip) {
+        if (_loadedShips.contains(ship.id)) {
+            // TODO Fix this (ruby u know how?)
+            val shipData = if (ship is ShipObjectServer) {
+                ship.shipData
+            } else {
+                ship as ShipData
+            }
+
+            // Only try to unload the ship if it was loaded
+            deletedShipObjects.add(shipData)
+            _loadedShips.remove(ship.id)
+        }
+
+        allShips.remove(ship.id)
+        shipToVoxelUpdates.remove(ship.id)
+    }
+
+    override fun teleportShip(ship: ServerShip, positionInWorld: Vector3dc, shipToWorldRotation: Quaterniondc) {
+        val newTransform: ShipTransform = ShipTransformImpl(
+            positionInWorld = positionInWorld,
+            positionInShip = ship.transform.positionInShip,
+            shipToWorldRotation = shipToWorldRotation,
+            shipToWorldScaling = ship.transform.shipToWorldScaling,
+        )
+
+        if (ship is LoadedServerShipInternal) {
+            ship.teleportShip(newTransform)
+        } else {
+            // TODO: Do we want to change this?
+            // (ship as ShipData).prevTickTransform = newTransform
+            (ship as ShipData).transform = newTransform
+        }
     }
 
     data class LevelVoxelUpdates(
