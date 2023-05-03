@@ -8,9 +8,6 @@ interface PhysicsVSBody : ServerBaseVSBody {
         const val REASON_UNKNOWN = "unspecified"
     }
 
-    // override val segments: List<PhysicsBodySegment>
-
-
     fun applyForceInWorld(force: Vector3dc) = applyForceInWorld(REASON_UNKNOWN, force)
     fun applyForceInLocal(force: Vector3dc) = applyForceInLocal(REASON_UNKNOWN, force)
     fun applyForceInWorld(force: Vector3dc, pos: Vector3dc) = applyForceInWorld(REASON_UNKNOWN, force)

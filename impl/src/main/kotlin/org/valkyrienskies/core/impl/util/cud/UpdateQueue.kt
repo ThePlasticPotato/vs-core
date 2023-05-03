@@ -2,18 +2,26 @@ package org.valkyrienskies.core.impl.util.cud
 
 import java.util.concurrent.atomic.AtomicReference
 
+interface ReadableUpdateQueue<out U: Any> {
+    fun poll(): U?
+}
+
+interface WriteableUpdateQueue<in U: Any> {
+    fun update(newUpdate: U)
+}
+
 class UpdateQueue<U : Any>(
     private val combiner: UpdateCombiner<U>
-) {
+) : ReadableUpdateQueue<U>, WriteableUpdateQueue<U> {
 
     private val ref = AtomicReference<U?>(null)
 
     /**
      * Removes and returns the next update in queue, if it exists
      */
-    fun poll(): U? = ref.getAndSet(null)
+    override fun poll(): U? = ref.getAndSet(null)
 
-    fun update(newUpdate: U) {
+    override fun update(newUpdate: U) {
         // Only put the new update if a previous update doesn't exist
         val didPutNewUpdate = ref.compareAndSet(null, newUpdate)
 

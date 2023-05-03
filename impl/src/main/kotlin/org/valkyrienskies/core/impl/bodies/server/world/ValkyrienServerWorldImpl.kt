@@ -11,7 +11,7 @@ import org.valkyrienskies.core.api.reference.VSRef
 import org.valkyrienskies.core.api.world.ValkyrienServerWorld
 import org.valkyrienskies.core.api.world.properties.DimensionId
 import org.valkyrienskies.core.impl.bodies.BodyShapeInternal
-import org.valkyrienskies.core.impl.bodies.ServerVSBodyImpl
+import org.valkyrienskies.core.impl.entities.bodies.ServerVSBodyImpl
 import org.valkyrienskies.core.impl.bodies.VSBodyCreateDataToPhysics
 import org.valkyrienskies.core.impl.bodies.VSBodyUpdateToServer
 import org.valkyrienskies.core.impl.bodies.physics.world.PhysicsIdAllocator

@@ -4,16 +4,8 @@ import org.joml.Matrix3dc
 import org.joml.Quaterniondc
 import org.joml.Vector3dc
 import org.valkyrienskies.core.api.VSBeta
-import org.valkyrienskies.core.api.bodies.shape.BodySegment
-import org.valkyrienskies.core.api.bodies.shape.BodyShape
 
 interface ServerBaseVSBody : BaseVSBody {
-
-    val primarySegment: BodySegment get() = requireNotNull(getSegment(0))
-    val segments: Collection<BodySegment>
-    fun getSegment(id: Long): BodySegment?
-
-    val shape: BodyShape
 
     /**
      * The mass of this body, in kg

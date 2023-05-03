@@ -1,9 +1,8 @@
 package org.valkyrienskies.core.impl.entities.bodies.physics_to_server
 
-import org.joml.Vector3dc
 import org.joml.primitives.AABBdc
 import org.valkyrienskies.core.api.bodies.properties.BodyId
-import org.valkyrienskies.core.api.bodies.properties.BodyTransform
+import org.valkyrienskies.core.api.bodies.properties.BodyTransformVelocity
 
 /**
  * Update frame sent from the physics to the server thread every tick
@@ -19,9 +18,7 @@ class PhysicsToServerBodyWorldUpdate(
 
 class PhysicsToServerBodyUpdate(
     val id: BodyId,
-    val transform: BodyTransform,
-    val velocity: Vector3dc,
-    val omega: Vector3dc,
+    val transform: BodyTransformVelocity,
     /**
      * AABB in model space
      */

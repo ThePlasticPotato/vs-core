@@ -3,51 +3,59 @@ package org.valkyrienskies.core.impl.entities.bodies.server_to_physics
 import it.unimi.dsi.fastutil.longs.Long2LongMap
 import org.valkyrienskies.core.api.bodies.properties.BodyTransform
 import org.valkyrienskies.core.api.util.HasId
-import org.valkyrienskies.core.impl.bodies.ServerVSBodyImpl
-import org.valkyrienskies.core.impl.entities.EntityWorld
+import org.valkyrienskies.core.impl.entities.bodies.ServerVSBodyImpl
 import org.valkyrienskies.core.impl.entities.ObservableProperty
-import org.valkyrienskies.core.impl.util.cud.UpdateQueue
+import org.valkyrienskies.core.impl.entities.bodies.physics_to_server.PhysicsToServerBodyReceiver
+import org.valkyrienskies.core.impl.entities.world.EntityWorld
+import org.valkyrienskies.core.impl.util.cud.WriteableUpdateQueue
 import org.valkyrienskies.core.impl.util.fastForEach
 
 /**
- * Collects changes from the server body world into immutable update frames and sends them to the physics
+ * Collects changes from the server body world into immutable [ServerToPhysicsBodyUpdate]
+ * frames and sends them to the physics thread
+ *
+ * @param updateQueue
+ * The update queue this will push updates to
+ *
+ * @param bodies
+ * The server body world to send updates from
+ *
+ * @param lastTransformUpdate
+ * Maps body ID -> the server tick its last transform update was sent.
+ * This is used to ignore transform updates for teleported bodies.
+ * This must be safe to modify from server tick. This will be mutated
  */
 class ServerToPhysicsBodyWorldSender(
-    /**
-     * The update queue to push updates to
-     */
-    private val updateQueue: UpdateQueue<ServerToPhysicsBodyWorldUpdate>,
-    /**
-     * The server body world to send updates from
-     */
+    private val updateQueue: WriteableUpdateQueue<ServerToPhysicsBodyWorldUpdate>,
     private val bodies: EntityWorld<ServerVSBodyImpl>,
-    /**
-     * Maps body ID -> the server tick its last transform update was sent.
-     *
-     * This is used to ignore transform updates for teleported bodies
-     *
-     * This must be safe to modify from server tick. This will be mutated
-     */
     private val lastTransformUpdate: Long2LongMap
 ) {
 
+    /**
+     * Called on the server tick. Should be called *after* the [PhysicsToServerBodyReceiver] is ticked
+     */
     fun tickServer() {
         listenTransformUpdates()
 
+        updateQueue.update(generateUpdate())
     }
 
     private fun generateUpdate(): ServerToPhysicsBodyWorldUpdate {
-//        val newBodies: List<ServerToPhysicsBodyNew> = bodies.entitiesAddedThisTick.values.map { body ->
-//            ServerToPhysicsBodyNew(
-//                body.id,
-//                body.dimension,
-//                body.transform
-//                body.shape,
-//                body.settings,
-//                body.)
-//        }
-//        val update = ServerToPhysicsBodyWorldUpdate(bodies.tickNum, )
-        TODO()
+        val newBodies: List<ServerToPhysicsBodyNew> = bodies.entitiesAddedThisTick.values.map { body ->
+            ServerToPhysicsBodyNew(
+                body.id,
+                body.dimension,
+                body.transform,
+                body.settings
+            )
+        }
+
+        val updatedBodies = bodies.entities
+            .filterNot { bodies.entitiesAddedThisTick.containsKey(it.id) } // exclude entities which were added
+            .map { body -> ServerToPhysicsBodyUpdate(body.id, body.transform) } // generate updates
+
+        val deletedBodies = bodies.entitiesRemovedThisTick
+        return ServerToPhysicsBodyWorldUpdate(bodies.tickNum, newBodies, updatedBodies, deletedBodies)
     }
 
     /**
