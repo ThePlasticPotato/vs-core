@@ -1,12 +1,11 @@
 package org.valkyrienskies.core.apigame.world
 
-import org.joml.Quaterniondc
-import org.joml.Vector3dc
 import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.world.LevelYRange
 import org.valkyrienskies.core.api.world.ServerShipWorld
+import org.valkyrienskies.core.apigame.ShipTeleportData
 import org.valkyrienskies.core.apigame.constraints.VSConstraint
 import org.valkyrienskies.core.apigame.constraints.VSConstraintId
 import org.valkyrienskies.core.apigame.world.chunks.ChunkUnwatchTask
@@ -70,7 +69,7 @@ interface ServerShipWorldCore : ShipWorldCore, ServerShipWorld {
     fun removeDimension(dimensionId: DimensionId)
     fun onDisconnect(player: IPlayer)
     fun deleteShip(ship: ServerShip)
-    fun teleportShip(ship: ServerShip, positionInWorld: Vector3dc, shipToWorldRotation: Quaterniondc)
+    fun teleportShip(ship: ServerShip, teleportData: ShipTeleportData)
 
     val dimensionToGroundBodyIdImmutable: Map<DimensionId, ShipId>
 }

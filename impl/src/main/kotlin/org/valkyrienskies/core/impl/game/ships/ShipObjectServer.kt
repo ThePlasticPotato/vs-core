@@ -2,7 +2,7 @@ package org.valkyrienskies.core.impl.game.ships
 
 import com.google.common.collect.MutableClassToInstanceMap
 import org.valkyrienskies.core.api.ships.WingManager
-import org.valkyrienskies.core.api.ships.properties.ShipTransform
+import org.valkyrienskies.core.apigame.ShipTeleportData
 import org.valkyrienskies.core.impl.api.LoadedServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipUser
@@ -80,9 +80,11 @@ class ShipObjectServer(
         }
     }
 
-    override fun teleportShip(newTransform: ShipTransform) {
-        // Before anything else, increment shipTeleportId to avoid race conditions
-        shipTeleportId++ // Only increment this to avoid reusing old values
-        shipData.transform = newTransform
+    override fun teleportShip(teleportData: ShipTeleportData) {
+        // Increment shipTeleportId to avoid race conditions (only increment to avoid reusing old values)
+        shipTeleportId++
+        shipData.transform = teleportData.createNewShipTransform(transform)
+        shipData.physicsData.linearVelocity = teleportData.newVel
+        shipData.physicsData.angularVelocity = teleportData.newOmega
     }
 }

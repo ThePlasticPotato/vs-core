@@ -1,6 +1,5 @@
 package org.valkyrienskies.core.impl.game.ships
 
-import org.joml.Quaterniondc
 import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.Vector3i
@@ -10,6 +9,7 @@ import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.api.world.LevelYRange
+import org.valkyrienskies.core.apigame.ShipTeleportData
 import org.valkyrienskies.core.apigame.constraints.VSConstraint
 import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintId
@@ -599,20 +599,13 @@ class ShipObjectServerWorld @Inject constructor(
         shipToVoxelUpdates.remove(ship.id)
     }
 
-    override fun teleportShip(ship: ServerShip, positionInWorld: Vector3dc, shipToWorldRotation: Quaterniondc) {
-        val newTransform: ShipTransform = ShipTransformImpl(
-            positionInWorld = positionInWorld,
-            positionInShip = ship.transform.positionInShip,
-            shipToWorldRotation = shipToWorldRotation,
-            shipToWorldScaling = ship.transform.shipToWorldScaling,
-        )
-
+    override fun teleportShip(ship: ServerShip, teleportData: ShipTeleportData) {
         if (ship is LoadedServerShipInternal) {
-            ship.teleportShip(newTransform)
+            ship.teleportShip(teleportData)
         } else {
             // TODO: Do we want to change this?
             // (ship as ShipData).prevTickTransform = newTransform
-            (ship as ShipData).transform = newTransform
+            (ship as ShipData).transform = teleportData.createNewShipTransform(ship.transform)
         }
     }
 

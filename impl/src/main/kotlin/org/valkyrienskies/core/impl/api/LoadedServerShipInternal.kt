@@ -1,6 +1,6 @@
 package org.valkyrienskies.core.impl.api
 
-import org.valkyrienskies.core.api.ships.properties.ShipTransform
+import org.valkyrienskies.core.apigame.ShipTeleportData
 import org.valkyrienskies.core.apigame.ships.LoadedServerShipCore
 
 interface LoadedServerShipInternal : LoadedServerShipCore, LoadedShipInternal,
@@ -9,5 +9,5 @@ interface LoadedServerShipInternal : LoadedServerShipCore, LoadedShipInternal,
     // the teleport.
     val shipTeleportId: Int
 
-    fun teleportShip(newTransform: ShipTransform)
+    fun teleportShip(teleportData: ShipTeleportData)
 }

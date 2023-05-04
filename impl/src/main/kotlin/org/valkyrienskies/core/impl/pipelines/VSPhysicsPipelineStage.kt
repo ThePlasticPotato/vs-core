@@ -142,7 +142,9 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val wingManager = ship.wingManager
             val momentOfInertia = ship._inertia.momentOfInertiaTensor
 
-            val (force, torque) = WingPhysicsSolver.applyWingForces(shipTransform, poseVel, wingManager, momentOfInertia)
+            val (force, torque) = WingPhysicsSolver.applyWingForces(
+                shipTransform, poseVel, wingManager, momentOfInertia
+            )
             ship.applyInvariantForce(force)
             ship.applyInvariantTorque(torque)
             // endregion
@@ -243,23 +245,19 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val shipTeleportId = shipUpdate.shipTeleportId
             val currentShipPos = shipUpdate.currentShipPos
             val currentShipRot = shipUpdate.currentShipRot
+            val currentShipVel = shipUpdate.currentShipVel
+            val currentShipOmega = shipUpdate.currentShipOmega
             val updatePoseVelFromGame = physShip.lastShipTeleportId != shipTeleportId
 
-            val newShipPos = if (!updatePoseVelFromGame) {
-                oldPoseVel.pos.sub(deltaVoxelOffset, Vector3d())
+            val newShipPoseVel = if (!updatePoseVelFromGame) {
+                PoseVel(
+                    oldPoseVel.pos.sub(deltaVoxelOffset, Vector3d()), oldPoseVel.rot, oldPoseVel.vel, oldPoseVel.omega
+                )
             } else {
-                currentShipPos
+                PoseVel(
+                    currentShipPos, currentShipRot, currentShipVel, currentShipOmega
+                )
             }
-
-            val newShipRot = if (!updatePoseVelFromGame) {
-                oldPoseVel.rot
-            } else {
-                currentShipRot
-            }
-
-            val newShipPoseVel = PoseVel(
-                newShipPos, newShipRot, oldPoseVel.vel, oldPoseVel.omega
-            )
 
             physShip._inertia = shipUpdate.inertiaData
             physShip.forceInducers = shipUpdate.forcesInducers
@@ -276,6 +274,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             }
 
             physShip.lastShipTeleportId = shipTeleportId
+            physShip.isStatic = isStatic
         }
 
         // Send voxel updates
@@ -417,6 +416,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     attachmentConstraint.fixedDistance
                 )
             }
+
             FIXED_ATTACHMENT_ORIENTATION -> {
                 val fixedAttachmentOrientationConstraint = vsConstraint as VSAttachmentOrientationConstraint
                 FixedAttachmentOrientationConstraint(
@@ -426,6 +426,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     fixedAttachmentOrientationConstraint.localPos1, fixedAttachmentOrientationConstraint.maxForce
                 )
             }
+
             FIXED_ORIENTATION -> {
                 val fixedOrientationConstraint = vsConstraint as VSFixedOrientationConstraint
                 FixedOrientationConstraint(
@@ -434,6 +435,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     fixedOrientationConstraint.maxTorque
                 )
             }
+
             HINGE_ORIENTATION -> {
                 val hingeOrientationConstraint = vsConstraint as VSHingeOrientationConstraint
                 HingeOrientationConstraint(
@@ -442,6 +444,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     hingeOrientationConstraint.maxTorque
                 )
             }
+
             HINGE_SWING_LIMITS -> {
                 val hingeSwingLimitsConstraint = vsConstraint as VSHingeSwingLimitsConstraint
                 HingeSwingLimitsConstraint(
@@ -451,6 +454,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     hingeSwingLimitsConstraint.maxSwingAngle
                 )
             }
+
             HINGE_TARGET_ANGLE -> {
                 val hingeTargetAngleConstraint = vsConstraint as VSHingeTargetAngleConstraint
                 HingeSwingLimitsConstraint(
@@ -460,6 +464,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     hingeTargetAngleConstraint.nextTickTargetAngle
                 )
             }
+
             POS_DAMPING -> {
                 val posDampingConstraint = vsConstraint as VSPosDampingConstraint
                 PosDampingConstraint(
@@ -468,6 +473,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     posDampingConstraint.posDamping
                 )
             }
+
             ROPE -> {
                 val ropeConstraint = vsConstraint as VSRopeConstraint
                 RopeConstraint(
@@ -476,6 +482,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     ropeConstraint.ropeLength
                 )
             }
+
             ROT_DAMPING -> {
                 val rotDampingConstraint = vsConstraint as VSRotDampingConstraint
                 val rotDampingAxes: RotDampingAxes = when (rotDampingConstraint.rotDampingAxes) {
@@ -490,6 +497,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     rotDampingAxes
                 )
             }
+
             SLIDE -> {
                 val slideConstraint = vsConstraint as VSSlideConstraint
                 SlideConstraint(
@@ -498,6 +506,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     slideConstraint.localSlideAxis0, slideConstraint.maxDistBetweenPoints
                 )
             }
+
             SPHERICAL_SWING_LIMITS -> {
                 val sphericalSwingLimitsConstraint = vsConstraint as VSSphericalSwingLimitsConstraint
                 SphericalSwingLimitsConstraint(
@@ -507,6 +516,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     sphericalSwingLimitsConstraint.maxSwingAngle
                 )
             }
+
             SPHERICAL_TWIST_LIMITS -> {
                 val sphericalTwistLimitsConstraint = vsConstraint as VSSphericalTwistLimitsConstraint
                 SphericalTwistLimitsConstraint(
@@ -516,6 +526,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     sphericalTwistLimitsConstraint.maxTwistAngle
                 )
             }
+
             else -> throw IllegalArgumentException("Unknown constraint type ${vsConstraint.constraintType}")
         }
     }

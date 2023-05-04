@@ -1,6 +1,9 @@
 package org.valkyrienskies.core.apigame
 
+import org.joml.Quaterniondc
+import org.joml.Vector3dc
 import org.valkyrienskies.core.api.ships.ServerShip
+import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.api.world.ServerShipWorld
 
 interface VSCoreCommands {
@@ -11,5 +14,14 @@ interface VSCoreCommands {
 
     fun scaleShip(ship: ServerShip, newScale: Float)
 
-    fun teleportShip(world: ServerShipWorld, ship: ServerShip, x: Double, y: Double, z: Double)
+    fun teleportShip(world: ServerShipWorld, ship: ServerShip, teleportData: ShipTeleportData)
+}
+
+interface ShipTeleportData {
+    val newPos: Vector3dc
+    val newRot: Quaterniondc
+    val newVel: Vector3dc
+    val newOmega: Vector3dc
+
+    fun createNewShipTransform(oldShipTransform: ShipTransform): ShipTransform
 }

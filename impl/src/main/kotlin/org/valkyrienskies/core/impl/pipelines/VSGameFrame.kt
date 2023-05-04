@@ -61,6 +61,8 @@ data class UpdateShipInGameFrameData(
     val shipTeleportId: Int,
     val currentShipPos: Vector3dc,
     val currentShipRot: Quaterniondc,
+    val currentShipVel: Vector3dc,
+    val currentShipOmega: Vector3dc,
 )
 
 enum class ConstraintUpdateTypeInGameFrame {

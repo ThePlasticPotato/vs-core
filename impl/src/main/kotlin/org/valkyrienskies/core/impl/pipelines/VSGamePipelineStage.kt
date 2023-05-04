@@ -222,6 +222,8 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val shipTeleportId: Int = it.shipTeleportId
             val currentShipPos: Vector3dc = it.shipData.transform.positionInWorld
             val currentShipRot: Quaterniondc = it.shipData.transform.shipToWorldRotation
+            val currentShipVel: Vector3dc = it.shipData.physicsData.linearVelocity
+            val currentShipOmega: Vector3dc = it.shipData.physicsData.angularVelocity
 
             // Deep copy objects from ShipData, since we don't want VSGameFrame to be modified
             val updateShipInGameFrameData = UpdateShipInGameFrameData(
@@ -236,6 +238,8 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 shipTeleportId,
                 currentShipPos,
                 currentShipRot,
+                currentShipVel,
+                currentShipOmega,
             )
             updatedShips[uuid] = updateShipInGameFrameData
         }
