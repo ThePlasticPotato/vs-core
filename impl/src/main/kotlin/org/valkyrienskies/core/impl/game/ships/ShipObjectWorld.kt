@@ -6,6 +6,7 @@ import kotlinx.coroutines.plus
 import org.joml.primitives.AABBdc
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.api.world.ServerShipWorld
 import org.valkyrienskies.core.api.world.ShipWorld
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
@@ -60,8 +61,9 @@ abstract class ShipObjectWorld<ShipObjectType : ShipObject>(
         newBlockMass: Double
     ) {
         // If there is a ShipData at this position and dimension, then tell it about the block update
-        allShips.getShipDataFromChunkPos(posX shr 4, posZ shr 4, dimensionId)
-            ?.onSetBlock(posX, posY, posZ, oldBlockType, newBlockType, oldBlockMass, newBlockMass)
+        allShips.getByChunkPos(posX shr 4, posZ shr 4, dimensionId)?.onSetBlock(
+            posX, posY, posZ, oldBlockType, newBlockType, oldBlockMass, newBlockMass, this is ServerShipWorld
+        )
     }
 
     @Deprecated("redundant", ReplaceWith("loadedShips.getShipDataIntersecting(aabb)"))

@@ -92,14 +92,18 @@ class ShipData(
         oldBlockType: BlockType,
         newBlockType: BlockType,
         oldBlockMass: Double,
-        newBlockMass: Double
+        newBlockMass: Double,
+        isRunningOnServer: Boolean,
     ) {
-        super.onSetBlock(posX, posY, posZ, oldBlockType, newBlockType, oldBlockMass, newBlockMass)
+        super.onSetBlock(posX, posY, posZ, oldBlockType, newBlockType, oldBlockMass, newBlockMass, isRunningOnServer)
 
         inertiaData.onSetBlockUseSphereMOI(posX, posY, posZ, oldBlockMass, newBlockMass)
 
         // Update [shipVoxelAABB]
-        updateShipAABBGenerator(posX, posY, posZ, newBlockType != BlockTypeImpl.AIR)
+        if (isRunningOnServer) {
+            // This ship AABB generator gets in a strange state on client, only update it on the server side
+            updateShipAABBGenerator(posX, posY, posZ, newBlockType != BlockTypeImpl.AIR)
+        }
     }
 
     /**

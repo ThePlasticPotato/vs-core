@@ -16,6 +16,7 @@ interface ShipInternal : ShipCore {
         oldBlockType: BlockType,
         newBlockType: BlockType,
         oldBlockMass: Double,
-        newBlockMass: Double
+        newBlockMass: Double,
+        isRunningOnServer: Boolean,
     )
 }
