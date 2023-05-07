@@ -1,6 +1,7 @@
 package org.valkyrienskies.core.impl.api
 
 import org.valkyrienskies.core.api.ships.PhysShip
+import org.valkyrienskies.core.api.ships.properties.ShipId
 
 /**
  * Ship force inducer
@@ -17,5 +18,13 @@ interface ShipForcesInducer {
      *                 Please don't use [ShipData], [ShipObject] or anything else from the game stage pipeline.
      */
     fun applyForces(physShip: PhysShip)
-}
 
+    /**
+     * Apply forces/torques on the physics tick, also allow looking up other ships based on the id. When looking up
+     * ships based on id PLEASE only use them in a read-only manner! Modifying them will cause race conditions when we
+     * eventually run these in parallel.
+     */
+    fun applyForcesAndLookupPhysShips(physShip: PhysShip, lookupPhysShip: (ShipId) -> PhysShip?) {
+        // Default implementation to not break existing implementations
+    }
+}
