@@ -20,9 +20,7 @@ interface ShipForcesInducer {
     fun applyForces(physShip: PhysShip)
 
     /**
-     * Apply forces/torques on the physics tick, also allow looking up other ships based on the id. When looking up
-     * ships based on id PLEASE only use them in a read-only manner! Modifying them will cause race conditions when we
-     * eventually run these in parallel.
+     * Apply forces/torques on the physics tick, also allow looking up other ships based on the id.
      */
     fun applyForcesAndLookupPhysShips(physShip: PhysShip, lookupPhysShip: (ShipId) -> PhysShip?) {
         // Default implementation to not break existing implementations
