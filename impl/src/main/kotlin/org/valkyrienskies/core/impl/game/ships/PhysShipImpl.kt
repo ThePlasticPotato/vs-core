@@ -25,6 +25,7 @@ data class PhysShipImpl constructor(
     var segments: SegmentTracker,
     internal var lastShipTeleportId: Int,
     internal val wingManager: WingManagerImpl = WingManagerImpl(),
+    override var isStatic: Boolean = false
 ) : PhysShip {
     var poseVel: PoseVel
         get() {
@@ -57,8 +58,6 @@ data class PhysShipImpl constructor(
     private val rotTorques = ArrayDeque<Vector3dc>()
     private val invPosForces = ArrayDeque<Vector3dc>()
     private val invPosPositions = ArrayDeque<Vector3dc>()
-
-    override var isStatic = false
 
     fun applyQueuedForces() {
         invForces.pollUntilEmpty(rigidBodyReference::addInvariantForceToNextPhysTick)

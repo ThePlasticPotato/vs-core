@@ -220,7 +220,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     inertiaData,
                     poseVel,
                     segments,
-                    shipTeleportId
+                    shipTeleportId,
+                    isStatic = isStatic,
                 )
             if (wingManagerChanges != null) {
                 physShip.wingManager.applyChanges(wingManagerChanges)
