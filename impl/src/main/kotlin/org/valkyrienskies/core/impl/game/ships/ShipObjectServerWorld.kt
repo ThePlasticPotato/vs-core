@@ -7,7 +7,6 @@ import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.ships.properties.ShipId
-import org.valkyrienskies.core.api.ships.properties.ShipTransform
 import org.valkyrienskies.core.api.world.LevelYRange
 import org.valkyrienskies.core.apigame.ShipTeleportData
 import org.valkyrienskies.core.apigame.constraints.VSConstraint
@@ -603,9 +602,14 @@ class ShipObjectServerWorld @Inject constructor(
         if (ship is LoadedServerShipInternal) {
             ship.teleportShip(teleportData)
         } else {
-            // TODO: Do we want to change this?
-            // (ship as ShipData).prevTickTransform = newTransform
-            (ship as ShipData).transform = teleportData.createNewShipTransform(ship.transform)
+            val shipAsLoaded = loadedShips.getById(ship.id)
+            if (shipAsLoaded != null) {
+                shipAsLoaded.teleportShip(teleportData)
+            } else {
+                // TODO: Do we want to change this?
+                // (ship as ShipData).prevTickTransform = newTransform
+                (ship as ShipData).transform = teleportData.createNewShipTransform(ship.transform)
+            }
         }
     }
 
