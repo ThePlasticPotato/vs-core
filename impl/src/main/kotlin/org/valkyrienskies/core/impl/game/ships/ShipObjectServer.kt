@@ -8,6 +8,8 @@ import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipUser
 import org.valkyrienskies.core.impl.api.ShipForcesInducer
 import org.valkyrienskies.core.impl.api.Ticked
+import org.valkyrienskies.core.impl.datastructures.BlockPos2ObjectOpenHashMap
+import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
 import org.valkyrienskies.core.impl.networking.delta.DeltaEncodedChannelServerTCP
 import org.valkyrienskies.core.impl.util.serialization.VSJacksonUtil
 
@@ -41,7 +43,9 @@ class ShipObjectServer(
         }
         val wingManager = WingManagerImpl()
         wingManager.createWingGroup()
+        val connManager = ConnectivityForestImpl(ConnGraph(), BlockPos2ObjectOpenHashMap())
         setAttachment(WingManager::class.java, wingManager)
+        setAttachment(ConnectivityForest::class.java, connManager)
     }
 
     override fun <T> setAttachment(clazz: Class<T>, value: T?) {
