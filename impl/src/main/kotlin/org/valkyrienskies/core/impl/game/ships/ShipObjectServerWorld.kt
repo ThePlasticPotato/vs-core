@@ -6,6 +6,7 @@ import org.joml.Vector3i
 import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.ServerShip
+import org.valkyrienskies.core.api.ships.getAttachment
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.world.LevelYRange
 import org.valkyrienskies.core.apigame.ShipTeleportData
@@ -233,6 +234,19 @@ class ShipObjectServerWorld @Inject constructor(
                     "Could not find ship or dimension body for block update at $posX, $posY, $posZ in dimension $dimensionId"
                 )
                 return
+            }
+
+            if (shipData != null) {
+                val forest: ConnectivityForestImpl = shipData.getAttachment<ConnectivityForest>() as ConnectivityForestImpl
+
+                val voxelType = (newBlockType as BlockTypeImpl)
+
+                if (voxelType == BlockTypeImpl.AIR) {
+                    forest.delVertex(posX, posY, posZ)
+                }
+                else {
+                    forest.newVertex(posX, posY, posZ)
+                }
             }
 
             val voxelUpdates = shipToVoxelUpdates.getOrPut(shipId) { HashMap() }
