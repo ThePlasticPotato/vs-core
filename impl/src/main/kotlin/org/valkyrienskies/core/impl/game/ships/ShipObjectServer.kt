@@ -43,7 +43,7 @@ class ShipObjectServer(
         }
         val wingManager = WingManagerImpl()
         wingManager.createWingGroup()
-        val connManager = ConnectivityForestImpl(ConnGraph(), BlockPos2ObjectOpenHashMap())
+        val connManager = ConnectivityForestImpl(ConnGraph(), BlockPos2ObjectOpenHashMap(), mutableSetOf())
         setAttachment(WingManager::class.java, wingManager)
         setAttachment(ConnectivityForest::class.java, connManager)
     }
