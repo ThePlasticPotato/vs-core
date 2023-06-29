@@ -6,7 +6,6 @@ import org.joml.Vector3i
 import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.ServerShip
-import org.valkyrienskies.core.api.ships.getAttachment
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.api.world.LevelYRange
 import org.valkyrienskies.core.apigame.ShipTeleportData
@@ -225,9 +224,12 @@ class ShipObjectServerWorld @Inject constructor(
                 return
             }
 
-            if (shipData != null) {
-                if (shipData.getAttachment(ConnectivityForest::class.java) != null) {
-                    val forest: ConnectivityForestImpl = shipData.getAttachment(ConnectivityForest::class.java)!! as ConnectivityForestImpl
+
+
+            if (shipData != null && allShips.getById(shipId) != null) {
+                val serverShip : ServerShip  = allShips.getById(shipId) as ServerShip
+                if (serverShip.getAttachment(ConnectivityForest::class.java) != null) {
+                    val forest: ConnectivityForestImpl = serverShip.getAttachment(ConnectivityForest::class.java)!! as ConnectivityForestImpl
 
                     val voxelType = (newBlockType as BlockTypeImpl)
 
