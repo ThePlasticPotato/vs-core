@@ -25,6 +25,8 @@ import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.api.LoadedServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipInternal
+import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
+import org.valkyrienskies.core.impl.datastructures.dynconn.ConnVertex
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
 import org.valkyrienskies.core.impl.game.ChunkAllocatorProvider
 import org.valkyrienskies.core.impl.game.DimensionInfo
@@ -56,7 +58,6 @@ import org.valkyrienskies.physics_api.voxel_updates.DeleteVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.DenseVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.EmptyVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel_updates.KrunchVoxelStates
 import org.valkyrienskies.physics_api.voxel_updates.SparseVoxelShapeUpdate
 import java.util.concurrent.CompletableFuture
 import javax.inject.Inject
@@ -230,10 +231,43 @@ class ShipObjectServerWorld @Inject constructor(
                 val voxelType = (newBlockType as BlockTypeImpl)
 
                 if (voxelType == BlockTypeImpl.AIR) {
+                    // ignore this, should never not be a BlockPosVertex anyway, if it is we've got bigger problems
+                    val adjacentVertexes : Collection<BlockPosVertex> = forest.graph.adjacentVertices(forest.vertices.get(posX, posY, posZ)) as Collection<BlockPosVertex>
                     forest.delVertex(posX, posY, posZ)
-                }
-                else {
+                    if (!adjacentVertexes.isEmpty()) {
+                        // check if the ship is still intact
+                        var intact : Boolean = true
+                        var disconnectOne: Vector3ic? = null
+                        var disconnectTwo: Vector3ic? = null
+
+                        for (it in adjacentVertexes) {
+                            for (otherit in adjacentVertexes) {
+                                if (!forest.graph.connected(it, otherit)) {
+                                    intact = false
+                                    disconnectOne = Vector3i(it.posX, it.posY, it.posZ)
+                                    disconnectTwo = Vector3i(otherit.posX, otherit.posY, otherit.posZ)
+                                    logger.info("Ship with ID '$shipId' is no longer intact! Breakage point: $posX, $posY, $posZ - Disconnecting from: $disconnectOne and $disconnectTwo")
+                                    break
+                                }
+                            }
+                        }
+
+                        if (!intact) {
+                            // ship is no longer intact, split it!
+
+                            if (disconnectTwo != null && disconnectOne != null) {
+                                forest.split(disconnectOne, disconnectTwo)
+                            }
+                            // find the largest connected component
+                            //todo : this. it's the last step. I'm tired. (that last part was added by ai, thank you for adding "im tired", very true)
+                        }
+                    }
+                } else {
                     forest.newVertex(posX, posY, posZ)
+                    val adjacentVertexes : Collection<ConnVertex> = forest.graph.adjacentVertices(forest.vertices.get(posX, posY, posZ))
+                    if (adjacentVertexes.isEmpty()) {
+                        // someone used setblock :3dsus: or some mod jank idk
+                    }
                 }
             }
 
