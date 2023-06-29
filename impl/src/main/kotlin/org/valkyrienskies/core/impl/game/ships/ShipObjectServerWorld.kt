@@ -4,6 +4,7 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.Vector3i
 import org.joml.Vector3ic
+import org.valkyrienskies.core.api.ships.LoadedServerShip
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.core.api.ships.properties.ShipId
@@ -239,8 +240,9 @@ class ShipObjectServerWorld @Inject constructor(
 
 
 
-            if (shipData != null && allShips.getById(shipId) != null) {
-                val serverShip : ServerShip  = allShips.getById(shipId) as ServerShip
+            if (shipData != null && loadedShips.getById(shipId) != null) {
+                // val serverShip : ServerShip  = allShips.getById(shipId) as ServerShip
+                val serverShip : LoadedServerShip = loadedShips.getById(shipId) as LoadedServerShip
                 if (serverShip.getAttachment(ConnectivityForest::class.java) != null) {
                     val forest: ConnectivityForestImpl = serverShip.getAttachment(ConnectivityForest::class.java)!! as ConnectivityForestImpl
 
@@ -270,12 +272,9 @@ class ShipObjectServerWorld @Inject constructor(
 
                             if (!intact) {
                                 // ship is no longer intact, split it!
-
                                 if (disconnectTwo != null && disconnectOne != null) {
-                                    forest.split(disconnectOne, disconnectTwo)
+                                    forest.breakages.add(Pair(disconnectOne, disconnectTwo))
                                 }
-                                // find the largest connected component
-                                //todo : this. it's the last step. I'm tired. (that last part was added by ai, thank you for adding "im tired", very true)
                             }
                         }
                     } else {
