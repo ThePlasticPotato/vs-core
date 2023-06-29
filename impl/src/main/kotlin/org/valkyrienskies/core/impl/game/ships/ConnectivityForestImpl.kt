@@ -1,17 +1,20 @@
 package org.valkyrienskies.core.impl.game.ships
 
+import org.joml.Vector3dc
+import org.joml.Vector3ic
 import org.valkyrienskies.core.impl.datastructures.BlockPos2ObjectOpenHashMap
+import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnVertex
 
 class ConnectivityForestImpl(override val graph: ConnGraph,
-    override val vertices: BlockPos2ObjectOpenHashMap<ConnVertex>
+    override val vertices: BlockPos2ObjectOpenHashMap<BlockPosVertex>
 ) : ConnectivityForest {
 
     override fun newVertex(posX: Int, posY: Int, posZ: Int): Boolean {
         if (vertices.get(posX, posY, posZ) != null) return false
 
-        val vertex = ConnVertex()
+        val vertex = BlockPosVertex(posX, posY, posZ)
         vertices.put(posX, posY, posZ, vertex)
 
         if (vertices.contains(posX + 1, posY, posZ)) {
@@ -39,9 +42,9 @@ class ConnectivityForestImpl(override val graph: ConnGraph,
     override fun delVertex(posX: Int, posY: Int, posZ: Int): Boolean {
         if (vertices.get(posX, posY, posZ) == null) return false
 
-        val vertex: ConnVertex = vertices.get(posX, posY, posZ)!!
+        val vertex: BlockPosVertex = vertices.get(posX, posY, posZ)!!
 
-        var list : Collection<ConnVertex> = graph.adjacentVertices(vertex)
+        val list : Collection<ConnVertex> = graph.adjacentVertices(vertex)
 
         if (list.isEmpty()) {
             vertices.remove(posX, posY, posZ)
@@ -54,8 +57,8 @@ class ConnectivityForestImpl(override val graph: ConnGraph,
         return true
     }
 
-    override fun split(posX: Int, posY: Int, posZ: Int, posX2: Int, posY2: Int, posZ2: Int): Boolean {
-        TODO("Not yet implemented")
+    override fun split(vectorOne: Vector3ic, vectorTwo: Vector3ic): Boolean {
+        return false
     }
 
     override fun merge() {
