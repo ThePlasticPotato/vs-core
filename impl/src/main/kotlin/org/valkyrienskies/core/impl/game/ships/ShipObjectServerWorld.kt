@@ -239,49 +239,52 @@ class ShipObjectServerWorld @Inject constructor(
             }
 
             if (shipData != null) {
-                val forest: ConnectivityForestImpl = shipData.getAttachment<ConnectivityForest>() as ConnectivityForestImpl
+                if (shipData.getAttachment(ConnectivityForest::class.java) != null) {
+                    val forest: ConnectivityForestImpl = shipData.getAttachment(ConnectivityForest::class.java)!! as ConnectivityForestImpl
 
-                val voxelType = (newBlockType as BlockTypeImpl)
+                    val voxelType = (newBlockType as BlockTypeImpl)
 
-                if (voxelType == BlockTypeImpl.AIR) {
-                    // ignore this, should never not be a BlockPosVertex anyway, if it is we've got bigger problems
-                    val adjacentVertexes : Collection<BlockPosVertex> = forest.graph.adjacentVertices(forest.vertices.get(posX, posY, posZ)) as Collection<BlockPosVertex>
-                    forest.delVertex(posX, posY, posZ)
-                    if (!adjacentVertexes.isEmpty()) {
-                        // check if the ship is still intact
-                        var intact : Boolean = true
-                        var disconnectOne: Vector3ic? = null
-                        var disconnectTwo: Vector3ic? = null
+                    if (voxelType == BlockTypeImpl.AIR) {
+                        // ignore this, should never not be a BlockPosVertex anyway, if it is we've got bigger problems
+                        val adjacentVertexes : Collection<BlockPosVertex> = forest.graph.adjacentVertices(forest.vertices.get(posX, posY, posZ)) as Collection<BlockPosVertex>
+                        forest.delVertex(posX, posY, posZ)
+                        if (!adjacentVertexes.isEmpty()) {
+                            // check if the ship is still intact
+                            var intact : Boolean = true
+                            var disconnectOne: Vector3ic? = null
+                            var disconnectTwo: Vector3ic? = null
 
-                        for (it in adjacentVertexes) {
-                            for (otherit in adjacentVertexes) {
-                                if (!forest.graph.connected(it, otherit)) {
-                                    intact = false
-                                    disconnectOne = Vector3i(it.posX, it.posY, it.posZ)
-                                    disconnectTwo = Vector3i(otherit.posX, otherit.posY, otherit.posZ)
-                                    logger.info("Ship with ID '$shipId' is no longer intact! Breakage point: $posX, $posY, $posZ - Disconnecting from: $disconnectOne and $disconnectTwo")
-                                    break
+                            for (it in adjacentVertexes) {
+                                for (otherit in adjacentVertexes) {
+                                    if (!forest.graph.connected(it, otherit)) {
+                                        intact = false
+                                        disconnectOne = Vector3i(it.posX, it.posY, it.posZ)
+                                        disconnectTwo = Vector3i(otherit.posX, otherit.posY, otherit.posZ)
+                                        logger.info("Ship with ID '$shipId' is no longer intact! Breakage point: $posX, $posY, $posZ - Disconnecting from: $disconnectOne and $disconnectTwo")
+                                        break
+                                    }
                                 }
                             }
-                        }
 
-                        if (!intact) {
-                            // ship is no longer intact, split it!
+                            if (!intact) {
+                                // ship is no longer intact, split it!
 
-                            if (disconnectTwo != null && disconnectOne != null) {
-                                forest.split(disconnectOne, disconnectTwo)
+                                if (disconnectTwo != null && disconnectOne != null) {
+                                    forest.split(disconnectOne, disconnectTwo)
+                                }
+                                // find the largest connected component
+                                //todo : this. it's the last step. I'm tired. (that last part was added by ai, thank you for adding "im tired", very true)
                             }
-                            // find the largest connected component
-                            //todo : this. it's the last step. I'm tired. (that last part was added by ai, thank you for adding "im tired", very true)
                         }
-                    }
-                } else {
-                    forest.newVertex(posX, posY, posZ)
-                    val adjacentVertexes : Collection<ConnVertex> = forest.graph.adjacentVertices(forest.vertices.get(posX, posY, posZ))
-                    if (adjacentVertexes.isEmpty()) {
-                        // someone used setblock :3dsus: or some mod jank idk
+                    } else {
+                        forest.newVertex(posX, posY, posZ)
+                        val adjacentVertexes : Collection<ConnVertex> = forest.graph.adjacentVertices(forest.vertices.get(posX, posY, posZ))
+                        if (adjacentVertexes.isEmpty()) {
+                            // someone used setblock :3dsus: or some mod jank idk
+                        }
                     }
                 }
+
             }
 
             val voxelUpdates = shipToVoxelUpdates.getOrPut(shipId) { HashMap() }
