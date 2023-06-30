@@ -237,7 +237,7 @@ class ShipObjectServerWorld @Inject constructor(
 
                     if (voxelType == BlockTypeImpl.AIR) {
                         // ignore this, should never not be a BlockPosVertex anyway, if it is we've got bigger problems
-                        val adjacentVertexes : Collection<BlockPosVertex> = forest.graph.adjacentVertices(forest.vertices.get(posX, posY, posZ)) as Collection<BlockPosVertex>
+                        val adjacentVertexes : Collection<BlockPosVertex> = forest.graph.adjacentVertices(forest.vertices.get(Vector3i(posX, posY, posZ))) as Collection<BlockPosVertex>
                         forest.delVertex(posX, posY, posZ)
                         if (!adjacentVertexes.isEmpty()) {
                             // check if the ship is still intact
@@ -266,7 +266,7 @@ class ShipObjectServerWorld @Inject constructor(
                         }
                     } else {
                         forest.newVertex(posX, posY, posZ)
-                        val adjacentVertexes : Collection<ConnVertex> = forest.graph.adjacentVertices(forest.vertices.get(posX, posY, posZ))
+                        val adjacentVertexes : Collection<ConnVertex> = forest.graph.adjacentVertices(forest.vertices.get(Vector3i(posX, posY, posZ)))
                         if (adjacentVertexes.isEmpty()) {
                             // someone used setblock :3dsus: or some mod jank idk
                         }

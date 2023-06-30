@@ -1,6 +1,7 @@
 package org.valkyrienskies.core.impl.game.ships
 
 import com.google.common.collect.MutableClassToInstanceMap
+import org.joml.Vector3ic
 import org.valkyrienskies.core.api.ships.WingManager
 import org.valkyrienskies.core.apigame.ShipTeleportData
 import org.valkyrienskies.core.impl.api.LoadedServerShipInternal
@@ -9,6 +10,7 @@ import org.valkyrienskies.core.impl.api.ServerShipUser
 import org.valkyrienskies.core.impl.api.ShipForcesInducer
 import org.valkyrienskies.core.impl.api.Ticked
 import org.valkyrienskies.core.impl.datastructures.BlockPos2ObjectOpenHashMap
+import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
 import org.valkyrienskies.core.impl.networking.delta.DeltaEncodedChannelServerTCP
 import org.valkyrienskies.core.impl.util.serialization.VSJacksonUtil
@@ -43,7 +45,7 @@ class ShipObjectServer(
         }
         val wingManager = WingManagerImpl()
         wingManager.createWingGroup()
-        val connManager = ConnectivityForestImpl(ConnGraph(), BlockPos2ObjectOpenHashMap(), mutableSetOf())
+        val connManager = ConnectivityForestImpl(ConnGraph(), HashMap<Vector3ic, BlockPosVertex>(), mutableSetOf())
         setAttachment(WingManager::class.java, wingManager)
         setAttachment(ConnectivityForest::class.java, connManager)
     }
