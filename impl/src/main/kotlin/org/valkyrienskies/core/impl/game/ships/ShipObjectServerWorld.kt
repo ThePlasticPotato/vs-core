@@ -243,17 +243,51 @@ class ShipObjectServerWorld @Inject constructor(
                             // check if the ship is still intact
                             var disconnectOne: Vector3ic? = null
                             var disconnectTwo: Vector3ic? = null
+                            var disconnectThree: Vector3ic? = null
+                            var disconnectFour: Vector3ic? = null
+                            var disconnectFive: Vector3ic? = null
+                            var disconnectSix: Vector3ic? = null
+
+                            var foundTwo = false
+                            var foundThree = false
+                            var foundFour = false
+                            var foundFive = false
+                            var foundSix = false
+
+                            var intact = true
 
                             for (it in adjacentVertexes) {
                                 for (otherit in adjacentVertexes) {
                                     if (!forest.graph.connected(it, otherit)) {
+                                        intact = false
                                         disconnectOne = Vector3i(it.posX, it.posY, it.posZ)
-                                        disconnectTwo = Vector3i(otherit.posX, otherit.posY, otherit.posZ)
-                                        logger.info("Ship with ID '$shipId' is no longer intact! Breakage point: $posX, $posY, $posZ - Disconnecting from: $disconnectOne and $disconnectTwo")
-                                        forest.breakages.add(Pair(disconnectOne, disconnectTwo))
+                                        if (!foundTwo) {
+                                            disconnectTwo = Vector3i(otherit.posX, otherit.posY, otherit.posZ)
+                                            foundTwo = true
+                                        } else if (!foundThree) {
+                                            disconnectThree = Vector3i(otherit.posX, otherit.posY, otherit.posZ)
+                                            foundThree = true
+                                        } else if (!foundFour) {
+                                            disconnectFour = Vector3i(otherit.posX, otherit.posY, otherit.posZ)
+                                            foundFour = true
+                                        } else if (!foundFive) {
+                                            disconnectFive = Vector3i(otherit.posX, otherit.posY, otherit.posZ)
+                                            foundFive = true
+                                        } else if (!foundSix) {
+                                            disconnectSix = Vector3i(otherit.posX, otherit.posY, otherit.posZ)
+                                            foundSix = true
+                                            break
+                                        }
+                                        logger.info("Ship with ID '$shipId' is no longer intact! Breakage point: $posX, $posY, $posZ")
+
                                     }
                                 }
                             }
+
+                            if (!intact && disconnectOne != null && disconnectTwo != null) {
+                                forest.breakages.add(arrayListOf(disconnectOne, disconnectTwo, disconnectThree, disconnectFour, disconnectFive, disconnectSix))
+                            }
+
                         }
                     } else {
                         forest.newVertex(posX, posY, posZ)

@@ -14,6 +14,7 @@ import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
 import org.valkyrienskies.core.impl.networking.delta.DeltaEncodedChannelServerTCP
 import org.valkyrienskies.core.impl.util.serialization.VSJacksonUtil
+import java.util.concurrent.CopyOnWriteArraySet
 
 class ShipObjectServer(
     override val shipData: ShipData,

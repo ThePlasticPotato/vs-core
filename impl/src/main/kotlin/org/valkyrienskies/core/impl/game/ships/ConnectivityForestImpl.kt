@@ -8,7 +8,7 @@ import org.valkyrienskies.core.impl.datastructures.dynconn.ConnVertex
 
 class ConnectivityForestImpl(override val graph: ConnGraph,
     override val vertices: HashMap<Vector3ic, BlockPosVertex>,
-    override val breakages: MutableSet<Pair<Vector3ic, Vector3ic>>
+    override val breakages: MutableSet<ArrayList<Vector3ic?>>
 ) : ConnectivityForest {
 
     override fun newVertex(posX: Int, posY: Int, posZ: Int): Boolean {
@@ -58,28 +58,91 @@ class ConnectivityForestImpl(override val graph: ConnGraph,
         return true
     }
 
-    override fun split(vectorOne: Vector3ic, vectorTwo: Vector3ic): Pair<HashMap<Vector3ic, BlockPosVertex>, Boolean> {
-        val vertexOne = vertices[Vector3i(vectorOne.x(), vectorOne.y(), vectorOne.z())]
-        val vertexTwo = vertices[Vector3i(vectorTwo.x(), vectorTwo.y(), vectorTwo.z())]
+    override fun split(vertlist: ArrayList<Vector3ic?>): MutableSet<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>> {
+
+        val vertexOne = vertices[vertlist[0]]
+        val vertexTwo = vertices[vertlist[1]]
+        var vertexThree: BlockPosVertex? = null
+        if (vertlist.size > 2) vertexThree = vertices[vertlist[2]]
+        var vertexFour: BlockPosVertex? = null
+        if (vertlist.size > 3) vertexFour = vertices[vertlist[3]]
+        var vertexFive: BlockPosVertex? = null
+        if (vertlist.size > 4) vertexFive = vertices[vertlist[4]]
+        var vertexSix: BlockPosVertex? = null
+        if (vertlist.size > 5) vertexSix = vertices[vertlist[5]]
 
         val connectedToOne = HashMap<Vector3ic, BlockPosVertex>()
         val connectedToTwo = HashMap<Vector3ic, BlockPosVertex>()
+        val connectedToThree = HashMap<Vector3ic, BlockPosVertex>()
+        val connectedToFour = HashMap<Vector3ic, BlockPosVertex>()
+        val connectedToFive = HashMap<Vector3ic, BlockPosVertex>()
+        val connectedToSix = HashMap<Vector3ic, BlockPosVertex>()
 
         if (vertexOne != null && vertexTwo != null) {
-            vertices.forEach{vec, vertex ->
+            vertices.forEach{ (vec, vertex) ->
                 if (graph.connected(vertexOne, vertex)) {
                     connectedToOne[vec] = vertex
                 }
                 if (graph.connected(vertexTwo, vertex)) {
                     connectedToTwo[vec] = vertex
                 }
+                if (vertexThree != null) {
+                    if (graph.connected(vertexThree, vertex)) {
+                        connectedToThree[vec] = vertex
+                    }
+                }
+                if (vertexFour != null) {
+                    if (graph.connected(vertexFour, vertex)) {
+                        connectedToFour[vec] = vertex
+                    }
+                }
+                if (vertexFive != null) {
+                    if (graph.connected(vertexFive, vertex)) {
+                        connectedToFive[vec] = vertex
+                    }
+                }
+                if (vertexSix != null) {
+                    if (graph.connected(vertexSix, vertex)) {
+                        connectedToSix[vec] = vertex
+                    }
+                }
             }
         }
 
-        if (connectedToOne.values.size > connectedToTwo.values.size) {
-            return Pair(connectedToTwo, true)
+
+
+        val breaking = mutableSetOf<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>>()
+
+        breaking.add(Pair(connectedToOne, vertlist[0]!!))
+        breaking.add(Pair(connectedToTwo, vertlist[1]!!))
+        if (vertexThree != null) {
+            breaking.add(Pair(connectedToThree, vertlist[2]!!))
         }
-        return Pair(connectedToOne, false)
+        if (vertexFour != null) {
+            breaking.add(Pair(connectedToFour, vertlist[3]!!))
+        }
+        if (vertexFive != null) {
+            breaking.add(Pair(connectedToFive, vertlist[4]!!))
+        }
+        if (vertexSix != null) {
+            breaking.add(Pair(connectedToSix, vertlist[5]!!))
+        }
+
+        removeLargestMap(breaking)
+
+        return breaking
+    }
+
+    fun removeLargestMap(remover: MutableSet<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>>) {
+        var largest = 0
+        var largestMap = Pair(HashMap<Vector3ic, BlockPosVertex>(), Vector3i(0, 0, 0) as Vector3ic)
+        for (map in remover) {
+            if (map.first.size > largest) {
+                largest = map.first.size
+                largestMap = map
+            }
+        }
+        remover.remove(largestMap)
     }
 
     override fun merge() {
