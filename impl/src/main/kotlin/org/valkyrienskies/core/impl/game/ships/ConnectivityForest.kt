@@ -1,11 +1,8 @@
 package org.valkyrienskies.core.impl.game.ships
 
 import org.joml.Vector3ic
-import org.valkyrienskies.core.impl.datastructures.BlockPos2ObjectOpenHashMap
-import org.valkyrienskies.core.impl.datastructures.DenseBlockPosSet
 import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
-import org.valkyrienskies.core.impl.datastructures.dynconn.ConnVertex
 
 interface ConnectivityForest {
 
@@ -18,7 +15,7 @@ interface ConnectivityForest {
      * A hashmap of all the vertices in the graph.
      */
 
-    val vertices: BlockPos2ObjectOpenHashMap<BlockPosVertex>
+    val vertices: HashMap<Vector3ic, BlockPosVertex>
 
     /**
      * A queue for breakages to be sent to VS2 itself.
@@ -41,7 +38,7 @@ interface ConnectivityForest {
     /**
      * Scans a ship, and returns the smaller, split half of the graph.
      */
-    fun split(vectorOne: Vector3ic, vectorTwo: Vector3ic): Pair<BlockPos2ObjectOpenHashMap<BlockPosVertex>, Boolean>
+    fun split(vectorOne: Vector3ic, vectorTwo: Vector3ic): Pair<HashMap<Vector3ic, BlockPosVertex>, Boolean>
 
     // todo: later
     fun merge()
