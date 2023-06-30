@@ -241,26 +241,17 @@ class ShipObjectServerWorld @Inject constructor(
                         forest.delVertex(posX, posY, posZ)
                         if (!adjacentVertexes.isEmpty()) {
                             // check if the ship is still intact
-                            var intact : Boolean = true
                             var disconnectOne: Vector3ic? = null
                             var disconnectTwo: Vector3ic? = null
 
                             for (it in adjacentVertexes) {
                                 for (otherit in adjacentVertexes) {
                                     if (!forest.graph.connected(it, otherit)) {
-                                        intact = false
                                         disconnectOne = Vector3i(it.posX, it.posY, it.posZ)
                                         disconnectTwo = Vector3i(otherit.posX, otherit.posY, otherit.posZ)
                                         logger.info("Ship with ID '$shipId' is no longer intact! Breakage point: $posX, $posY, $posZ - Disconnecting from: $disconnectOne and $disconnectTwo")
-                                        break
+                                        forest.breakages.add(Pair(disconnectOne, disconnectTwo))
                                     }
-                                }
-                            }
-
-                            if (!intact) {
-                                // ship is no longer intact, split it!
-                                if (disconnectTwo != null && disconnectOne != null) {
-                                    forest.breakages.add(Pair(disconnectOne, disconnectTwo))
                                 }
                             }
                         }
