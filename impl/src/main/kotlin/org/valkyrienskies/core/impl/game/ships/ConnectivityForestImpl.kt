@@ -69,7 +69,7 @@ class ConnectivityForestImpl(override val graph: ConnGraph,
         val connectedToTwo = BlockPos2ObjectOpenHashMap<BlockPosVertex>()
 
         if (vertexOne != null && vertexTwo != null) {
-            vertices.forEach{x, y, z, vertex -> Unit
+            vertices.forEach{x, y, z, vertex ->
                 if (graph.connected(vertexOne, vertex)) {
                     connectedToOne.put(x, y, z, vertex)
                 }
