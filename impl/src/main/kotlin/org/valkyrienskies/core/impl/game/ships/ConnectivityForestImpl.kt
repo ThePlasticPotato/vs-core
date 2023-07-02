@@ -1,5 +1,6 @@
 package org.valkyrienskies.core.impl.game.ships
 
+import org.joml.Vector3d
 import org.joml.Vector3i
 import org.joml.Vector3ic
 import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
@@ -149,6 +150,21 @@ class ConnectivityForestImpl(override val graph: ConnGraph,
 
     override fun merge() {
         TODO("Not yet implemented")
+    }
+
+    override fun verifyIntactOnLoad() {
+        for (vertex in vertices.values) {
+            for (otherVertex in vertices.values) {
+                if (!graph.connected(vertex, otherVertex)) {
+                    val toAdd = ArrayList<Vector3ic?>()
+                    val vec1 = Vector3i(vertex.posX, vertex.posY, vertex.posZ)
+                    val vec2 = Vector3i(otherVertex.posX, otherVertex.posY, otherVertex.posZ)
+                    toAdd.add(vec1)
+                    toAdd.add(vec2)
+                    breakagesToAdd.add(toAdd)
+                }
+            }
+        }
     }
 
     override fun addToBreakQueue(arr: ArrayList<Vector3ic?>) {
