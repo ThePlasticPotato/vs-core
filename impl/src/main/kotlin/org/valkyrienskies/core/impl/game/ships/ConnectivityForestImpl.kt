@@ -173,7 +173,7 @@ class ConnectivityForestImpl(override val graph: ConnGraph,
 
     override fun removeFromBreakQueue(arr: ArrayList<Vector3ic?>) {
         if (breakages.contains(arr)) {
-            breakagesToRemove.remove(arr)
+            breakagesToRemove.add(arr)
         }
     }
 
