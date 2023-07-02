@@ -9,12 +9,10 @@ import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.ServerShipUser
 import org.valkyrienskies.core.impl.api.ShipForcesInducer
 import org.valkyrienskies.core.impl.api.Ticked
-import org.valkyrienskies.core.impl.datastructures.BlockPos2ObjectOpenHashMap
 import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
 import org.valkyrienskies.core.impl.networking.delta.DeltaEncodedChannelServerTCP
 import org.valkyrienskies.core.impl.util.serialization.VSJacksonUtil
-import java.util.concurrent.CopyOnWriteArraySet
 
 class ShipObjectServer(
     override val shipData: ShipData,
@@ -46,7 +44,7 @@ class ShipObjectServer(
         }
         val wingManager = WingManagerImpl()
         wingManager.createWingGroup()
-        val connManager = ConnectivityForestImpl(ConnGraph(), HashMap<Vector3ic, BlockPosVertex>(), mutableSetOf())
+        val connManager = ConnectivityForestImpl(ConnGraph(), HashMap<Vector3ic, BlockPosVertex>(), mutableSetOf(), mutableSetOf(), mutableSetOf())
         setAttachment(WingManager::class.java, wingManager)
         setAttachment(ConnectivityForest::class.java, connManager)
     }

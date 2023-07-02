@@ -47,6 +47,11 @@ interface ConnectivityForest {
     // todo: later
     fun merge()
 
+    /**
+     * Verifies that the connectivity forest is intact. If not, adds breakages to the break queue.
+     */
+    fun verifyIntactOnLoad()
+
     fun addToBreakQueue(arr : ArrayList<Vector3ic?>)
 
     fun removeFromBreakQueue(arr : ArrayList<Vector3ic?>)
