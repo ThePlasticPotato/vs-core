@@ -8,7 +8,9 @@ import org.valkyrienskies.core.impl.datastructures.dynconn.ConnVertex
 
 class ConnectivityForestImpl(override val graph: ConnGraph,
     override val vertices: HashMap<Vector3ic, BlockPosVertex>,
-    override val breakages: MutableSet<ArrayList<Vector3ic?>>
+    override val breakages: MutableSet<ArrayList<Vector3ic?>>,
+    override val breakagesToAdd: MutableSet<ArrayList<Vector3ic?>>,
+    override val breakagesToRemove: MutableSet<ArrayList<Vector3ic?>>
 ) : ConnectivityForest {
 
     override fun newVertex(posX: Int, posY: Int, posZ: Int): Boolean {
@@ -147,5 +149,30 @@ class ConnectivityForestImpl(override val graph: ConnGraph,
 
     override fun merge() {
         TODO("Not yet implemented")
+    }
+
+    override fun addToBreakQueue(arr: ArrayList<Vector3ic?>) {
+        breakagesToAdd.add(arr)
+    }
+
+    override fun removeFromBreakQueue(arr: ArrayList<Vector3ic?>) {
+        if (breakages.contains(arr)) {
+            breakagesToRemove.remove(arr)
+        }
+    }
+
+    override fun getBreakQueue(): Set<ArrayList<Vector3ic?>> {
+        return breakages.toSet()
+    }
+
+    override fun gameTick() {
+        if (breakagesToAdd.isNotEmpty()) {
+            breakages.addAll(breakagesToAdd)
+            breakagesToAdd.clear()
+        }
+        if (breakagesToRemove.isNotEmpty()) {
+            breakages.removeAll(breakagesToRemove)
+            breakagesToRemove.clear()
+        }
     }
 }

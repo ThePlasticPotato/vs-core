@@ -24,6 +24,9 @@ interface ConnectivityForest {
 
     val breakages: MutableSet<ArrayList<Vector3ic?>>
 
+    val breakagesToAdd: MutableSet<ArrayList<Vector3ic?>>
+    val breakagesToRemove: MutableSet<ArrayList<Vector3ic?>>
+
     /**
      * Attempts to add a new block to the connectivity graph.
      * Returns true if the block was added, false if it already existed in the graph.
@@ -43,4 +46,12 @@ interface ConnectivityForest {
 
     // todo: later
     fun merge()
+
+    fun addToBreakQueue(arr : ArrayList<Vector3ic?>)
+
+    fun removeFromBreakQueue(arr : ArrayList<Vector3ic?>)
+
+    fun getBreakQueue() : Set<ArrayList<Vector3ic?>>
+
+    fun gameTick()
 }
