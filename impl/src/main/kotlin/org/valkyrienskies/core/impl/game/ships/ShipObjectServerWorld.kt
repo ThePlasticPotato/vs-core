@@ -285,7 +285,7 @@ class ShipObjectServerWorld @Inject constructor(
                             }
 
                             if (!intact && disconnectOne != null && disconnectTwo != null) {
-                                forest.breakages.add(arrayListOf(disconnectOne, disconnectTwo, disconnectThree, disconnectFour, disconnectFive, disconnectSix))
+                                forest.addToBreakQueue(arrayListOf(disconnectOne, disconnectTwo, disconnectThree, disconnectFour, disconnectFive, disconnectSix))
                             }
 
                         }
