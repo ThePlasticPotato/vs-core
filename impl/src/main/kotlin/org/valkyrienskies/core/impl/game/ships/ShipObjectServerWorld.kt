@@ -239,10 +239,26 @@ class ShipObjectServerWorld @Inject constructor(
             }
 
 
-
             if (shipData != null && loadedShips.getById(shipId) != null) {
                 // val serverShip : ServerShip  = allShips.getById(shipId) as ServerShip
                 val serverShip : LoadedServerShip = loadedShips.getById(shipId) as LoadedServerShip
+
+                if (serverShip.getAttachment(AirPocketForest::class.java) != null) {
+                    val airForest: AirPocketForestImpl = serverShip.getAttachment(AirPocketForest::class.java)!! as AirPocketForestImpl
+
+                    airForest.setUpdateOutsideAir(true)
+
+                    val voxelType = (newBlockType as BlockTypeImpl)
+
+                    if (voxelType == BlockTypeImpl.AIR) {
+                        airForest.newVertex(posX, posY, posZ)
+                    } else {
+                        airForest.delVertex(posX, posY, posZ)
+                    }
+
+                }
+
+
                 if (serverShip.getAttachment(ConnectivityForest::class.java) != null) {
                     val forest: ConnectivityForestImpl = serverShip.getAttachment(ConnectivityForest::class.java)!! as ConnectivityForestImpl
 
