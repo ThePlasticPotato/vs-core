@@ -22,36 +22,45 @@ class AirPocketForestImpl(
         return false
     }
 
-    override fun verifyAirPocket(changed: BlockPosVertex): Boolean {
+    override fun verifyAirPocket(changed: Vector3ic): Boolean {
+        if (airVertices[changed] == null) return false
         var isOutside = false
         for (vertex in outsideAirVertices.values) {
-            if (graph.connected(changed, vertex)) {
+            if (graph.connected(airVertices[changed], vertex)) {
                 isOutside = true
                 break
             }
         }
         return if (!isOutside) {
-            val set: MutableSet<BlockPosVertex> = mutableSetOf()
+            val set: MutableSet<Vector3ic> = mutableSetOf()
             set.add(changed)
             for (vertex in airVertices.values) {
-                if (graph.connected(changed, vertex)) {
-                    set.add(vertex)
+                if (graph.connected(airVertices[changed], vertex)) {
+                    set.add(Vector3i(vertex.posX, vertex.posY, vertex.posZ))
                 }
             }
             addAirPocket(set)
             true
         } else {
-            removeAirPocket(changed)
+            removeAirPocket(airVertices[changed]!!)
             false
         }
     }
 
-    fun addAirPocket(toAdd: Set<BlockPosVertex>) {
+    fun addAirPocket(toAdd: Set<Vector3ic>) {
         for (vertex in toAdd) {
-            if (airPockets.values.contains(vertex)) {
+            if (airVertices[vertex] == null) {
                 continue
-            } else {
-                airPockets.put(Vector3i(vertex.posX, vertex.posY, vertex.posZ), vertex)
+            }
+            var shouldAdd = true
+            for (airPocket in airPockets.values) {
+                if (airPocket.posX == vertex.x() && airPocket.posY == vertex.x() && airPocket.posZ == vertex.x()) {
+                    shouldAdd = false
+                    break
+                }
+            }
+            if (shouldAdd) {
+                airPockets.put(Vector3i(vertex.x(), vertex.x(), vertex.x()), airVertices[vertex]!!)
             }
         }
     }
@@ -67,8 +76,8 @@ class AirPocketForestImpl(
         }
     }
 
-    override fun newVertex(posX: Int, posY: Int, posZ: Int): Boolean {
-        if (airVertices.get(Vector3i(posX, posY, posZ)) != null) return false
+    override fun newVertex(posX: Int, posY: Int, posZ: Int, silent: Boolean): Boolean {
+        if (airVertices[Vector3i(posX, posY, posZ)] != null) return false
 
         val vertex = BlockPosVertex(posX, posY, posZ)
 
@@ -92,36 +101,43 @@ class AirPocketForestImpl(
         if (airVertices.contains(Vector3i(posX, posY, posZ - 1))) {
             graph.addEdge(vertex, airVertices[Vector3i(posX, posY, posZ - 1)]!!)
         }
-
-        verifyAirPocket(vertex)
+        if (!silent) {
+            verifyAirPocket(Vector3i(posX, posY, posZ))
+        }
 
         return true
     }
 
-    override fun delVertex(posX: Int, posY: Int, posZ: Int): Boolean {
+    override fun delVertex(posX: Int, posY: Int, posZ: Int, silent: Boolean): Boolean {
         if (airVertices.get(Vector3i(posX, posY, posZ)) == null) return false
 
         val vertex: BlockPosVertex = airVertices[Vector3i(posX, posY, posZ)]!!
 
-        val list : Collection<BlockPosVertex> = graph.adjacentVertices(vertex) as Collection<BlockPosVertex>
+        val list : Collection<ConnVertex> = graph.adjacentVertices(vertex)
 
         if (list.isEmpty()) {
             airVertices.remove(Vector3i(posX, posY, posZ))
             return true
         }
-        for (cVertex: BlockPosVertex in list) {
+        for (cVertex: ConnVertex in list) {
             graph.removeEdge(vertex, cVertex)
-            verifyAirPocket(cVertex)
+            if (cVertex is BlockPosVertex) {
+                if (!silent) {
+                    verifyAirPocket(Vector3i(cVertex.posX, cVertex.posY, cVertex.posZ))
+                }
+            }
         }
         airVertices.remove(Vector3i(posX, posY, posZ))
 
         return true
     }
 
-    override fun updateOutsideAirVertices(new: Set<BlockPosVertex>) {
-        outsideAirVertices.clear()
-        for (vertex in new) {
-            outsideAirVertices.put(Vector3i(vertex.posX, vertex.posY, vertex.posZ), vertex)
+    override fun updateOutsideAirVertices(new: Set<Vector3ic>) {
+        if (new.isNotEmpty()) {
+            outsideAirVertices.clear()
+            for (vertex in new) {
+                outsideAirVertices.put(vertex, airVertices[vertex]!!)
+            }
         }
     }
 

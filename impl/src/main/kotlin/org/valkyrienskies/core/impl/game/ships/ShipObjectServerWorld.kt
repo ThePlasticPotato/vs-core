@@ -233,15 +233,15 @@ class ShipObjectServerWorld @Inject constructor(
                 if (serverShip.getAttachment(AirPocketForest::class.java) != null) {
                     val airForest: AirPocketForestImpl = serverShip.getAttachment(AirPocketForest::class.java)!! as AirPocketForestImpl
 
-                    airForest.setUpdateOutsideAir(true)
-
                     val voxelType = (newBlockType as BlockTypeImpl)
 
                     if (voxelType == BlockTypeImpl.AIR) {
-                        airForest.newVertex(posX, posY, posZ)
+                        airForest.newVertex(posX, posY, posZ, false)
                     } else {
-                        airForest.delVertex(posX, posY, posZ)
+                        airForest.delVertex(posX, posY, posZ, false)
                     }
+
+                    airForest.setUpdateOutsideAir(true)
 
                 }
 

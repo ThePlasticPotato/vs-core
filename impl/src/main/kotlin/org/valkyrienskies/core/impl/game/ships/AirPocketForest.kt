@@ -39,24 +39,24 @@ interface AirPocketForest {
     /**
      * Checks that the listed breakpoints are, infact, still connected; if not, creates an air pocket out of the set within the newly sealed room
      */
-    fun verifyAirPocket(changed: BlockPosVertex) : Boolean
+    fun verifyAirPocket(changed: Vector3ic) : Boolean
 
     /**
      * Attempts to add a new block to the connectivity graph.
      * Returns true if the block was added, false if it already existed in the graph.
      */
-    fun newVertex(posX: Int, posY: Int, posZ: Int): Boolean
+    fun newVertex(posX: Int, posY: Int, posZ: Int, silent: Boolean): Boolean
 
     /**
      * Attempts to remove a block from the connectivity graph.
      * Returns true if the block was removed, false if it didn't exist in the graph.
      */
-    fun delVertex(posX: Int, posY: Int, posZ: Int): Boolean
+    fun delVertex(posX: Int, posY: Int, posZ: Int, silent: Boolean): Boolean
 
     /**
      * Refreshes the list of the outermost air vertices, which will always be outside.
      */
-    fun updateOutsideAirVertices(new: Set<BlockPosVertex>)
+    fun updateOutsideAirVertices(new: Set<Vector3ic>)
 
     fun setUpdateOutsideAir(bool: Boolean)
     fun toUpdateOutsideAir(): Boolean
