@@ -45,8 +45,10 @@ class ShipObjectServer(
         val wingManager = WingManagerImpl()
         wingManager.createWingGroup()
         val connManager = ConnectivityForestImpl(ConnGraph(), HashMap<Vector3ic, BlockPosVertex>(), mutableSetOf(), mutableSetOf(), mutableSetOf())
+        val airManager = AirPocketForestImpl(ConnGraph(), HashMap<Vector3ic, BlockPosVertex>(), HashMap<Vector3ic, BlockPosVertex>(), HashMap<Vector3ic, BlockPosVertex>())
         setAttachment(WingManager::class.java, wingManager)
         setAttachment(ConnectivityForest::class.java, connManager)
+        setAttachment(AirPocketForest::class.java, airManager)
     }
 
     override fun <T> setAttachment(clazz: Class<T>, value: T?) {
