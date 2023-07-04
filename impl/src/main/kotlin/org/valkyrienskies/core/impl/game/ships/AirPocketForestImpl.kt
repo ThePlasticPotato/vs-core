@@ -31,18 +31,18 @@ class AirPocketForestImpl(
                 break
             }
         }
-        return if (!isOutside) {
-            val set: MutableSet<Vector3ic> = mutableSetOf()
-            set.add(changed)
-            for (vertex in airVertices.values) {
-                if (graph.connected(airVertices[changed], vertex)) {
-                    set.add(Vector3i(vertex.posX, vertex.posY, vertex.posZ))
-                }
+        val set: MutableSet<Vector3ic> = mutableSetOf()
+        set.add(changed)
+        for (vertex in airVertices.values) {
+            if (graph.connected(airVertices[changed], vertex)) {
+                set.add(Vector3i(vertex.posX, vertex.posY, vertex.posZ))
             }
+        }
+        return if (!isOutside) {
             addAirPocket(set)
             true
         } else {
-            removeAirPocket(airVertices[changed]!!)
+            removeAirPocket(set)
             false
         }
     }
@@ -65,12 +65,14 @@ class AirPocketForestImpl(
         }
     }
 
-    fun removeAirPocket(blockPosVertex: BlockPosVertex) {
-        if (isInAirPocket(blockPosVertex.posX, blockPosVertex.posY, blockPosVertex.posZ)) {
-            for (vertex in airPockets.values) {
-                if (vertex.posX == blockPosVertex.posX && vertex.posY == blockPosVertex.posY && vertex.posZ == blockPosVertex.posZ) {
-                    airPockets.remove(Vector3i(vertex.posX, vertex.posY, vertex.posZ))
-                    return
+    fun removeAirPocket(toRemove: Set<Vector3ic>) {
+        for (blockPosVertex in toRemove) {
+            if (isInAirPocket(blockPosVertex.x(), blockPosVertex.y(), blockPosVertex.z())) {
+                for (vertex in airPockets.values) {
+                    if (vertex.posX == blockPosVertex.x() && vertex.posY == blockPosVertex.y() && vertex.posZ == blockPosVertex.z()) {
+                        airPockets.remove(blockPosVertex)
+                        return
+                    }
                 }
             }
         }
