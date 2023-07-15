@@ -106,9 +106,13 @@ class ShipObjectNetworkManagerClient @AssistedInject constructor(
             }
             val shipDataJson = ship.shipDataChannel.decode(buf)
 
+            // This fixes ship bounding boxes flashing on clients
+            // I'm not sure why this works, but it works
+            val original = ship.shipData.shipAABB
             VSJacksonUtil.deltaMapper
                 .readerForUpdating(ship.shipData)
                 .readValue<ShipDataCommon>(shipDataJson)
+            ship.shipData.shipAABB = original
         }
         buf.release()
     }.also { packet.data.retain() }
