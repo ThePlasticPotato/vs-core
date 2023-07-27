@@ -19,12 +19,12 @@ import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
  */
 data class VSGameFrame(
     val newShips: List<NewShipInGameFrameData>, // Ships to be added to the Physics simulation
-    val deletedShips: List<ShipId>, // Ships to be deleted from the Physics simulation
-    val updatedShips: Map<ShipId, UpdateShipInGameFrameData>, // Map of ship updates
-    val voxelUpdatesMap: Map<ShipId, List<IVoxelShapeUpdate>>, // Voxel updates applied by this frame
-    val constraintsCreatedThisTick: List<VSConstraintAndId>,
-    val constraintsUpdatedThisTick: List<VSConstraintAndId>,
-    val constraintsDeletedThisTick: List<VSConstraintId>
+    val deletedShips: List<Pair<ShipId, PhysicsEngineId>>, // Ships to be deleted from the Physics simulation (ShipId, dimension)
+    val updatedShips: Map<Pair<ShipId, PhysicsEngineId>, UpdateShipInGameFrameData>, // Map of ship updates
+    val voxelUpdatesMap: Map<Pair<ShipId, PhysicsEngineId>, List<IVoxelShapeUpdate>>, // Voxel updates applied by this frame
+    val constraintsCreatedThisTick: Map<PhysicsEngineId, List<VSConstraintAndId>>,
+    val constraintsUpdatedThisTick: Map<PhysicsEngineId, List<VSConstraintAndId>>,
+    val constraintsDeletedThisTick: Map<PhysicsEngineId, List<VSConstraintId>>
 )
 
 /**
@@ -32,7 +32,7 @@ data class VSGameFrame(
  */
 data class NewShipInGameFrameData(
     val uuid: ShipId,
-    val dimension: Int,
+    val dimension: PhysicsEngineId,
     val minDefined: Vector3ic,
     val maxDefined: Vector3ic,
     val totalVoxelRegion: AABBic,
