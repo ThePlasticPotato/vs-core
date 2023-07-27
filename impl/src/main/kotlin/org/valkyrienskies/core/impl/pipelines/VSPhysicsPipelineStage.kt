@@ -6,7 +6,6 @@ import org.joml.Vector3dc
 import org.joml.primitives.AABBd
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint
-import org.valkyrienskies.core.apigame.constraints.VSAttachmentOrientationConstraint
 import org.valkyrienskies.core.apigame.constraints.VSConstraint
 import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintId
@@ -42,29 +41,30 @@ import org.valkyrienskies.core.impl.game.ships.PhysShipImpl
 import org.valkyrienskies.core.impl.game.ships.WingPhysicsSolver
 import org.valkyrienskies.core.impl.util.logger
 import org.valkyrienskies.physics_api.ConstraintId
+import org.valkyrienskies.physics_api.Lod1BlockRegistry
+import org.valkyrienskies.physics_api.PhysicsBodyId
+import org.valkyrienskies.physics_api.PhysicsBodyInertiaData
 import org.valkyrienskies.physics_api.PhysicsWorldReference
 import org.valkyrienskies.physics_api.PoseVel
-import org.valkyrienskies.physics_api.RigidBodyId
-import org.valkyrienskies.physics_api.RigidBodyInertiaData
-import org.valkyrienskies.physics_api.SegmentId
-import org.valkyrienskies.physics_api.SegmentTracker
-import org.valkyrienskies.physics_api.constraints.AttachmentConstraint
-import org.valkyrienskies.physics_api.constraints.Constraint
+import org.valkyrienskies.physics_api.VSPhysicsFactories
+import org.valkyrienskies.physics_api.VoxelShapeReference
+import org.valkyrienskies.physics_api.constraints.AttachmentConstraintData
 import org.valkyrienskies.physics_api.constraints.ConstraintAndId
-import org.valkyrienskies.physics_api.constraints.FixedAttachmentOrientationConstraint
-import org.valkyrienskies.physics_api.constraints.FixedOrientationConstraint
-import org.valkyrienskies.physics_api.constraints.HingeOrientationConstraint
-import org.valkyrienskies.physics_api.constraints.HingeSwingLimitsConstraint
-import org.valkyrienskies.physics_api.constraints.PosDampingConstraint
-import org.valkyrienskies.physics_api.constraints.RopeConstraint
+import org.valkyrienskies.physics_api.constraints.ConstraintData
+import org.valkyrienskies.physics_api.constraints.FixedOrientationConstraintData
+import org.valkyrienskies.physics_api.constraints.HingeOrientationConstraintData
+import org.valkyrienskies.physics_api.constraints.HingeSwingLimitsConstraintData
+import org.valkyrienskies.physics_api.constraints.PosDampingConstraintData
+import org.valkyrienskies.physics_api.constraints.RopeConstraintData
 import org.valkyrienskies.physics_api.constraints.RotDampingAxes
-import org.valkyrienskies.physics_api.constraints.RotDampingConstraint
-import org.valkyrienskies.physics_api.constraints.SlideConstraint
-import org.valkyrienskies.physics_api.constraints.SphericalSwingLimitsConstraint
-import org.valkyrienskies.physics_api.constraints.SphericalTwistLimitsConstraint
+import org.valkyrienskies.physics_api.constraints.RotDampingConstraintData
+import org.valkyrienskies.physics_api.constraints.SlideConstraintData
+import org.valkyrienskies.physics_api.constraints.SphericalSwingLimitsConstraintData
+import org.valkyrienskies.physics_api.constraints.SphericalTwistLimitsConstraintData
+import org.valkyrienskies.physics_api.dummy_impl.DummyLod1BlockRegistry
 import org.valkyrienskies.physics_api.dummy_impl.DummyPhysicsWorldReference
-import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel_updates.VoxelRigidBodyShapeUpdates
+import org.valkyrienskies.physics_api.dummy_impl.DummyVSPhysicsFactories
+import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
 import org.valkyrienskies.physics_api_krunch.KrunchBootstrap
 import org.valkyrienskies.physics_api_krunch.KrunchPhysicsWorldSettings
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -83,25 +83,38 @@ class VSPhysicsPipelineStage @Inject constructor() {
     private var pendingUpdates: MutableList<Pair<ShipId, List<IVoxelShapeUpdate>>> = ArrayList()
     private var pendingUpdatesSize: Int = 0
 
+    private val settings = VSCoreConfig.SERVER.physics.makeKrunchSettings()
+    private val factories: VSPhysicsFactories
+    // TODO: Register blocks to lod1BlockRegistry
+    private val lod1BlockRegistry: Lod1BlockRegistry
+
     var isUsingDummy = false
         private set
 
     init {
+        var factoriesTemp: VSPhysicsFactories
+        var lod1BlockRegistryTemp: Lod1BlockRegistry
         // Try creating the physics engine
         physicsEngine = try {
             val temp = KrunchBootstrap.createKrunchPhysicsWorld()
             // Apply physics engine settings
             KrunchBootstrap.setKrunchSettings(
                 temp,
-                VSCoreConfig.SERVER.physics.makeKrunchSettings()
+                settings
             )
+            factoriesTemp = KrunchBootstrap.getKrunchFactories()
+            lod1BlockRegistryTemp = factoriesTemp.lod1BlockRegistryFactory.createLod1BlockRegistry(factoriesTemp.vsByteBufferFactory.createVSByteBuffer(65000))
             temp
         } catch (e: Exception) {
             // Fallback to dummy physics engine if Krunch isn't supported
             e.printStackTrace()
             isUsingDummy = true
+            factoriesTemp = DummyVSPhysicsFactories
+            lod1BlockRegistryTemp = DummyLod1BlockRegistry()
             DummyPhysicsWorldReference()
         }
+        factories = factoriesTemp
+        lod1BlockRegistry = lod1BlockRegistryTemp
     }
 
     /**
@@ -154,10 +167,26 @@ class VSPhysicsPipelineStage @Inject constructor() {
         }
 
         // Run the physics engine
-        physicsEngine.tick(gravity, timeStep, simulatePhysics)
+        tickTemp(gravity, timeStep, simulatePhysics)
 
         // Return a new physics frame
         return createPhysicsFrame()
+    }
+
+    // TODO: Optimize this to be multi threaded
+    private fun tickTemp(gravity: Vector3dc, timeStep: Double, simulatePhysics: Boolean) {
+        val islands = physicsEngine.preStep(gravity, timeStep)
+        val subTimeStep = timeStep / settings.subSteps
+        islands.forEach { island ->
+            island.preStep(gravity, timeStep)
+            if (simulatePhysics) {
+                for (i in 0 until settings.subSteps) {
+                    island.subStep(gravity, subTimeStep, i.toDouble() / settings.subSteps.toDouble())
+                }
+            }
+            island.postStep()
+        }
+        physicsEngine.postStep()
     }
 
     fun deleteResources() {
@@ -175,7 +204,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
                 )
 
             val shipRigidBodyReference = shipRigidBodyReferenceAndId.rigidBodyReference
-            physicsEngine.deleteRigidBody(shipRigidBodyReference.rigidBodyId)
+            physicsEngine.deleteRigidBody(shipRigidBodyReference.physicsBodyId)
             shipIdToPhysShip.remove(deletedShipId)
         }
 
@@ -194,23 +223,18 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val totalVoxelRegion = newShipInGameFrameData.totalVoxelRegion
             val inertiaData = newShipInGameFrameData.inertiaData
             val poseVel = newShipInGameFrameData.poseVel
-            val segments = newShipInGameFrameData.segments
             val isStatic = newShipInGameFrameData.isStatic
             val shipVoxelsFullyLoaded = newShipInGameFrameData.shipVoxelsFullyLoaded
             val wingManagerChanges = newShipInGameFrameData.wingManagerChanges
             val shipTeleportId = newShipInGameFrameData.shipTeleportId
 
-            val newRigidBodyReference =
-                physicsEngine.createVoxelRigidBody(
-                    dimension, minDefined, maxDefined, totalVoxelRegion
-                )
+            val voxelCollisionShape = factories.collisionShapeFactory.makeVoxelShapeReference(minDefined, maxDefined, totalVoxelRegion, lod1BlockRegistry)
+            voxelCollisionShape.isVoxelTerrainFullyLoaded = shipVoxelsFullyLoaded
+            val newRigidBodyReference = physicsEngine.createRigidBody(voxelCollisionShape)
             newRigidBodyReference.inertiaData = physInertiaToRigidBodyInertiaData(inertiaData)
             newRigidBodyReference.poseVel = poseVel
             newRigidBodyReference.collisionShapeOffset = newShipInGameFrameData.voxelOffset
             newRigidBodyReference.isStatic = isStatic
-            newRigidBodyReference.isVoxelTerrainFullyLoaded = shipVoxelsFullyLoaded
-            // TODO: This will need to be changed when we have multiple segments
-            newRigidBodyReference.setSegmentDisplacement(0, segments.segments.values.first().segmentDisplacement)
 
             val physShip =
                 PhysShipImpl(
@@ -219,7 +243,6 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     newShipInGameFrameData.forcesInducers,
                     inertiaData,
                     poseVel,
-                    segments,
                     shipTeleportId,
                     isStatic = isStatic,
                 )
@@ -270,7 +293,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             shipRigidBody.poseVel = newShipPoseVel
             shipRigidBody.inertiaData = physInertiaToRigidBodyInertiaData(shipUpdate.inertiaData)
             shipRigidBody.isStatic = isStatic
-            shipRigidBody.isVoxelTerrainFullyLoaded = shipVoxelsFullyLoaded
+            (shipRigidBody.collisionShape as VoxelShapeReference).isVoxelTerrainFullyLoaded = shipVoxelsFullyLoaded
 
             if (wingManagerChanges != null) {
                 physShip.wingManager.applyChanges(wingManagerChanges)
@@ -373,9 +396,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
         val voxelUpdatesMap: Map<ShipId, List<IVoxelShapeUpdate>> = emptyMap()
         shipIdToPhysShip.forEach { (shipId, shipIdAndRigidBodyReference) ->
             val rigidBodyReference = shipIdAndRigidBodyReference.rigidBodyReference
-            val inertiaData: RigidBodyInertiaData = rigidBodyReference.inertiaData
+            val inertiaData: PhysicsBodyInertiaData = rigidBodyReference.inertiaData
             val poseVel: PoseVel = rigidBodyReference.poseVel
-            val segments: SegmentTracker = rigidBodyReference.segmentTracker
             val shipVoxelOffset: Vector3dc = rigidBodyReference.collisionShapeOffset
             val aabb = AABBd()
             rigidBodyReference.getAABB(aabb)
@@ -383,7 +405,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
 
             shipDataMap[shipId] =
                 ShipInPhysicsFrameData(
-                    shipId, inertiaData, poseVel, segments, shipVoxelOffset, aabb, lastShipTeleportId
+                    shipId, inertiaData, poseVel, shipVoxelOffset, aabb, lastShipTeleportId
                 )
         }
         return VSPhysicsFrame(shipDataMap, voxelUpdatesMap, physTick++)
@@ -402,83 +424,75 @@ class VSPhysicsPipelineStage @Inject constructor() {
         return settings
     }
 
-    private fun convertVSConstraintToPhysicsConstraint(vsConstraint: VSConstraint): Constraint {
-        val body0Id: RigidBodyId = shipIdToPhysShip[vsConstraint.shipId0]!!.rigidBodyReference.rigidBodyId
-        val body1Id: RigidBodyId = shipIdToPhysShip[vsConstraint.shipId1]!!.rigidBodyReference.rigidBodyId
-        val segment0Id: SegmentId = 0
-        val segment1Id: SegmentId = 0
+    private fun convertVSConstraintToPhysicsConstraint(vsConstraint: VSConstraint): ConstraintData {
+        val body0Id: PhysicsBodyId = shipIdToPhysShip[vsConstraint.shipId0]!!.rigidBodyReference.physicsBodyId
+        val body1Id: PhysicsBodyId = shipIdToPhysShip[vsConstraint.shipId1]!!.rigidBodyReference.physicsBodyId
         return when (vsConstraint.constraintType) {
             ATTACHMENT -> {
                 val attachmentConstraint = vsConstraint as VSAttachmentConstraint
-                AttachmentConstraint(
-                    body0Id, body1Id, segment0Id, segment1Id, attachmentConstraint.compliance,
+                AttachmentConstraintData(
+                    body0Id, body1Id, attachmentConstraint.compliance,
                     attachmentConstraint.localPos0, attachmentConstraint.localPos1, attachmentConstraint.maxForce,
-                    attachmentConstraint.fixedDistance
+                    true, attachmentConstraint.fixedDistance
                 )
             }
 
             FIXED_ATTACHMENT_ORIENTATION -> {
-                val fixedAttachmentOrientationConstraint = vsConstraint as VSAttachmentOrientationConstraint
-                FixedAttachmentOrientationConstraint(
-                    body0Id, body1Id, segment0Id, segment1Id, fixedAttachmentOrientationConstraint.compliance,
-                    fixedAttachmentOrientationConstraint.localRot0, fixedAttachmentOrientationConstraint.localRot1,
-                    fixedAttachmentOrientationConstraint.maxTorque, fixedAttachmentOrientationConstraint.localPos0,
-                    fixedAttachmentOrientationConstraint.localPos1, fixedAttachmentOrientationConstraint.maxForce
-                )
+                TODO("Not implemented")
             }
 
             FIXED_ORIENTATION -> {
                 val fixedOrientationConstraint = vsConstraint as VSFixedOrientationConstraint
-                FixedOrientationConstraint(
-                    body0Id, body1Id, segment0Id, segment1Id, fixedOrientationConstraint.compliance,
+                FixedOrientationConstraintData(
+                    body0Id, body1Id, fixedOrientationConstraint.compliance,
                     fixedOrientationConstraint.localRot0, fixedOrientationConstraint.localRot1,
-                    fixedOrientationConstraint.maxTorque
+                    fixedOrientationConstraint.maxTorque, true
                 )
             }
 
             HINGE_ORIENTATION -> {
                 val hingeOrientationConstraint = vsConstraint as VSHingeOrientationConstraint
-                HingeOrientationConstraint(
-                    body0Id, body1Id, segment0Id, segment1Id, hingeOrientationConstraint.compliance,
+                HingeOrientationConstraintData(
+                    body0Id, body1Id, hingeOrientationConstraint.compliance,
                     hingeOrientationConstraint.localRot0, hingeOrientationConstraint.localRot1,
-                    hingeOrientationConstraint.maxTorque
+                    hingeOrientationConstraint.maxTorque, true
                 )
             }
 
             HINGE_SWING_LIMITS -> {
                 val hingeSwingLimitsConstraint = vsConstraint as VSHingeSwingLimitsConstraint
-                HingeSwingLimitsConstraint(
-                    body0Id, body1Id, segment0Id, segment1Id, hingeSwingLimitsConstraint.compliance,
+                HingeSwingLimitsConstraintData(
+                    body0Id, body1Id, hingeSwingLimitsConstraint.compliance,
                     hingeSwingLimitsConstraint.localRot0, hingeSwingLimitsConstraint.localRot1,
-                    hingeSwingLimitsConstraint.maxTorque, hingeSwingLimitsConstraint.minSwingAngle,
+                    hingeSwingLimitsConstraint.maxTorque, true, hingeSwingLimitsConstraint.minSwingAngle,
                     hingeSwingLimitsConstraint.maxSwingAngle
                 )
             }
 
             HINGE_TARGET_ANGLE -> {
                 val hingeTargetAngleConstraint = vsConstraint as VSHingeTargetAngleConstraint
-                HingeSwingLimitsConstraint(
-                    body0Id, body1Id, segment0Id, segment1Id, hingeTargetAngleConstraint.compliance,
+                HingeSwingLimitsConstraintData(
+                    body0Id, body1Id, hingeTargetAngleConstraint.compliance,
                     hingeTargetAngleConstraint.localRot0, hingeTargetAngleConstraint.localRot1,
-                    hingeTargetAngleConstraint.maxTorque, hingeTargetAngleConstraint.targetAngle,
+                    hingeTargetAngleConstraint.maxTorque, true, hingeTargetAngleConstraint.targetAngle,
                     hingeTargetAngleConstraint.nextTickTargetAngle
                 )
             }
 
             POS_DAMPING -> {
                 val posDampingConstraint = vsConstraint as VSPosDampingConstraint
-                PosDampingConstraint(
-                    body0Id, body1Id, segment0Id, segment1Id, posDampingConstraint.compliance,
+                PosDampingConstraintData(
+                    body0Id, body1Id, posDampingConstraint.compliance,
                     posDampingConstraint.localPos0, posDampingConstraint.localPos1, posDampingConstraint.maxForce,
-                    posDampingConstraint.posDamping
+                    true, posDampingConstraint.posDamping
                 )
             }
 
             ROPE -> {
                 val ropeConstraint = vsConstraint as VSRopeConstraint
-                RopeConstraint(
-                    body0Id, body1Id, segment0Id, segment1Id, ropeConstraint.compliance,
-                    ropeConstraint.localPos0, ropeConstraint.localPos1, ropeConstraint.maxForce,
+                RopeConstraintData(
+                    body0Id, body1Id, ropeConstraint.compliance,
+                    ropeConstraint.localPos0, ropeConstraint.localPos1, ropeConstraint.maxForce, true,
                     ropeConstraint.ropeLength
                 )
             }
@@ -490,39 +504,39 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     PERPENDICULAR -> RotDampingAxes.PERPENDICULAR
                     ALL_AXES -> RotDampingAxes.ALL_AXES
                 }
-                RotDampingConstraint(
-                    body0Id, body1Id, segment0Id, segment1Id, rotDampingConstraint.compliance,
+                RotDampingConstraintData(
+                    body0Id, body1Id, rotDampingConstraint.compliance,
                     rotDampingConstraint.localRot0, rotDampingConstraint.localRot1,
-                    rotDampingConstraint.maxTorque, rotDampingConstraint.rotDamping,
+                    rotDampingConstraint.maxTorque, true, rotDampingConstraint.rotDamping,
                     rotDampingAxes
                 )
             }
 
             SLIDE -> {
                 val slideConstraint = vsConstraint as VSSlideConstraint
-                SlideConstraint(
-                    body0Id, body1Id, segment0Id, segment1Id, slideConstraint.compliance,
-                    slideConstraint.localPos0, slideConstraint.localPos1, slideConstraint.maxForce,
+                SlideConstraintData(
+                    body0Id, body1Id, slideConstraint.compliance,
+                    slideConstraint.localPos0, slideConstraint.localPos1, slideConstraint.maxForce, true,
                     slideConstraint.localSlideAxis0, slideConstraint.maxDistBetweenPoints
                 )
             }
 
             SPHERICAL_SWING_LIMITS -> {
                 val sphericalSwingLimitsConstraint = vsConstraint as VSSphericalSwingLimitsConstraint
-                SphericalSwingLimitsConstraint(
-                    body0Id, body1Id, segment0Id, segment1Id, sphericalSwingLimitsConstraint.compliance,
+                SphericalSwingLimitsConstraintData(
+                    body0Id, body1Id, sphericalSwingLimitsConstraint.compliance,
                     sphericalSwingLimitsConstraint.localRot0, sphericalSwingLimitsConstraint.localRot1,
-                    sphericalSwingLimitsConstraint.maxTorque, sphericalSwingLimitsConstraint.minSwingAngle,
+                    sphericalSwingLimitsConstraint.maxTorque, true, sphericalSwingLimitsConstraint.minSwingAngle,
                     sphericalSwingLimitsConstraint.maxSwingAngle
                 )
             }
 
             SPHERICAL_TWIST_LIMITS -> {
                 val sphericalTwistLimitsConstraint = vsConstraint as VSSphericalTwistLimitsConstraint
-                SphericalTwistLimitsConstraint(
-                    body0Id, body1Id, segment0Id, segment1Id, sphericalTwistLimitsConstraint.compliance,
+                SphericalTwistLimitsConstraintData(
+                    body0Id, body1Id, sphericalTwistLimitsConstraint.compliance,
                     sphericalTwistLimitsConstraint.localRot0, sphericalTwistLimitsConstraint.localRot1,
-                    sphericalTwistLimitsConstraint.maxTorque, sphericalTwistLimitsConstraint.minTwistAngle,
+                    sphericalTwistLimitsConstraint.maxTorque, true, sphericalTwistLimitsConstraint.minTwistAngle,
                     sphericalTwistLimitsConstraint.maxTwistAngle
                 )
             }
@@ -534,7 +548,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
     private fun convertVSConstraintIdToConstraintId(vsConstraintId: VSConstraintId): ConstraintId = vsConstraintId
 
     companion object {
-        private fun physInertiaToRigidBodyInertiaData(inertia: PhysInertia): RigidBodyInertiaData {
+        private fun physInertiaToRigidBodyInertiaData(inertia: PhysInertia): PhysicsBodyInertiaData {
             val invMass = 1.0 / inertia.shipMass
             if (!invMass.isFinite())
                 throw IllegalStateException("invMass is not finite!")
@@ -543,7 +557,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             if (!invInertiaMatrix.isFinite)
                 throw IllegalStateException("invInertiaMatrix is not finite!")
 
-            return RigidBodyInertiaData(invMass, invInertiaMatrix)
+            return PhysicsBodyInertiaData(invMass, invInertiaMatrix)
         }
 
         private const val MAX_UPDATES_PER_PHYS_TICK = 1000

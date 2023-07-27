@@ -10,19 +10,17 @@ import org.valkyrienskies.core.impl.api.ShipForcesInducer
 import org.valkyrienskies.core.impl.util.assertions.assertIsPhysicsThread
 import org.valkyrienskies.core.impl.util.assertions.requireIsFinite
 import org.valkyrienskies.core.impl.util.pollUntilEmpty
+import org.valkyrienskies.physics_api.PhysicsBodyReference
 import org.valkyrienskies.physics_api.PoseVel
-import org.valkyrienskies.physics_api.RigidBodyReference
-import org.valkyrienskies.physics_api.SegmentTracker
 import java.util.ArrayDeque
 
 data class PhysShipImpl constructor(
     override val id: ShipId,
     // Don't use these outside of vs-core, I beg of thee
-    val rigidBodyReference: RigidBodyReference,
+    val rigidBodyReference: PhysicsBodyReference<*>,
     var forceInducers: List<ShipForcesInducer>,
     var _inertia: PhysInertia,
     private var _poseVel: PoseVel,
-    var segments: SegmentTracker,
     internal var lastShipTeleportId: Int,
     internal val wingManager: WingManagerImpl = WingManagerImpl(),
     override var isStatic: Boolean = false

@@ -12,8 +12,7 @@ import org.valkyrienskies.core.impl.api.ShipForcesInducer
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.ShipPhysicsData
 import org.valkyrienskies.physics_api.PoseVel
-import org.valkyrienskies.physics_api.SegmentTracker
-import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
 
 /**
  * A [VSGameFrame] represents the change of state of the game that occurred over 1 tick
@@ -40,7 +39,6 @@ data class NewShipInGameFrameData(
     val inertiaData: PhysInertia,
     val physicsData: ShipPhysicsData,
     val poseVel: PoseVel,
-    val segments: SegmentTracker,
     val voxelOffset: Vector3dc,
     val isStatic: Boolean,
     val shipVoxelsFullyLoaded: Boolean,

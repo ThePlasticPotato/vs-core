@@ -51,6 +51,7 @@ import org.valkyrienskies.core.impl.networking.VSNetworking
 import org.valkyrienskies.core.impl.util.WorldScoped
 import org.valkyrienskies.core.impl.util.assertions.stages.TickStageEnforcer
 import org.valkyrienskies.core.impl.util.names.NounListNameGenerator
+import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.DeleteVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.DenseVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel_updates.EmptyVoxelShapeUpdate
