@@ -4,6 +4,8 @@ import org.joml.Vector3d
 import org.joml.Vector3dc
 import org.joml.Vector3i
 import org.joml.Vector3ic
+import org.joml.primitives.AABBi
+import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.ships.LoadedServerShip
 import org.valkyrienskies.core.api.ships.QueryableShipData
 import org.valkyrienskies.core.api.ships.ServerShip
@@ -55,6 +57,7 @@ import org.valkyrienskies.core.impl.networking.NetworkChannel.Companion.logger
 import org.valkyrienskies.core.impl.networking.VSNetworking
 import org.valkyrienskies.core.impl.util.WorldScoped
 import org.valkyrienskies.core.impl.util.assertions.stages.TickStageEnforcer
+import org.valkyrienskies.core.impl.util.expand
 import org.valkyrienskies.core.impl.util.names.NounListNameGenerator
 import org.valkyrienskies.physics_api.voxel.updates.DeleteVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel.updates.DenseVoxelShapeUpdate
@@ -253,9 +256,13 @@ class ShipObjectServerWorld @Inject constructor(
                     } else {
                         airForest.delVertex(posX, posY, posZ, false)
                     }
-
-                    airForest.setUpdateOutsideAir(true)
-
+                    if (shipData.shipAABB != null) {
+                        val exclusion: AABBic = shipData.shipAABB!!.expand(-1, AABBi())
+                        val border: AABBic = AABBi(shipData.shipAABB)
+                        if (border.containsPoint(posX,posY,posZ) && !exclusion.containsPoint(posX,posY,posZ)) {
+                            airForest.setUpdateOutsideAir(true)
+                        }
+                    }
                 }
 
 
