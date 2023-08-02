@@ -22,9 +22,14 @@ interface AirPocketForest {
     public val outsideAirVertices: HashMap<Vector3ic, BlockPosVertex>
 
     /**
-     * A set of all the air pockets that are split from outside air.
+     * A set of all the air blocks that are split from outside air.
      */
-    val airPockets: HashMap<Vector3ic, BlockPosVertex>
+    val sealedAirBlocks: HashMap<Vector3ic, BlockPosVertex>
+
+    /**
+     * A set of each individual air pocket as a set.
+     */
+    val individualAirPockets: MutableSet<HashMap<Vector3ic, BlockPosVertex>>
 
     /**
      * A boolean that is set to true if the outside air vertices need to be updated. For VS2 communication.

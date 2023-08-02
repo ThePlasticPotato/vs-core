@@ -9,12 +9,13 @@ import org.valkyrienskies.core.impl.datastructures.dynconn.ConnVertex
 class AirPocketForestImpl(
     override val graph: ConnGraph, override val airVertices: HashMap<Vector3ic, BlockPosVertex>,
     public override val outsideAirVertices: HashMap<Vector3ic, BlockPosVertex>,
-    override val airPockets: HashMap<Vector3ic, BlockPosVertex>
+    override val sealedAirBlocks: HashMap<Vector3ic, BlockPosVertex>,
+    override val individualAirPockets: MutableSet<HashMap<Vector3ic, BlockPosVertex>>
 ) : AirPocketForest {
 
     override var shouldUpdateOutsideAir: Boolean = false
     override fun isInAirPocket(posX: Int, posY: Int, posZ: Int): Boolean {
-        for (vertex in airPockets.values) {
+        for (vertex in sealedAirBlocks.values) {
             if (vertex.posX == posX && vertex.posY == posY && vertex.posZ == posZ) {
                     return true
             }
@@ -48,34 +49,79 @@ class AirPocketForestImpl(
     }
 
     fun addAirPocket(toAdd: Set<Vector3ic>) {
+        val newPocket : HashMap<Vector3ic, BlockPosVertex> = HashMap()
         for (vertex in toAdd) {
             if (airVertices[vertex] == null) {
                 continue
             }
+            newPocket.put(vertex, airVertices[vertex]!!)
             var shouldAdd = true
-            for (airPocket in airPockets.values) {
+            for (airPocket in sealedAirBlocks.values) {
                 if (airPocket.posX == vertex.x() && airPocket.posY == vertex.x() && airPocket.posZ == vertex.x()) {
                     shouldAdd = false
                     break
                 }
             }
             if (shouldAdd) {
-                airPockets.put(Vector3i(vertex.x(), vertex.x(), vertex.x()), airVertices[vertex]!!)
+                sealedAirBlocks.put(Vector3i(vertex.x(), vertex.x(), vertex.x()), airVertices[vertex]!!)
             }
         }
+        if (newPocket.isEmpty()) return
+        mergeAirPockets(newPocket)
     }
 
-    fun removeAirPocket(toRemove: Set<Vector3ic>) {
-        for (blockPosVertex in toRemove) {
-            if (isInAirPocket(blockPosVertex.x(), blockPosVertex.y(), blockPosVertex.z())) {
-                for (vertex in airPockets.values) {
-                    if (vertex.posX == blockPosVertex.x() && vertex.posY == blockPosVertex.y() && vertex.posZ == blockPosVertex.z()) {
-                        airPockets.remove(blockPosVertex)
-                        return
+    fun removeAirPocket(toRemove: MutableSet<Vector3ic>) {
+        while (toRemove.isNotEmpty()) {
+            val remove: MutableSet<Vector3ic> = mutableSetOf()
+            for (vector in toRemove) {
+                val retrievedPocket = getPocketFromPos(vector.x(), vector.y(), vector.z())
+                if (retrievedPocket != null) {
+                    remove.addAll(retrievedPocket.keys)
+                    individualAirPockets.remove(retrievedPocket)
+                    break
+                }
+            }
+            for (vector in toRemove) {
+                toRemove.removeAll(remove)
+                for (removeVector in remove) {
+                    sealedAirBlocks.remove(removeVector)
+                }
+                remove.clear()
+            }
+        }
+
+    }
+
+    fun mergeAirPockets(newPocket: HashMap<Vector3ic, BlockPosVertex>) {
+        var toRemoveFromIndividualAirPockets: MutableSet<HashMap<Vector3ic, BlockPosVertex>> = mutableSetOf()
+        for (sealedAirBlock in newPocket.keys) {
+            for (airPocket in individualAirPockets) {
+                var shouldRemove = false
+                for (otherSealedAirBlock in airPocket.keys) {
+                    if (sealedAirBlock.equals(otherSealedAirBlock)) {
+                        shouldRemove = true
+                        break
                     }
+                }
+                if (shouldRemove) {
+                    newPocket.putAll(airPocket)
+                    toRemoveFromIndividualAirPockets.add(airPocket)
                 }
             }
         }
+        individualAirPockets.add(newPocket)
+        individualAirPockets.removeAll(toRemoveFromIndividualAirPockets)
+    }
+
+    fun getPocketFromPos(x: Int, y: Int, z: Int): HashMap<Vector3ic, BlockPosVertex>? {
+        for (airPocket in individualAirPockets) {
+            for (vertex in airPocket.values) {
+                if (vertex.posX == x && vertex.posY == y && vertex.posZ == z) {
+                    return airPocket
+                }
+            }
+        }
+        return null
     }
 
     override fun newVertex(posX: Int, posY: Int, posZ: Int, silent: Boolean): Boolean {
