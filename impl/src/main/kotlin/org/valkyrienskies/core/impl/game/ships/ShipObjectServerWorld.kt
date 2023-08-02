@@ -263,6 +263,10 @@ class ShipObjectServerWorld @Inject constructor(
                             airForest.setUpdateOutsideAir(true)
                         }
                     }
+
+                    for (vector in airForest.sealedAirBlocks.keys) {
+                        logger.info("Sealed air block at $vector")
+                    }
                 }
 
 

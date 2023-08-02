@@ -94,6 +94,7 @@ class AirPocketForestImpl(
 
     fun mergeAirPockets(newPocket: HashMap<Vector3ic, BlockPosVertex>) {
         var toRemoveFromIndividualAirPockets: MutableSet<HashMap<Vector3ic, BlockPosVertex>> = mutableSetOf()
+        var updatedPocket: HashMap<Vector3ic, BlockPosVertex> = HashMap(newPocket)
         for (sealedAirBlock in newPocket.keys) {
             for (airPocket in individualAirPockets) {
                 var shouldRemove = false
@@ -104,12 +105,12 @@ class AirPocketForestImpl(
                     }
                 }
                 if (shouldRemove) {
-                    newPocket.putAll(airPocket)
+                    updatedPocket.putAll(airPocket)
                     toRemoveFromIndividualAirPockets.add(airPocket)
                 }
             }
         }
-        individualAirPockets.add(newPocket)
+        individualAirPockets.add(updatedPocket)
         individualAirPockets.removeAll(toRemoveFromIndividualAirPockets)
     }
 
