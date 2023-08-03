@@ -1,6 +1,7 @@
 package org.valkyrienskies.core.impl.game.ships
 
 import org.joml.Vector3ic
+import org.joml.primitives.AABBic
 import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
 
@@ -35,6 +36,11 @@ interface AirPocketForest {
      * A boolean that is set to true if the outside air vertices need to be updated. For VS2 communication.
      */
     var shouldUpdateOutsideAir: Boolean
+
+    /**
+     * The current AABB of the ship.
+     */
+    var currentShipAABB: AABBic
 
     /**
      * Returns whether the given position is within one of the air pockets listed in airPockets.

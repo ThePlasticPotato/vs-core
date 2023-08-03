@@ -2,6 +2,8 @@ package org.valkyrienskies.core.impl.game.ships
 
 import org.joml.Vector3i
 import org.joml.Vector3ic
+import org.joml.primitives.AABBi
+import org.joml.primitives.AABBic
 import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnVertex
@@ -10,7 +12,8 @@ class AirPocketForestImpl(
     override val graph: ConnGraph, override val airVertices: HashMap<Vector3ic, BlockPosVertex>,
     public override val outsideAirVertices: HashMap<Vector3ic, BlockPosVertex>,
     override val sealedAirBlocks: HashMap<Vector3ic, BlockPosVertex>,
-    override val individualAirPockets: MutableSet<HashMap<Vector3ic, BlockPosVertex>>
+    override val individualAirPockets: MutableSet<HashMap<Vector3ic, BlockPosVertex>>,
+    override var currentShipAABB: AABBic
 ) : AirPocketForest {
 
     override var shouldUpdateOutsideAir: Boolean = false
@@ -54,17 +57,8 @@ class AirPocketForestImpl(
             if (airVertices[vertex] == null) {
                 continue
             }
+            sealedAirBlocks.put(vertex, airVertices[vertex]!!)
             newPocket.put(vertex, airVertices[vertex]!!)
-            var shouldAdd = true
-            for (airPocket in sealedAirBlocks.values) {
-                if (airPocket.posX == vertex.x() && airPocket.posY == vertex.x() && airPocket.posZ == vertex.x()) {
-                    shouldAdd = false
-                    break
-                }
-            }
-            if (shouldAdd) {
-                sealedAirBlocks.put(Vector3i(vertex.x(), vertex.x(), vertex.x()), airVertices[vertex]!!)
-            }
         }
         if (newPocket.isEmpty()) return
         mergeAirPockets(newPocket)
@@ -81,13 +75,20 @@ class AirPocketForestImpl(
                     break
                 }
             }
-            for (vector in toRemove) {
-                toRemove.removeAll(remove)
-                for (removeVector in remove) {
-                    sealedAirBlocks.remove(removeVector)
+            if (remove.isEmpty()) {
+                for (vector in toRemove) {
+                    sealedAirBlocks.remove(vector)
                 }
-                remove.clear()
+                toRemove.clear()
+                return
             }
+            toRemove.removeAll(remove)
+            for (removeVector in remove) {
+                sealedAirBlocks.remove(removeVector)
+                // delVertex(removeVector.x(), removeVector.y(), removeVector.z(), false)
+                }
+            remove.clear()
+
         }
 
     }
@@ -185,6 +186,7 @@ class AirPocketForestImpl(
         if (new.isNotEmpty()) {
             outsideAirVertices.clear()
             for (vertex in new) {
+                newVertex(vertex.x(), vertex.y(), vertex.z(), true)
                 outsideAirVertices.put(vertex, airVertices[vertex]!!)
             }
         }
