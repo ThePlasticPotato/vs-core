@@ -2,7 +2,6 @@ package org.valkyrienskies.core.impl.game.ships
 
 import org.joml.Vector3i
 import org.joml.Vector3ic
-import org.joml.primitives.AABBi
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
