@@ -3,6 +3,8 @@ package org.valkyrienskies.core.impl.pipelines
 import org.joml.Matrix3d
 import org.joml.Vector3d
 import org.joml.Vector3dc
+import org.joml.Vector3f
+import org.joml.Vector3i
 import org.joml.primitives.AABBd
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.apigame.constraints.VSAttachmentConstraint
@@ -36,6 +38,7 @@ import org.valkyrienskies.core.apigame.constraints.VSSphericalTwistLimitsConstra
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.config.PhysicsConfig
 import org.valkyrienskies.core.impl.config.VSCoreConfig
+import org.valkyrienskies.core.impl.game.BlockTypeImpl
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl
 import org.valkyrienskies.core.impl.game.ships.WingPhysicsSolver
@@ -64,7 +67,16 @@ import org.valkyrienskies.physics_api.constraints.SphericalTwistLimitsConstraint
 import org.valkyrienskies.physics_api.dummy_impl.DummyLod1BlockRegistry
 import org.valkyrienskies.physics_api.dummy_impl.DummyPhysicsWorldReference
 import org.valkyrienskies.physics_api.dummy_impl.DummyVSPhysicsFactories
+import org.valkyrienskies.physics_api.voxel.CollisionPoint
+import org.valkyrienskies.physics_api.voxel.Lod1LiquidBlockState
+import org.valkyrienskies.physics_api.voxel.Lod1SolidBlockState
+import org.valkyrienskies.physics_api.voxel.Lod1SolidBoxesCollisionShape
+import org.valkyrienskies.physics_api.voxel.LodBlockBoundingBox
+import org.valkyrienskies.physics_api.voxel.updates.DeleteVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.DenseVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.EmptyVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.SparseVoxelShapeUpdate
 import org.valkyrienskies.physics_api_krunch.KrunchBootstrap
 import org.valkyrienskies.physics_api_krunch.KrunchPhysicsWorldSettings
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -107,6 +119,61 @@ class VSPhysicsPipelineStage @Inject constructor() {
             )
             factoriesTemp = KrunchBootstrap.getKrunchFactories()
             lod1BlockRegistryTemp = factoriesTemp.lod1BlockRegistryFactory.createLod1BlockRegistry(factoriesTemp.vsByteBufferFactory.createVSByteBuffer(65000))
+
+            val vsByteBuffer = factoriesTemp.vsByteBufferFactory.createVSByteBuffer(1000000)
+
+            // TODO: Register blocks properly somewhere else
+            // Register basic blocks
+            val fullLodBoundingBox = LodBlockBoundingBox.createVSBoundingBox(0, 0, 0, 15, 15, 15)
+            val fullBlockCollisionPoints = listOf(
+                CollisionPoint(Vector3f(.25f, .25f, .25f), .25f),
+                CollisionPoint(Vector3f(.25f, .25f, .75f), .25f),
+                CollisionPoint(Vector3f(.25f, .75f, .25f), .25f),
+                CollisionPoint(Vector3f(.25f, .75f, .75f), .25f),
+                CollisionPoint(Vector3f(.75f, .25f, .25f), .25f),
+                CollisionPoint(Vector3f(.75f, .25f, .75f), .25f),
+                CollisionPoint(Vector3f(.75f, .75f, .25f), .25f),
+                CollisionPoint(Vector3f(.75f, .75f, .75f), .25f),
+            )
+
+            val solidBlockState = Lod1SolidBlockState(
+                collisionShape = Lod1SolidBoxesCollisionShape(
+                    overallBoundingBox = fullLodBoundingBox,
+                    collisionPoints = fullBlockCollisionPoints,
+                    solidBoxes = listOf(fullLodBoundingBox),
+                    negativeBoxes = listOf(),
+                ),
+                elasticity = 0.3.toFloat(),
+                friction = 1.0.toFloat(),
+                hardness = 1.0.toFloat(),
+                lod1SolidBlockStateId = BlockTypeImpl.SOLID.toInt(),
+            )
+
+            val waterBlockState = Lod1LiquidBlockState(
+                boundingBox = fullLodBoundingBox,
+                density = 1000.0.toFloat(),
+                dragCoefficient = 0.3.toFloat(),
+                fluidVel = Vector3f(),
+                lod1LiquidBlockStateId = BlockTypeImpl.WATER.toInt(),
+            )
+
+            val lavaBlockState = Lod1LiquidBlockState(
+                boundingBox = fullLodBoundingBox,
+                density = 10000.0.toFloat(),
+                dragCoefficient = 0.3.toFloat(),
+                fluidVel = Vector3f(),
+                lod1LiquidBlockStateId = BlockTypeImpl.LAVA.toInt(),
+            )
+
+            // Register solid/liquid states
+            lod1BlockRegistryTemp.registerLod1SolidBlockState(solidBlockState, vsByteBuffer)
+            lod1BlockRegistryTemp.registerLod1LiquidBlockState(waterBlockState, vsByteBuffer)
+            lod1BlockRegistryTemp.registerLod1LiquidBlockState(lavaBlockState, vsByteBuffer)
+
+            // Register block states
+            lod1BlockRegistryTemp.registerLod1BlockState(solidBlockState.lod1SolidBlockStateId, Lod1BlockRegistry.LIQUID_AIR_BLOCK_STATE_ID, BlockTypeImpl.SOLID.toInt())
+            lod1BlockRegistryTemp.registerLod1BlockState(Lod1BlockRegistry.SOLID_AIR_BLOCK_STATE_ID, waterBlockState.lod1LiquidBlockStateId, BlockTypeImpl.WATER.toInt())
+            lod1BlockRegistryTemp.registerLod1BlockState(Lod1BlockRegistry.SOLID_AIR_BLOCK_STATE_ID, lavaBlockState.lod1LiquidBlockStateId, BlockTypeImpl.LAVA.toInt())
         } catch (e: Exception) {
             // Fallback to dummy physics engine if Krunch isn't supported
             e.printStackTrace()
@@ -202,6 +269,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
         physicsEngines.forEach { (_, physicsEngine) ->
             physicsEngine.deletePhysicsWorldResources()
         }
+        // TODO: Also send updates to delete entire dimensions
+        dimensionToShipIdToPhysShip.clear()
         physicsEngines.clear()
         lod1BlockRegistry.close()
         hasBeenDeleted = true
@@ -230,6 +299,12 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val shipId = newShipInGameFrameData.uuid
             val dimensionId = newShipInGameFrameData.dimension
             shipIdToDimension[shipId] = dimensionId
+            // Create a new dimension
+            // TODO: Create dedicated updates for creating/deleting dimensions
+            if (!(dimensionToShipIdToPhysShip.containsKey(dimensionId))) {
+                dimensionToShipIdToPhysShip[dimensionId] = HashMap()
+                physicsEngines[dimensionId] = KrunchBootstrap.createKrunchPhysicsWorld()
+            }
             val shipIdToPhysShip = dimensionToShipIdToPhysShip[dimensionId]!!
 
             if (shipIdToPhysShip.containsKey(shipId)) {
@@ -389,6 +464,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
         for (i in 0 until pendingUpdates.size) {
             val curUpdate = pendingUpdates[i]
             val (shipId, physicsEngineId) = curUpdate.first
+            val physicsEngine = physicsEngines[physicsEngineId]
             val shipIdToPhysShip = dimensionToShipIdToPhysShip[physicsEngineId]!!
             val shipRigidBodyReferenceAndId = shipIdToPhysShip[shipId]
                 ?: throw IllegalStateException(
@@ -396,18 +472,54 @@ class VSPhysicsPipelineStage @Inject constructor() {
                         " but no rigid body exists for this ship!"
                 )
             val shipRigidBodyReference = shipRigidBodyReferenceAndId.rigidBodyReference
+            val voxelShape = shipRigidBodyReference.collisionShape as VoxelShapeReference
 
             var isAllOfISent = false
+            val vsByteBuffer = factories.vsByteBufferFactory.createVSByteBuffer(1000000)
 
-            if (curUpdate.second.size <= updatesToSend - updatesSent) {
+            if (true || curUpdate.second.size <= updatesToSend - updatesSent) {
                 // Send all of it
-                val voxelRigidBodyShapeUpdates =
-                    VoxelRigidBodyShapeUpdates(shipRigidBodyReference.rigidBodyId, curUpdate.second.toTypedArray())
-                physicsEngine.queueVoxelShapeUpdates(arrayOf(voxelRigidBodyShapeUpdates))
+                for (update in curUpdate.second) {
+                    when (update) {
+                        is DeleteVoxelShapeUpdate -> {
+                            voxelShape.deleteChunk(Vector3i(update.regionX, update.regionY, update.regionZ))
+                        }
+                        is EmptyVoxelShapeUpdate -> {
+                            // TODO: This is stupidly inefficient. Add a function to check if a chunk exists at a pos.
+                            val copy = voxelShape.copyVoxel16Chunk(Vector3i(update.regionX, update.regionY, update.regionZ))
+                            if (copy == null || update.overwriteExistingVoxels) {
+                                val voxelChunk16 =
+                                    factories.voxelChunk16Factory.createEmptyVoxelChunk16(lod1BlockRegistry)
+                                voxelChunk16.bakeChunk(vsByteBuffer)
+                                voxelShape.insertChunk(
+                                    Vector3i(update.regionX, update.regionY, update.regionZ), voxelChunk16
+                                )
+                            }
+                        }
+                        is DenseVoxelShapeUpdate -> {
+                            val voxelChunk16 = factories.voxelChunk16Factory.createEmptyVoxelChunk16(lod1BlockRegistry)
+                            voxelChunk16.queueUpdate(update)
+                            voxelChunk16.bakeChunk(vsByteBuffer)
+                            voxelShape.insertChunk(Vector3i(update.regionX, update.regionY, update.regionZ), voxelChunk16)
+                        }
+                        is SparseVoxelShapeUpdate -> {
+                            var voxelChunk16 = voxelShape.copyVoxel16Chunk(Vector3i(update.regionX, update.regionY, update.regionZ))
+                            if (voxelChunk16 == null) {
+                                voxelChunk16 = factories.voxelChunk16Factory.createEmptyVoxelChunk16(lod1BlockRegistry)
+                            }
+                            voxelChunk16.queueUpdate(update)
+                            voxelChunk16.bakeChunk(vsByteBuffer)
+                            voxelShape.insertChunk(Vector3i(update.regionX, update.regionY, update.regionZ), voxelChunk16)
+                        }
+                    }
+                }
+                // Bake changes
+                voxelShape.bakeVoxelShape()
                 updatesSent += curUpdate.second.size
                 isAllOfISent = true
             } else {
                 // Send part of it
+                /*
                 val toSend = curUpdate.second.subList(0, updatesToSend - updatesSent)
                 val toKeepForNextPhysTick = curUpdate.second.subList(updatesToSend - updatesSent, curUpdate.second.size)
                 val voxelRigidBodyShapeUpdates =
@@ -415,6 +527,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
                 physicsEngine.queueVoxelShapeUpdates(arrayOf(voxelRigidBodyShapeUpdates))
                 updatesSent += toSend.size
                 pendingUpdates[i] = Pair(shipId, toKeepForNextPhysTick)
+
+                 */
             }
             if (updatesSent == updatesToSend) {
                 pendingUpdates = if (isAllOfISent)

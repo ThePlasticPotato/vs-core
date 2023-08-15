@@ -3,7 +3,7 @@ package org.valkyrienskies.core.impl.game.ships.types
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
-import org.valkyrienskies.physics_api.voxel_updates.DenseVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.DenseVoxelShapeUpdate
 
 class DenseTerrainUpdateBuilderImpl(
     chunkX: Int,
