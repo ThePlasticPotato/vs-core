@@ -115,9 +115,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
                 settings
             )
             factoriesTemp = KrunchBootstrap.getKrunchFactories()
-            lod1BlockRegistryTemp = factoriesTemp.lod1BlockRegistryFactory.createLod1BlockRegistry(factoriesTemp.vsByteBufferFactory.createVSByteBuffer(65000))
-
             val vsByteBuffer = factoriesTemp.vsByteBufferFactory.createVSByteBuffer(1000000)
+            lod1BlockRegistryTemp = factoriesTemp.lod1BlockRegistryFactory.createLod1BlockRegistry(vsByteBuffer)
 
             // TODO: Register blocks properly somewhere else
             // Register basic blocks
@@ -454,6 +453,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
         // endregion
 
         // region Send updates to static ships, staggered to limit number of updates per tick
+        val vsByteBuffer = factories.vsByteBufferFactory.createVSByteBuffer(1000000)
         for (i in 0 until pendingUpdates.size) {
             val curUpdate = pendingUpdates[i]
             val (shipId, physicsEngineId) = curUpdate.first
@@ -465,8 +465,6 @@ class VSPhysicsPipelineStage @Inject constructor() {
                 )
             val shipRigidBodyReference = shipRigidBodyReferenceAndId.rigidBodyReference
             val voxelShape = shipRigidBodyReference.collisionShape as VoxelShapeReference
-
-            val vsByteBuffer = factories.vsByteBufferFactory.createVSByteBuffer(1000000)
 
             // Send all of it
             for (update in curUpdate.second) {
