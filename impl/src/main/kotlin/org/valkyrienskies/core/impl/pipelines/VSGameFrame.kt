@@ -8,6 +8,7 @@ import org.valkyrienskies.core.api.ships.WingManagerChanges
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintId
+import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.api.ShipForcesInducer
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.ShipPhysicsData
@@ -19,12 +20,12 @@ import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
  */
 data class VSGameFrame(
     val newShips: List<NewShipInGameFrameData>, // Ships to be added to the Physics simulation
-    val deletedShips: List<Pair<ShipId, PhysicsEngineId>>, // Ships to be deleted from the Physics simulation (ShipId, dimension)
-    val updatedShips: Map<Pair<ShipId, PhysicsEngineId>, UpdateShipInGameFrameData>, // Map of ship updates
-    val voxelUpdatesMap: Map<Pair<ShipId, PhysicsEngineId>, List<IVoxelShapeUpdate>>, // Voxel updates applied by this frame
-    val constraintsCreatedThisTick: Map<PhysicsEngineId, List<VSConstraintAndId>>,
-    val constraintsUpdatedThisTick: Map<PhysicsEngineId, List<VSConstraintAndId>>,
-    val constraintsDeletedThisTick: Map<PhysicsEngineId, List<VSConstraintId>>
+    val deletedShips: List<ShipId>, // Ships to be deleted from the Physics simulation
+    val updatedShips: Map<ShipId, UpdateShipInGameFrameData>, // Map of ship updates
+    val voxelUpdatesMap: Map<ShipId, List<IVoxelShapeUpdate>>, // Voxel updates applied by this frame
+    val constraintsCreatedThisTick: List<VSConstraintAndId>,
+    val constraintsUpdatedThisTick: List<VSConstraintAndId>,
+    val constraintsDeletedThisTick: List<VSConstraintId>
 )
 
 /**
@@ -32,7 +33,7 @@ data class VSGameFrame(
  */
 data class NewShipInGameFrameData(
     val uuid: ShipId,
-    val dimension: PhysicsEngineId,
+    val dimension: DimensionId,
     val minDefined: Vector3ic,
     val maxDefined: Vector3ic,
     val totalVoxelRegion: AABBic,

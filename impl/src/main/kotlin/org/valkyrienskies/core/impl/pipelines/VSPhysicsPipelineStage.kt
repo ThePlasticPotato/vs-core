@@ -33,6 +33,7 @@ import org.valkyrienskies.core.apigame.constraints.VSRotDampingConstraint
 import org.valkyrienskies.core.apigame.constraints.VSSlideConstraint
 import org.valkyrienskies.core.apigame.constraints.VSSphericalSwingLimitsConstraint
 import org.valkyrienskies.core.apigame.constraints.VSSphericalTwistLimitsConstraint
+import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.config.PhysicsConfig
 import org.valkyrienskies.core.impl.config.VSCoreConfig
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
@@ -73,13 +74,15 @@ import kotlin.math.min
 
 class VSPhysicsPipelineStage @Inject constructor() {
     private val gameFramesQueue: ConcurrentLinkedQueue<VSGameFrame> = ConcurrentLinkedQueue()
-    private val physicsEngines: MutableMap<PhysicsEngineId, PhysicsWorldReference> = mutableMapOf()
+    private val physicsEngines: MutableMap<DimensionId, PhysicsWorldReference> = mutableMapOf()
 
     // Map dimension to ship ids to rigid bodies, and map rigid bodies to ship ids
-    private val dimensionToShipIdToPhysShip: MutableMap<PhysicsEngineId, MutableMap<ShipId, PhysShipImpl>> = HashMap()
+    private val dimensionToShipIdToPhysShip: MutableMap<DimensionId, MutableMap<ShipId, PhysShipImpl>> = HashMap()
+    private val shipIdToDimension: MutableMap<ShipId, DimensionId> = HashMap()
+    private val constraintIdToDimension: MutableMap<VSConstraintId, DimensionId> = HashMap()
     private var physTick = 0
 
-    private var pendingUpdates: MutableList<Pair<Pair<ShipId, PhysicsEngineId>, List<IVoxelShapeUpdate>>> = ArrayList()
+    private var pendingUpdates: MutableList<Pair<Pair<ShipId, DimensionId>, List<IVoxelShapeUpdate>>> = ArrayList()
     private var pendingUpdatesSize: Int = 0
 
     private val settings = VSCoreConfig.SERVER.physics.makeKrunchSettings()
@@ -206,7 +209,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
 
     private fun applyGameFrame(gameFrame: VSGameFrame) {
         // Delete deleted ships
-        gameFrame.deletedShips.forEach { (deletedShipId, dimensionId) ->
+        gameFrame.deletedShips.forEach { deletedShipId ->
+            val dimensionId = shipIdToDimension[deletedShipId]
             val physicsEngine = physicsEngines[dimensionId]!!
             val shipIdToPhysShip = dimensionToShipIdToPhysShip[dimensionId]!!
             val shipRigidBodyReferenceAndId = shipIdToPhysShip[deletedShipId]
@@ -218,12 +222,14 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val shipRigidBodyReference = shipRigidBodyReferenceAndId.rigidBodyReference
             physicsEngine.deleteRigidBody(shipRigidBodyReference.physicsBodyId)
             shipIdToPhysShip.remove(deletedShipId)
+            shipIdToDimension.remove(deletedShipId)
         }
 
         // Create new ships
         gameFrame.newShips.forEach { newShipInGameFrameData ->
             val shipId = newShipInGameFrameData.uuid
             val dimensionId = newShipInGameFrameData.dimension
+            shipIdToDimension[shipId] = dimensionId
             val shipIdToPhysShip = dimensionToShipIdToPhysShip[dimensionId]!!
 
             if (shipIdToPhysShip.containsKey(shipId)) {
@@ -269,8 +275,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
         }
 
         // Update existing ships
-        gameFrame.updatedShips.forEach { (shipIdAndDimension, shipUpdate) ->
-            val (shipId, dimensionId) = shipIdAndDimension
+        gameFrame.updatedShips.forEach { (shipId, shipUpdate) ->
+            val dimensionId = shipIdToDimension[shipId]
             val shipIdToPhysShip = dimensionToShipIdToPhysShip[dimensionId]!!
 
             val physShip = shipIdToPhysShip[shipId]
@@ -323,8 +329,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
         }
 
         // Send voxel updates
-        gameFrame.voxelUpdatesMap.forEach { (shipIdAndDimension, voxelUpdatesList) ->
-            val (shipId, dimensionId) = shipIdAndDimension
+        gameFrame.voxelUpdatesMap.forEach { (shipId, voxelUpdatesList) ->
+            val dimensionId = shipIdToDimension[shipId]!!
             val shipIdToPhysShip = dimensionToShipIdToPhysShip[dimensionId]!!
 
             val shipRigidBodyReferenceAndId = shipIdToPhysShip[shipId]
@@ -341,39 +347,38 @@ class VSPhysicsPipelineStage @Inject constructor() {
                 // physicsEngine.queueVoxelShapeUpdates(arrayOf(voxelRigidBodyShapeUpdates))
             } else {
                 // Queue updates to static ships for later
-                pendingUpdates.add(Pair(shipIdAndDimension, voxelUpdatesList))
+                pendingUpdates.add(Pair(Pair(shipId, dimensionId), voxelUpdatesList))
                 pendingUpdatesSize += voxelUpdatesList.size
             }
         }
 
         // region Create/Update/Delete constraints
-        gameFrame.constraintsCreatedThisTick.forEach { (physicsEngineId, vsConstraintAndIdList) ->
-            val physicsEngine = physicsEngines[physicsEngineId]!!
-            vsConstraintAndIdList.forEach { vsConstraintAndId ->
-                physicsEngine.addConstraint(
-                    ConstraintAndId(
-                        vsConstraintAndId.constraintId,
-                        convertVSConstraintToPhysicsConstraint(vsConstraintAndId.vsConstraint, physicsEngineId)
-                    )
+        gameFrame.constraintsCreatedThisTick.forEach { vsConstraintAndId ->
+            val dimensionId = shipIdToDimension[vsConstraintAndId.vsConstraint.shipId0]!!
+            constraintIdToDimension[vsConstraintAndId.constraintId] = dimensionId
+            val physicsEngine = physicsEngines[dimensionId]!!
+            physicsEngine.addConstraint(
+                ConstraintAndId(
+                    vsConstraintAndId.constraintId,
+                    convertVSConstraintToPhysicsConstraint(vsConstraintAndId.vsConstraint, dimensionId)
                 )
-            }
+            )
         }
-        gameFrame.constraintsUpdatedThisTick.forEach { (physicsEngineId, vsConstraintAndIdList) ->
-            val physicsEngine = physicsEngines[physicsEngineId]!!
-            vsConstraintAndIdList.forEach { vsConstraintAndId ->
-                physicsEngine.updateConstraint(
-                    ConstraintAndId(
-                        vsConstraintAndId.constraintId,
-                        convertVSConstraintToPhysicsConstraint(vsConstraintAndId.vsConstraint, physicsEngineId)
-                    )
+        gameFrame.constraintsUpdatedThisTick.forEach { vsConstraintAndId ->
+            val dimensionId = shipIdToDimension[vsConstraintAndId.vsConstraint.shipId0]!!
+            val physicsEngine = physicsEngines[dimensionId]!!
+            physicsEngine.updateConstraint(
+                ConstraintAndId(
+                    vsConstraintAndId.constraintId,
+                    convertVSConstraintToPhysicsConstraint(vsConstraintAndId.vsConstraint, dimensionId)
                 )
-            }
+            )
         }
-        gameFrame.constraintsDeletedThisTick.forEach { (physicsEngineId, vsConstraintIdList) ->
-            val physicsEngine = physicsEngines[physicsEngineId]!!
-            vsConstraintIdList.forEach { vsConstraintId ->
-                physicsEngine.removeConstraint(convertVSConstraintIdToConstraintId(vsConstraintId))
-            }
+        gameFrame.constraintsDeletedThisTick.forEach { vsConstraintId ->
+            val dimensionId = constraintIdToDimension[vsConstraintId]!!
+            val physicsEngine = physicsEngines[dimensionId]!!
+            physicsEngine.removeConstraint(convertVSConstraintIdToConstraintId(vsConstraintId))
+            constraintIdToDimension.remove(vsConstraintId)
         }
         // endregion
 
@@ -459,8 +464,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
         return settings
     }
 
-    private fun convertVSConstraintToPhysicsConstraint(vsConstraint: VSConstraint, physicsEngineId: PhysicsEngineId): ConstraintData {
-        val shipIdToPhysShip = dimensionToShipIdToPhysShip[physicsEngineId]!!
+    private fun convertVSConstraintToPhysicsConstraint(vsConstraint: VSConstraint, dimensionId: DimensionId): ConstraintData {
+        val shipIdToPhysShip = dimensionToShipIdToPhysShip[dimensionId]!!
         // Shit, do we allow shipIdToPhysShip to store ships from different physics engines?
         val body0Id: PhysicsBodyId = shipIdToPhysShip[vsConstraint.shipId0]!!.rigidBodyReference.physicsBodyId
         val body1Id: PhysicsBodyId = shipIdToPhysShip[vsConstraint.shipId1]!!.rigidBodyReference.physicsBodyId

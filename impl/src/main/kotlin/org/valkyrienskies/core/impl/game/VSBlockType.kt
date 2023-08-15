@@ -1,11 +1,11 @@
 package org.valkyrienskies.core.impl.game
 
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
-import org.valkyrienskies.physics_api.voxel_updates.KrunchVoxelStates
+import org.valkyrienskies.physics_api.voxel.KrunchVoxelStates
 
-data class BlockTypeImpl(val state: Byte) : BlockType {
+data class BlockTypeImpl(val state: Int) : BlockType {
     @Deprecated("", ReplaceWith("state"))
-    override fun toByte(): Byte = state
+    override fun toInt(): Int = state
 
     companion object {
         val AIR: BlockType = BlockTypeImpl(KrunchVoxelStates.AIR_STATE)

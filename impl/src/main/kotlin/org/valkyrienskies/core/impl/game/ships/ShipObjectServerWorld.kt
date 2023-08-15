@@ -51,12 +51,11 @@ import org.valkyrienskies.core.impl.networking.VSNetworking
 import org.valkyrienskies.core.impl.util.WorldScoped
 import org.valkyrienskies.core.impl.util.assertions.stages.TickStageEnforcer
 import org.valkyrienskies.core.impl.util.names.NounListNameGenerator
+import org.valkyrienskies.physics_api.voxel.updates.DeleteVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.DenseVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.EmptyVoxelShapeUpdate
 import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel_updates.DeleteVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel_updates.DenseVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel_updates.EmptyVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
-import org.valkyrienskies.physics_api.voxel_updates.SparseVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.SparseVoxelShapeUpdate
 import java.util.concurrent.CompletableFuture
 import javax.inject.Inject
 import javax.inject.Named
@@ -228,7 +227,7 @@ class ShipObjectServerWorld @Inject constructor(
             val voxelShapeUpdate =
                 voxelUpdates.getOrPut(chunkPos) { SparseVoxelShapeUpdate.createSparseVoxelShapeUpdate(chunkPos) }
 
-            val voxelType: Byte = (newBlockType as BlockTypeImpl).state
+            val voxelType: Int = (newBlockType as BlockTypeImpl).state
 
             when (voxelShapeUpdate) {
                 is SparseVoxelShapeUpdate -> {
@@ -247,6 +246,9 @@ class ShipObjectServerWorld @Inject constructor(
                     newVoxelShapeUpdate.addUpdate(posX and 15, posY and 15, posZ and 15, voxelType)
                     voxelUpdates[chunkPos] = newVoxelShapeUpdate
                 }
+                else -> {
+                    TODO()
+                }
             }
         }
     }
@@ -264,13 +266,16 @@ class ShipObjectServerWorld @Inject constructor(
             when (it) {
                 is DenseVoxelShapeUpdate, is EmptyVoxelShapeUpdate -> ship.onLoadChunk(it.regionX, it.regionZ)
                 is DeleteVoxelShapeUpdate -> ship.onUnloadChunk(it.regionX, it.regionZ)
+                else -> {
+                    TODO()
+                }
             }
 
             if (it is DenseVoxelShapeUpdate) {
                 it.forEachVoxel { x, y, z, voxelState ->
                     ship.updateShipAABBGenerator(
                         (it.regionX shl 4) + x, (it.regionY shl 4) + y, (it.regionZ shl 4) + z,
-                        voxelState != blockTypes.air.toByte()
+                        voxelState != blockTypes.air.toInt()
                     )
                 }
             }

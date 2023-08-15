@@ -1,7 +1,7 @@
 package org.valkyrienskies.core.impl.game.ships.types
 
 import org.valkyrienskies.core.apigame.world.chunks.TerrainUpdate
-import org.valkyrienskies.physics_api.voxel_updates.IVoxelShapeUpdate
+import org.valkyrienskies.physics_api.voxel.updates.IVoxelShapeUpdate
 
 data class TerrainUpdateImpl(
     val update: IVoxelShapeUpdate,
