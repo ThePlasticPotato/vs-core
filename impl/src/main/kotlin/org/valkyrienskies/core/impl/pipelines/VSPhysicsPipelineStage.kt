@@ -81,8 +81,6 @@ import org.valkyrienskies.physics_api_krunch.KrunchBootstrap
 import org.valkyrienskies.physics_api_krunch.KrunchPhysicsWorldSettings
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
-import kotlin.math.max
-import kotlin.math.min
 
 class VSPhysicsPipelineStage @Inject constructor() {
     private val gameFramesQueue: ConcurrentLinkedQueue<VSGameFrame> = ConcurrentLinkedQueue()
@@ -95,7 +93,6 @@ class VSPhysicsPipelineStage @Inject constructor() {
     private var physTick = 0
 
     private var pendingUpdates: MutableList<Pair<Pair<ShipId, DimensionId>, List<IVoxelShapeUpdate>>> = ArrayList()
-    private var pendingUpdatesSize: Int = 0
 
     private val settings = VSCoreConfig.SERVER.physics.makeKrunchSettings()
     private val factories: VSPhysicsFactories
@@ -423,7 +420,6 @@ class VSPhysicsPipelineStage @Inject constructor() {
             } else {
                 // Queue updates to static ships for later
                 pendingUpdates.add(Pair(Pair(shipId, dimensionId), voxelUpdatesList))
-                pendingUpdatesSize += voxelUpdatesList.size
             }
         }
 
@@ -458,13 +454,9 @@ class VSPhysicsPipelineStage @Inject constructor() {
         // endregion
 
         // region Send updates to static ships, staggered to limit number of updates per tick
-        val updatesToSend =
-            max(min(pendingUpdatesSize, MAX_UPDATES_PER_PHYS_TICK), pendingUpdatesSize - MAX_PENDING_UPDATES_SIZE)
-        var updatesSent = 0
         for (i in 0 until pendingUpdates.size) {
             val curUpdate = pendingUpdates[i]
             val (shipId, physicsEngineId) = curUpdate.first
-            val physicsEngine = physicsEngines[physicsEngineId]
             val shipIdToPhysShip = dimensionToShipIdToPhysShip[physicsEngineId]!!
             val shipRigidBodyReferenceAndId = shipIdToPhysShip[shipId]
                 ?: throw IllegalStateException(
@@ -474,71 +466,46 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val shipRigidBodyReference = shipRigidBodyReferenceAndId.rigidBodyReference
             val voxelShape = shipRigidBodyReference.collisionShape as VoxelShapeReference
 
-            var isAllOfISent = false
             val vsByteBuffer = factories.vsByteBufferFactory.createVSByteBuffer(1000000)
 
-            if (true || curUpdate.second.size <= updatesToSend - updatesSent) {
-                // Send all of it
-                for (update in curUpdate.second) {
-                    when (update) {
-                        is DeleteVoxelShapeUpdate -> {
-                            voxelShape.deleteChunk(Vector3i(update.regionX, update.regionY, update.regionZ))
-                        }
-                        is EmptyVoxelShapeUpdate -> {
-                            // TODO: This is stupidly inefficient. Add a function to check if a chunk exists at a pos.
-                            val copy = voxelShape.copyVoxel16Chunk(Vector3i(update.regionX, update.regionY, update.regionZ))
-                            if (copy == null || update.overwriteExistingVoxels) {
-                                val voxelChunk16 =
-                                    factories.voxelChunk16Factory.createEmptyVoxelChunk16(lod1BlockRegistry)
-                                voxelChunk16.bakeChunk(vsByteBuffer)
-                                voxelShape.insertChunk(
-                                    Vector3i(update.regionX, update.regionY, update.regionZ), voxelChunk16
-                                )
-                            }
-                        }
-                        is DenseVoxelShapeUpdate -> {
-                            val voxelChunk16 = factories.voxelChunk16Factory.createEmptyVoxelChunk16(lod1BlockRegistry)
-                            voxelChunk16.queueUpdate(update)
+            // Send all of it
+            for (update in curUpdate.second) {
+                when (update) {
+                    is DeleteVoxelShapeUpdate -> {
+                        voxelShape.deleteChunk(Vector3i(update.regionX, update.regionY, update.regionZ))
+                    }
+                    is EmptyVoxelShapeUpdate -> {
+                        val alreadyExists = voxelShape.voxel16ChunkExists(Vector3i(update.regionX, update.regionY, update.regionZ))
+                        if (!alreadyExists || update.overwriteExistingVoxels) {
+                            val voxelChunk16 =
+                                factories.voxelChunk16Factory.createEmptyVoxelChunk16(lod1BlockRegistry)
                             voxelChunk16.bakeChunk(vsByteBuffer)
-                            voxelShape.insertChunk(Vector3i(update.regionX, update.regionY, update.regionZ), voxelChunk16)
-                        }
-                        is SparseVoxelShapeUpdate -> {
-                            var voxelChunk16 = voxelShape.copyVoxel16Chunk(Vector3i(update.regionX, update.regionY, update.regionZ))
-                            if (voxelChunk16 == null) {
-                                voxelChunk16 = factories.voxelChunk16Factory.createEmptyVoxelChunk16(lod1BlockRegistry)
-                            }
-                            voxelChunk16.queueUpdate(update)
-                            voxelChunk16.bakeChunk(vsByteBuffer)
-                            voxelShape.insertChunk(Vector3i(update.regionX, update.regionY, update.regionZ), voxelChunk16)
+                            voxelShape.insertChunk(
+                                Vector3i(update.regionX, update.regionY, update.regionZ), voxelChunk16
+                            )
                         }
                     }
+                    is DenseVoxelShapeUpdate -> {
+                        val voxelChunk16 = factories.voxelChunk16Factory.createEmptyVoxelChunk16(lod1BlockRegistry)
+                        voxelChunk16.queueUpdate(update)
+                        voxelChunk16.bakeChunk(vsByteBuffer)
+                        voxelShape.insertChunk(Vector3i(update.regionX, update.regionY, update.regionZ), voxelChunk16)
+                    }
+                    is SparseVoxelShapeUpdate -> {
+                        var voxelChunk16 = voxelShape.copyVoxel16Chunk(Vector3i(update.regionX, update.regionY, update.regionZ))
+                        if (voxelChunk16 == null) {
+                            voxelChunk16 = factories.voxelChunk16Factory.createEmptyVoxelChunk16(lod1BlockRegistry)
+                        }
+                        voxelChunk16.queueUpdate(update)
+                        voxelChunk16.bakeChunk(vsByteBuffer)
+                        voxelShape.insertChunk(Vector3i(update.regionX, update.regionY, update.regionZ), voxelChunk16)
+                    }
                 }
-                // Bake changes
-                voxelShape.bakeVoxelShape()
-                updatesSent += curUpdate.second.size
-                isAllOfISent = true
-            } else {
-                // Send part of it
-                /*
-                val toSend = curUpdate.second.subList(0, updatesToSend - updatesSent)
-                val toKeepForNextPhysTick = curUpdate.second.subList(updatesToSend - updatesSent, curUpdate.second.size)
-                val voxelRigidBodyShapeUpdates =
-                    VoxelRigidBodyShapeUpdates(shipRigidBodyReference.rigidBodyId, toSend.toTypedArray())
-                physicsEngine.queueVoxelShapeUpdates(arrayOf(voxelRigidBodyShapeUpdates))
-                updatesSent += toSend.size
-                pendingUpdates[i] = Pair(shipId, toKeepForNextPhysTick)
-
-                 */
             }
-            if (updatesSent == updatesToSend) {
-                pendingUpdates = if (isAllOfISent)
-                    ArrayList(pendingUpdates.subList(i + 1, pendingUpdates.size))
-                else
-                    ArrayList(pendingUpdates.subList(i, pendingUpdates.size))
-                break
-            }
+            // Bake changes
+            voxelShape.bakeVoxelShape()
         }
-        pendingUpdatesSize -= updatesSent
+        pendingUpdates = ArrayList()
         // endregion
     }
 
