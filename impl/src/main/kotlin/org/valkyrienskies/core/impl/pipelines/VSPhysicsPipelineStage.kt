@@ -139,24 +139,24 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     solidBoxes = listOf(fullLodBoundingBox),
                     negativeBoxes = listOf(),
                 ),
-                elasticity = 0.3.toFloat(),
-                friction = 1.0.toFloat(),
-                hardness = 1.0.toFloat(),
+                elasticity = 0.3f,
+                friction = 1.0f,
+                hardness = 1.0f,
                 lod1SolidBlockStateId = BlockTypeImpl.SOLID.toInt(),
             )
 
             val waterBlockState = Lod1LiquidBlockState(
                 boundingBox = fullLodBoundingBox,
-                density = 1000.0.toFloat(),
-                dragCoefficient = 0.3.toFloat(),
+                density = 1000.0f,
+                dragCoefficient = 0.3f,
                 fluidVel = Vector3f(),
                 lod1LiquidBlockStateId = BlockTypeImpl.WATER.toInt(),
             )
 
             val lavaBlockState = Lod1LiquidBlockState(
                 boundingBox = fullLodBoundingBox,
-                density = 10000.0.toFloat(),
-                dragCoefficient = 0.3.toFloat(),
+                density = 10000.0f,
+                dragCoefficient = 0.3f,
                 fluidVel = Vector3f(),
                 lod1LiquidBlockStateId = BlockTypeImpl.LAVA.toInt(),
             )
