@@ -486,11 +486,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
                     is EmptyVoxelShapeUpdate -> {
                         val alreadyExists = voxelShape.voxel16ChunkExists(Vector3i(update.regionX, update.regionY, update.regionZ))
                         if (!alreadyExists || update.overwriteExistingVoxels) {
-                            val voxelChunk16 =
-                                factories.voxelChunk16Factory.createEmptyVoxelChunk16(lod1BlockRegistry)
-                            voxelChunk16.bakeChunk(vsByteBuffer)
-                            voxelShape.insertChunk(
-                                Vector3i(update.regionX, update.regionY, update.regionZ), voxelChunk16
+                            voxelShape.insertAirChunk(
+                                Vector3i(update.regionX, update.regionY, update.regionZ)
                             )
                         }
                     }
