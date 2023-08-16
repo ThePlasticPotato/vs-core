@@ -449,6 +449,11 @@ class ShipObjectServerWorld @Inject constructor(
         return newShipData
     }
 
+    override fun allocateShipId(dimensionId: DimensionId): ShipId {
+        val chunkAllocator = chunkAllocators.forDimension(dimensionId)
+        return chunkAllocator.allocateShipId()
+    }
+
     // region [rigidBodyIdToConstraints] helpers
     private fun addConstraintIdToRigidBodyIdToConstraintsHelper(
         shipId: ShipId, newConstraintId: VSConstraintId

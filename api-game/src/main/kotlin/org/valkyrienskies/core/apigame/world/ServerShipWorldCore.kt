@@ -46,6 +46,8 @@ interface ServerShipWorldCore : ShipWorldCore, ServerShipWorld {
         dimensionId: DimensionId
     ): ServerShip
 
+    fun allocateShipId(dimensionId: DimensionId): ShipId
+
     /**
      * @return True non-null if [vsConstraint] was created successfully.
      */
