@@ -4,7 +4,8 @@ import org.valkyrienskies.core.impl.config.VSCoreConfig
 import org.valkyrienskies.core.impl.pipelines.VSGamePipelineStage.Companion.GAME_TPS
 import org.valkyrienskies.core.impl.util.ThreadHints
 import org.valkyrienskies.core.impl.util.logger
-import java.util.*
+import java.util.LinkedList
+import java.util.Queue
 import java.util.concurrent.locks.LockSupport
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -55,6 +56,11 @@ class VSPhysicsPipelineBackgroundTask(
                         }
                     }
                 } else {
+                    if (vsPipeline.deleteResources) {
+                        vsPipeline.deletePhysicsResources()
+                        break
+                    }
+
                     // If paused, wait until not paused
                     if (!vsPipeline.arePhysicsRunning) {
                         // reset timing stuff

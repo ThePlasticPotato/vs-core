@@ -261,12 +261,17 @@ class VSPhysicsPipelineStage @Inject constructor() {
     }
 
     fun deleteResources() {
+        println("Deleting VSPhysicsPipelineStage resources!")
         if (hasBeenDeleted) throw IllegalStateException("Physics engine has already been deleted!")
         physicsEngines.forEach { (_, physicsEngine) ->
             physicsEngine.deletePhysicsWorldResources()
         }
         // TODO: Also send updates to delete entire dimensions
         dimensionToShipIdToPhysShip.clear()
+        shipIdToDimension.clear()
+        constraintIdToDimension.clear()
+        pendingUpdates.clear()
+
         physicsEngines.clear()
         lod1BlockRegistry.close()
         hasBeenDeleted = true

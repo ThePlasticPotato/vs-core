@@ -37,7 +37,7 @@ interface VSPipelineComponent {
 class VSPipelineImpl @Inject constructor(
     override val shipWorld: ShipObjectServerWorld,
     private val gameStage: VSGamePipelineStage,
-    private val physicsStage: VSPhysicsPipelineStage,
+    private var physicsStage: VSPhysicsPipelineStage?,
     private val networkStage: VSNetworkPipelineStage,
     hooks: CoreHooksImpl,
 ) : VSPipeline {
@@ -67,7 +67,7 @@ class VSPipelineImpl @Inject constructor(
 
     override var deleteResources = false
 
-    override val isUsingDummyPhysics get() = physicsStage.isUsingDummy
+    override val isUsingDummyPhysics get() = physicsStage!!.isUsingDummy
 
     override fun preTickGame() {
         val prevSynchronizePhysics = synchronizePhysics
@@ -96,17 +96,23 @@ class VSPipelineImpl @Inject constructor(
         }
 
         val gameFrame = gameStage.postTickGame()
-        physicsStage.pushGameFrame(gameFrame)
+        physicsStage!!.pushGameFrame(gameFrame)
+    }
+
+    fun deletePhysicsResources() {
+        println("Running deletePhysicsResources")
+        if (deleteResources) {
+            // Do this to turn the physics back on, so it can delete itself
+            arePhysicsRunning = true
+            physicsStage!!.deleteResources()
+            // Force this to be gc'd
+            physicsStage = null
+            physicsPipelineBackgroundTask.tellTaskToKillItself()
+        }
     }
 
     fun tickPhysics(gravity: Vector3dc, timeStep: Double) {
-        if (deleteResources) {
-            physicsStage.deleteResources()
-            physicsPipelineBackgroundTask.tellTaskToKillItself()
-            return
-        }
-
-        val physicsFrame = physicsStage.tickPhysics(gravity, timeStep, true)
+        val physicsFrame = physicsStage!!.tickPhysics(gravity, timeStep, true)
         gameStage.pushPhysicsFrame(physicsFrame)
         networkStage.pushPhysicsFrame(physicsFrame)
     }
