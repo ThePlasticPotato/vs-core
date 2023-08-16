@@ -267,6 +267,12 @@ class VSPhysicsPipelineStage @Inject constructor() {
             physicsEngine.deletePhysicsWorldResources()
         }
         // TODO: Also send updates to delete entire dimensions
+        // Close all collision shape resources (this isn't strictly necessary because the gc should clean this up, but it's better to do this sooner than waiting for gc)
+        dimensionToShipIdToPhysShip.forEach { (_, shipIdToPhysShip) ->
+            shipIdToPhysShip.forEach { (_, physShip) ->
+                physShip.rigidBodyReference.collisionShape?.close()
+            }
+        }
         dimensionToShipIdToPhysShip.clear()
         shipIdToDimension.clear()
         constraintIdToDimension.clear()
