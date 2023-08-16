@@ -39,6 +39,11 @@ import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.config.PhysicsConfig
 import org.valkyrienskies.core.impl.config.VSCoreConfig
 import org.valkyrienskies.core.impl.game.BlockTypeImpl
+import org.valkyrienskies.core.impl.game.physics.VSBoxCollisionShapeData
+import org.valkyrienskies.core.impl.game.physics.VSCapsuleCollisionShapeData
+import org.valkyrienskies.core.impl.game.physics.VSSphereCollisionShapeData
+import org.valkyrienskies.core.impl.game.physics.VSVoxelCollisionShapeData
+import org.valkyrienskies.core.impl.game.physics.VSWheelCollisionShapeData
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl
 import org.valkyrienskies.core.impl.game.ships.WingPhysicsSolver
@@ -47,6 +52,7 @@ import org.valkyrienskies.physics_api.ConstraintId
 import org.valkyrienskies.physics_api.Lod1BlockRegistry
 import org.valkyrienskies.physics_api.PhysicsBodyId
 import org.valkyrienskies.physics_api.PhysicsBodyInertiaData
+import org.valkyrienskies.physics_api.PhysicsBodyReference
 import org.valkyrienskies.physics_api.PhysicsWorldReference
 import org.valkyrienskies.physics_api.PoseVel
 import org.valkyrienskies.physics_api.VSPhysicsFactories
@@ -322,22 +328,47 @@ class VSPhysicsPipelineStage @Inject constructor() {
             }
 
             val physicsEngine = physicsEngines[dimensionId]!!
-            val minDefined = newShipInGameFrameData.minDefined
-            val maxDefined = newShipInGameFrameData.maxDefined
-            val totalVoxelRegion = newShipInGameFrameData.totalVoxelRegion
+            val newRigidBodyReference: PhysicsBodyReference<*>
+
+            when (val collisionShapeData = newShipInGameFrameData.collisionShapeData) {
+                is VSVoxelCollisionShapeData -> {
+                    val minDefined = collisionShapeData.minDefined
+                    val maxDefined = collisionShapeData.maxDefined
+                    val totalVoxelRegion = collisionShapeData.totalVoxelRegion
+                    val shipVoxelsFullyLoaded = collisionShapeData.shipVoxelsFullyLoaded
+                    val voxelCollisionShape = factories.collisionShapeFactory.makeVoxelShapeReference(minDefined, maxDefined, totalVoxelRegion, lod1BlockRegistry)
+                    voxelCollisionShape.isVoxelTerrainFullyLoaded = shipVoxelsFullyLoaded
+                    newRigidBodyReference = physicsEngine.createRigidBody(voxelCollisionShape)
+                }
+                is VSSphereCollisionShapeData -> {
+                    val sphereCollisionShape = factories.collisionShapeFactory.makeSphereShapeReference(collisionShapeData.radius)
+                    newRigidBodyReference = physicsEngine.createRigidBody(sphereCollisionShape)
+                }
+                is VSWheelCollisionShapeData -> {
+                    val wheelCollisionShape = factories.collisionShapeFactory.makeWheelShapeReference(collisionShapeData.wheelRadius, collisionShapeData.halfThickness)
+                    newRigidBodyReference = physicsEngine.createRigidBody(wheelCollisionShape)
+                }
+                is VSBoxCollisionShapeData -> {
+                    val boxCollisionShape = factories.collisionShapeFactory.makeBoxShapeReference(Vector3d(collisionShapeData.lengthX, collisionShapeData.lengthY, collisionShapeData.lengthZ))
+                    newRigidBodyReference = physicsEngine.createRigidBody(boxCollisionShape)
+                }
+                is VSCapsuleCollisionShapeData -> {
+                    val capsuleCollisionShape = factories.collisionShapeFactory.makeCapsuleShapeReference(collisionShapeData.radius, collisionShapeData.length)
+                    newRigidBodyReference = physicsEngine.createRigidBody(capsuleCollisionShape)
+                }
+                else -> throw IllegalArgumentException("What is newShipInGameFrameData.collisionShapeData? ${newShipInGameFrameData.collisionShapeData}")
+            }
+
             val inertiaData = newShipInGameFrameData.inertiaData
             val poseVel = newShipInGameFrameData.poseVel
             val isStatic = newShipInGameFrameData.isStatic
-            val shipVoxelsFullyLoaded = newShipInGameFrameData.shipVoxelsFullyLoaded
+
             val wingManagerChanges = newShipInGameFrameData.wingManagerChanges
             val shipTeleportId = newShipInGameFrameData.shipTeleportId
 
-            val voxelCollisionShape = factories.collisionShapeFactory.makeVoxelShapeReference(minDefined, maxDefined, totalVoxelRegion, lod1BlockRegistry)
-            voxelCollisionShape.isVoxelTerrainFullyLoaded = shipVoxelsFullyLoaded
-            val newRigidBodyReference = physicsEngine.createRigidBody(voxelCollisionShape)
             newRigidBodyReference.inertiaData = physInertiaToRigidBodyInertiaData(inertiaData)
             newRigidBodyReference.poseVel = poseVel
-            newRigidBodyReference.collisionShapeOffset = newShipInGameFrameData.voxelOffset
+            newRigidBodyReference.collisionShapeOffset = newShipInGameFrameData.collisionShapeOffset
             newRigidBodyReference.isStatic = isStatic
 
             val physShip =
@@ -370,7 +401,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val oldPoseVel = shipRigidBody.poseVel
 
             val oldVoxelOffset = shipRigidBody.collisionShapeOffset
-            val newVoxelOffset = shipUpdate.newVoxelOffset
+            val newVoxelOffset = shipUpdate.collisionShapeOffset
             val deltaVoxelOffset = oldPoseVel.rot.transform(newVoxelOffset.sub(oldVoxelOffset, Vector3d()))
             val isStatic = shipUpdate.isStatic
             val shipVoxelsFullyLoaded = shipUpdate.shipVoxelsFullyLoaded

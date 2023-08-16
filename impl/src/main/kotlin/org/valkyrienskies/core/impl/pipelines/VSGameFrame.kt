@@ -2,14 +2,13 @@ package org.valkyrienskies.core.impl.pipelines
 
 import org.joml.Quaterniondc
 import org.joml.Vector3dc
-import org.joml.Vector3ic
-import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.ships.WingManagerChanges
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintId
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.api.ShipForcesInducer
+import org.valkyrienskies.core.impl.game.physics.VSCollisionShapeData
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.ShipPhysicsData
 import org.valkyrienskies.physics_api.PoseVel
@@ -34,15 +33,12 @@ data class VSGameFrame(
 data class NewShipInGameFrameData(
     val uuid: ShipId,
     val dimension: DimensionId,
-    val minDefined: Vector3ic,
-    val maxDefined: Vector3ic,
-    val totalVoxelRegion: AABBic,
+    val collisionShapeData: VSCollisionShapeData,
+    val collisionShapeOffset: Vector3dc,
     val inertiaData: PhysInertia,
     val physicsData: ShipPhysicsData,
     val poseVel: PoseVel,
-    val voxelOffset: Vector3dc,
     val isStatic: Boolean,
-    val shipVoxelsFullyLoaded: Boolean,
     val forcesInducers: List<ShipForcesInducer>,
     val wingManagerChanges: WingManagerChanges?,
     val shipTeleportId: Int,
@@ -50,7 +46,7 @@ data class NewShipInGameFrameData(
 
 data class UpdateShipInGameFrameData(
     val uuid: ShipId,
-    val newVoxelOffset: Vector3dc,
+    val collisionShapeOffset: Vector3dc,
     val inertiaData: PhysInertia,
     val physicsData: ShipPhysicsData,
     val isStatic: Boolean,

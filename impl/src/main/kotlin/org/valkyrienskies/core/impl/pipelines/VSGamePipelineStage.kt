@@ -16,6 +16,7 @@ import org.valkyrienskies.core.apigame.constraints.VSConstraintId
 import org.valkyrienskies.core.apigame.constraints.VSForceConstraint
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.Ticked
+import org.valkyrienskies.core.impl.game.physics.VSVoxelCollisionShapeData
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.ShipData
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServer
@@ -144,18 +145,24 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val voxelOffset = Vector3d(.5, .5, .5)
             val isStatic = true
             val isVoxelsFullyLoaded = false
+
+            // Create a voxel shape
+            val collisionShapeData = VSVoxelCollisionShapeData(
+                minDefined = minDefined,
+                maxDefined = maxDefined,
+                totalVoxelRegion = totalVoxelRegion,
+                shipVoxelsFullyLoaded = isVoxelsFullyLoaded,
+            )
+
             val newShipInGameFrameData = NewShipInGameFrameData(
                 shipId,
                 dimensionId,
-                minDefined,
-                maxDefined,
-                totalVoxelRegion,
+                collisionShapeData,
+                voxelOffset,
                 inertiaData,
                 ShipPhysicsData(Vector3d(), Vector3d()),
                 poseVel,
-                voxelOffset,
                 isStatic,
-                isVoxelsFullyLoaded,
                 emptyList(),
                 null,
                 0,
@@ -184,19 +191,24 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val shipAsWingManager: WingManager = it.getAttachment(WingManager::class.java)!!
             val shipTeleportId: Int = it.shipTeleportId
 
+            // Create a voxel shape
+            val collisionShapeData = VSVoxelCollisionShapeData(
+                minDefined = minDefined,
+                maxDefined = maxDefined,
+                totalVoxelRegion = totalVoxelRegion,
+                shipVoxelsFullyLoaded = isVoxelsFullyLoaded,
+            )
+
             // Deep copy objects from ShipData, since we don't want VSGameFrame to be modified
             val newShipInGameFrameData = NewShipInGameFrameData(
                 uuid,
                 it.shipData.chunkClaimDimension,
-                minDefined,
-                maxDefined,
-                totalVoxelRegion,
+                collisionShapeData,
+                voxelOffset,
                 it.shipData.inertiaData.copyToPhyInertia(),
                 it.shipData.physicsData.copy(),
                 poseVel,
-                voxelOffset,
                 isStatic,
-                isVoxelsFullyLoaded,
                 it.forceInducers.toMutableList(), //Copy the list
                 shipAsWingManager.getWingChanges(),
                 shipTeleportId,
