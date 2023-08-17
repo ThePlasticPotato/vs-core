@@ -431,7 +431,11 @@ class VSPhysicsPipelineStage @Inject constructor() {
             shipRigidBody.poseVel = newShipPoseVel
             shipRigidBody.inertiaData = physInertiaToRigidBodyInertiaData(shipUpdate.inertiaData)
             shipRigidBody.isStatic = isStatic
-            (shipRigidBody.collisionShape as VoxelShapeReference).isVoxelTerrainFullyLoaded = shipVoxelsFullyLoaded
+
+            val collisionShapeCopy = shipRigidBody.collisionShape
+            if (collisionShapeCopy is VoxelShapeReference) {
+                collisionShapeCopy.isVoxelTerrainFullyLoaded = shipVoxelsFullyLoaded
+            }
 
             if (wingManagerChanges != null) {
                 physShip.wingManager.applyChanges(wingManagerChanges)

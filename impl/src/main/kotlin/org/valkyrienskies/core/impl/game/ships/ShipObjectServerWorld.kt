@@ -318,6 +318,13 @@ class ShipObjectServerWorld @Inject constructor(
             updatedShipObjects.add(shipObjectServer)
         }
 
+        loadedPhysicsEntities.forEach { (_, physicsEntity) ->
+            if (physicsEntity.needsUpdating) {
+                updatedPhysicsEntities.add(physicsEntity)
+                physicsEntity.needsUpdating = false
+            }
+        }
+
         // Remove constraints from deleted ships
         val allRemoved = deletedPhysicsEntities + deletedShipObjects.map { it.id }
         allRemoved.forEach { id ->
@@ -675,6 +682,14 @@ class ShipObjectServerWorld @Inject constructor(
                 (ship as ShipData).transform = teleportData.createNewShipTransform(ship.transform)
             }
         }
+    }
+
+    override fun teleportPhysicsEntity(physicsEntityServer: PhysicsEntityServer, teleportData: ShipTeleportData) {
+        physicsEntityServer.shipTeleportId++
+        physicsEntityServer.shipTransform = teleportData.createNewShipTransform(physicsEntityServer.shipTransform)
+        physicsEntityServer.linearVelocity = teleportData.newVel
+        physicsEntityServer.angularVelocity = teleportData.newOmega
+        physicsEntityServer.needsUpdating = true
     }
 
     data class LevelVoxelUpdates(

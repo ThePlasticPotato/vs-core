@@ -78,6 +78,7 @@ interface ServerShipWorldCore : ShipWorldCore, ServerShipWorld {
     fun onDisconnect(player: IPlayer)
     fun deleteShip(ship: ServerShip)
     fun teleportShip(ship: ServerShip, teleportData: ShipTeleportData)
+    fun teleportPhysicsEntity(physicsEntityServer: PhysicsEntityServer, teleportData: ShipTeleportData)
 
     val dimensionToGroundBodyIdImmutable: Map<DimensionId, ShipId>
 }

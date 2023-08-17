@@ -19,4 +19,5 @@ data class PhysicsEntityServer(
     var shipTeleportId: Int,
     var collisionShapeData: VSCollisionShapeData,
     var isStatic: Boolean = false,
+    var needsUpdating: Boolean = false,
 )
