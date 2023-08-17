@@ -144,27 +144,23 @@ class ShipObjectServerWorldChunkTracker @Inject constructor(
 
                     if (shipData.chunkClaimDimension != player.dimension) {
                         if (isPlayerWatchingThisChunk) {
-                            // if the chunk dimension is different from the player dimension,
-                            // unwatch it immediately, since the game already has
-                            removeWatchersFromChunk(shipData, chunkPosAsLong, listOf(player))
-                        }
-
-                        continue
-                    }
-
-                    if (displacementDistance < chunkWatchDistance) {
-                        if (!isPlayerWatchingThisChunk) {
-                            // Watch this chunk
-                            newPlayersWatching.add(player)
-                            // Update [minWatchingDistanceSq]
-                            minWatchingDistance = min(minWatchingDistance, displacementDistance)
-                        }
-                    } else if (displacementDistance > chunkUnwatchDistance) {
-                        if (isPlayerWatchingThisChunk) {
-                            // Unwatch this chunk
                             newPlayersUnwatching.add(player)
-                            // Update [minUnwatchingDistanceSq]
-                            minUnwatchingDistance = min(minUnwatchingDistance, displacementDistance)
+                        }
+                    } else {
+                        if (displacementDistance < chunkWatchDistance) {
+                            if (!isPlayerWatchingThisChunk) {
+                                // Watch this chunk
+                                newPlayersWatching.add(player)
+                                // Update [minWatchingDistanceSq]
+                                minWatchingDistance = min(minWatchingDistance, displacementDistance)
+                            }
+                        } else if (displacementDistance > chunkUnwatchDistance) {
+                            if (isPlayerWatchingThisChunk) {
+                                // Unwatch this chunk
+                                newPlayersUnwatching.add(player)
+                                // Update [minUnwatchingDistanceSq]
+                                minUnwatchingDistance = min(minUnwatchingDistance, displacementDistance)
+                            }
                         }
                     }
                 }
