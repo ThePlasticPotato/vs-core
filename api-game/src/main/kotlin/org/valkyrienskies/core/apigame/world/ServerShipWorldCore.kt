@@ -8,6 +8,8 @@ import org.valkyrienskies.core.api.world.ServerShipWorld
 import org.valkyrienskies.core.apigame.ShipTeleportData
 import org.valkyrienskies.core.apigame.constraints.VSConstraint
 import org.valkyrienskies.core.apigame.constraints.VSConstraintId
+import org.valkyrienskies.core.apigame.physics.PhysicsEntityData
+import org.valkyrienskies.core.apigame.physics.PhysicsEntityServer
 import org.valkyrienskies.core.apigame.world.chunks.ChunkUnwatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTask
 import org.valkyrienskies.core.apigame.world.chunks.ChunkWatchTasks
@@ -45,6 +47,10 @@ interface ServerShipWorldCore : ShipWorldCore, ServerShipWorld {
         blockPosInWorldCoordinates: Vector3ic, createShipObjectImmediately: Boolean, scaling: Double = 1.0,
         dimensionId: DimensionId
     ): ServerShip
+
+    fun createPhysicsEntity(physicsEntityData: PhysicsEntityData, dimensionId: DimensionId): PhysicsEntityServer
+
+    fun deletePhysicsEntity(id: ShipId)
 
     fun allocateShipId(dimensionId: DimensionId): ShipId
 

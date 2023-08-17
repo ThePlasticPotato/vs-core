@@ -14,11 +14,13 @@ import org.valkyrienskies.core.apigame.constraints.VSConstraint
 import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintId
 import org.valkyrienskies.core.apigame.constraints.VSForceConstraint
+import org.valkyrienskies.core.apigame.physics.PhysicsEntityServer
+import org.valkyrienskies.core.apigame.physics.VSVoxelCollisionShapeData
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.Ticked
-import org.valkyrienskies.core.impl.game.physics.VSVoxelCollisionShapeData
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.ShipData
+import org.valkyrienskies.core.impl.game.ships.ShipInertiaDataImpl
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServer
 import org.valkyrienskies.core.impl.game.ships.ShipObjectServerWorld
 import org.valkyrienskies.core.impl.game.ships.ShipPhysicsData
@@ -100,12 +102,29 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                     shipData.transform = newShipTransform
                 }
             } else {
-                // Check ground rigid body objects
-                if (!shipWorld.dimensionToGroundBodyIdImmutable.containsValue(shipId))
-                    logger.warn(
-                        "Received physics frame update for ship with ShipId: $shipId, " +
-                            "but a ship with this ShipId does not exist!"
-                    )
+                // Check physics entities
+                val physicsEntity: PhysicsEntityServer? = shipWorld.loadedPhysicsEntities[shipId]
+                if (physicsEntity != null) {
+                    val applyTransform = (physicsEntity.shipTeleportId == shipInPhysicsFrameData.lastShipTeleportId)
+                    if (applyTransform) {
+                        val newShipTransform = ShipTransformImpl.create(
+                            shipInPhysicsFrameData.poseVel.pos,
+                            Vector3d(),
+                            shipInPhysicsFrameData.poseVel.rot,
+                        )
+
+                        physicsEntity.linearVelocity = shipInPhysicsFrameData.poseVel.vel
+                        physicsEntity.angularVelocity = shipInPhysicsFrameData.poseVel.omega
+                        physicsEntity.shipTransform = newShipTransform
+                    }
+                } else {
+                    // Check ground rigid body objects
+                    if (!shipWorld.dimensionToGroundBodyIdImmutable.containsValue(shipId))
+                        logger.warn(
+                            "Received physics frame update for ship with ShipId: $shipId, " +
+                                "but a ship with this ShipId does not exist!"
+                        )
+                }
             }
         }
     }
@@ -120,7 +139,9 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
 
         val newGroundRigidBodyObjects = lastTickChanges.getNewGroundRigidBodyObjects()
         val newShipObjects = lastTickChanges.newShipObjects
+        val newPhysicsEntities = lastTickChanges.newPhysicsEntities
         val updatedShipObjects = lastTickChanges.updatedShipObjects
+        val updatedPhysicsEntities = lastTickChanges.updatedPhysicsEntities
         val deletedShipObjects = lastTickChanges.getDeletedShipObjectsIncludingGround()
         val shipVoxelUpdates = lastTickChanges.shipToVoxelUpdates
 
@@ -216,6 +237,38 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             newShips.add(newShipInGameFrameData)
         }
 
+        newPhysicsEntities.forEach {
+            val uuid = it.id
+            val dimension = it.dimensionId
+            val poseVel = PoseVel.createPoseVel(
+                it.shipTransform.positionInWorld,
+                it.shipTransform.shipToWorldRotation
+            )
+            val voxelOffset = getShipVoxelOffset(it.inertiaData)
+            val isStatic = it.isStatic
+            val shipTeleportId: Int = it.shipTeleportId
+
+            // Create a voxel shape
+            val collisionShapeData = it.collisionShapeData
+            val physicsData = ShipPhysicsData(it.linearVelocity, it.angularVelocity)
+
+            // Deep copy objects from ShipData, since we don't want VSGameFrame to be modified
+            val newShipInGameFrameData = NewShipInGameFrameData(
+                uuid,
+                dimension,
+                collisionShapeData,
+                voxelOffset,
+                (it.inertiaData as ShipInertiaDataImpl).copyToPhyInertia(),
+                physicsData,
+                poseVel,
+                isStatic,
+                listOf(),
+                null,
+                shipTeleportId,
+            )
+            newShips.add(newShipInGameFrameData)
+        }
+
         updatedShipObjects.forEach {
             val uuid = it.shipData.id
             val newVoxelOffset = getShipVoxelOffset(it.shipData.inertiaData)
@@ -238,6 +291,37 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 isVoxelsFullyLoaded,
                 it.forceInducers.toMutableList(), //Copy the list
                 shipAsWingManager.getWingChanges(),
+                shipTeleportId,
+                currentShipPos,
+                currentShipRot,
+                currentShipVel,
+                currentShipOmega,
+            )
+            updatedShips[uuid] = updateShipInGameFrameData
+        }
+
+        updatedPhysicsEntities.forEach {
+            val uuid = it.id
+            val newVoxelOffset = getShipVoxelOffset(it.inertiaData)
+            val isStatic = it.isStatic
+            val isVoxelsFullyLoaded = true
+            val shipTeleportId: Int = it.shipTeleportId
+            val currentShipPos: Vector3dc = it.shipTransform.positionInWorld
+            val currentShipRot: Quaterniondc = it.shipTransform.shipToWorldRotation
+            val currentShipVel: Vector3dc = it.linearVelocity
+            val currentShipOmega: Vector3dc = it.angularVelocity
+            val physicsData = ShipPhysicsData(it.linearVelocity, it.angularVelocity)
+
+            // Deep copy objects from ShipData, since we don't want VSGameFrame to be modified
+            val updateShipInGameFrameData = UpdateShipInGameFrameData(
+                uuid,
+                newVoxelOffset,
+                (it.inertiaData as ShipInertiaDataImpl).copyToPhyInertia(),
+                physicsData,
+                isStatic,
+                isVoxelsFullyLoaded,
+                listOf(),
+                null,
                 shipTeleportId,
                 currentShipPos,
                 currentShipRot,

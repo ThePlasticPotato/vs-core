@@ -13,6 +13,8 @@ import org.valkyrienskies.core.apigame.constraints.VSConstraint
 import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintId
 import org.valkyrienskies.core.apigame.constraints.VSForceConstraint
+import org.valkyrienskies.core.apigame.physics.PhysicsEntityData
+import org.valkyrienskies.core.apigame.physics.PhysicsEntityServer
 import org.valkyrienskies.core.apigame.world.IPlayer
 import org.valkyrienskies.core.apigame.world.ServerShipWorldCore
 import org.valkyrienskies.core.apigame.world.chunks.BlockType
@@ -122,6 +124,11 @@ class ShipObjectServerWorld @Inject constructor(
     override val loadedShips: QueryableShipData<ShipObjectServer>
         get() = _loadedShips
 
+    private val _loadedPhysicsEntities: MutableMap<ShipId, PhysicsEntityServer> = HashMap()
+
+    val loadedPhysicsEntities: Map<ShipId, PhysicsEntityServer>
+        get() = _loadedPhysicsEntities
+
     private val dimensionToGroundBodyId: MutableMap<DimensionId, ShipId> = HashMap()
 
     // An immutable view of [dimensionToGroundBodyId]
@@ -140,8 +147,11 @@ class ShipObjectServerWorld @Inject constructor(
 
     // These fields are used to generate [VSGameFrame]
     private val newShipObjects: MutableList<ShipObjectServer> = ArrayList()
+    private val newPhysicsEntities: MutableList<PhysicsEntityServer> = ArrayList()
     private val updatedShipObjects: MutableList<ShipObjectServer> = ArrayList()
+    private val updatedPhysicsEntities: MutableList<PhysicsEntityServer> = ArrayList()
     private val deletedShipObjects: MutableList<ShipData> = ArrayList()
+    private val deletedPhysicsEntities: MutableList<ShipId> = ArrayList()
     private var lastTickDeletedShipObjects: List<ShipData> = listOf()
         get() = enforcer.stage(GET_LAST_TICK_CHANGES).run { field }
     private var constraintsCreatedThisTick: MutableList<VSConstraintAndId> = ArrayList()
@@ -170,8 +180,11 @@ class ShipObjectServerWorld @Inject constructor(
      */
     inner class CurrentTickChanges(
         val newShipObjects: Collection<ShipObjectServer>,
+        val newPhysicsEntities: Collection<PhysicsEntityServer>,
         val updatedShipObjects: Collection<ShipObjectServer>,
+        val updatedPhysicsEntities: Collection<PhysicsEntityServer>,
         val deletedShipObjects: Collection<ShipData>,
+        val deletedPhysicsEntities: Collection<ShipId>,
         val shipToVoxelUpdates: ShipVoxelUpdates,
         val dimensionsAddedThisTick: Collection<DimensionId>,
         val dimensionsRemovedThisTick: Collection<DimensionId>,
@@ -189,7 +202,7 @@ class ShipObjectServerWorld @Inject constructor(
             val deletedGroundShips = dimensionsRemovedThisTick.map { dim: DimensionId ->
                 dimensionToGroundBodyId[dim]!!
             }
-            return deletedGroundShips + deletedShipObjects.map { it.id }
+            return deletedGroundShips + deletedShipObjects.map { it.id } + deletedPhysicsEntities
         }
     }
 
@@ -306,8 +319,9 @@ class ShipObjectServerWorld @Inject constructor(
         }
 
         // Remove constraints from deleted ships
-        deletedShipObjects.forEach { deletedShipObject ->
-            val constraintIds = shipIdToConstraints[deletedShipObject.id] ?: return@forEach
+        val allRemoved = deletedPhysicsEntities + deletedShipObjects.map { it.id }
+        allRemoved.forEach { id ->
+            val constraintIds = shipIdToConstraints[id] ?: return@forEach
             // Copy these constraint ids to avoid ConcurrentModificationException
             val constraintIdsCopy: List<VSConstraintId> = ArrayList(constraintIds)
             constraintIdsCopy.forEach { constraintId ->
@@ -449,6 +463,39 @@ class ShipObjectServerWorld @Inject constructor(
         return newShipData
     }
 
+    override fun createPhysicsEntity(physicsEntityData: PhysicsEntityData, dimensionId: DimensionId): PhysicsEntityServer {
+        if (_loadedPhysicsEntities.contains(physicsEntityData.shipId)) {
+            throw IllegalArgumentException(
+                "We already have a physics entity registered to id ${physicsEntityData.shipId}!"
+            )
+        }
+        val physicsEntity = PhysicsEntityServer(
+            id = physicsEntityData.shipId,
+            dimensionId = dimensionId,
+            linearVelocity = physicsEntityData.linearVelocity,
+            angularVelocity = physicsEntityData.angularVelocity,
+            inertiaData = physicsEntityData.inertiaData,
+            shipTransform = physicsEntityData.transform,
+            prevTickShipTransform = physicsEntityData.transform,
+            shipTeleportId = 0,
+            collisionShapeData = physicsEntityData.collisionShapeData,
+            isStatic = physicsEntityData.isStatic
+        )
+        _loadedPhysicsEntities[physicsEntityData.shipId] = physicsEntity
+        newPhysicsEntities.add(physicsEntity)
+        return physicsEntity
+    }
+
+    override fun deletePhysicsEntity(id: ShipId) {
+        if (!_loadedPhysicsEntities.contains(id)) {
+            throw IllegalArgumentException(
+                "Trying to remove a physics entity that doesn't exist with id ${id}!"
+            )
+        }
+        _loadedPhysicsEntities.remove(id)
+        deletedPhysicsEntities.add(id)
+    }
+
     override fun allocateShipId(dimensionId: DimensionId): ShipId {
         val chunkAllocator = chunkAllocators.forDimension(dimensionId)
         return chunkAllocator.allocateShipId()
@@ -538,8 +585,11 @@ class ShipObjectServerWorld @Inject constructor(
 
         return CurrentTickChanges(
             newShipObjects,
+            newPhysicsEntities,
             updatedShipObjects,
+            updatedPhysicsEntities,
             deletedShipObjects,
+            deletedPhysicsEntities,
             shipToVoxelUpdates,
             dimensionsAddedThisTick,
             dimensionsRemovedThisTick,
@@ -552,9 +602,12 @@ class ShipObjectServerWorld @Inject constructor(
     fun clearNewUpdatedDeletedShipObjectsAndVoxelUpdates() {
         enforcer.stage(CLEAR_FOR_RESET)
         newShipObjects.clear()
+        newPhysicsEntities.clear()
         updatedShipObjects.clear()
+        updatedPhysicsEntities.clear()
         lastTickDeletedShipObjects = deletedShipObjects.toList()
         deletedShipObjects.clear()
+        deletedPhysicsEntities.clear()
         shipToVoxelUpdates.clear()
         voxelShapeUpdatesList.clear()
         dimensionsAddedThisTick.clear()

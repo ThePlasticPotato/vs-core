@@ -6,9 +6,9 @@ import org.valkyrienskies.core.api.ships.WingManagerChanges
 import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintId
+import org.valkyrienskies.core.apigame.physics.VSCollisionShapeData
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.api.ShipForcesInducer
-import org.valkyrienskies.core.impl.game.physics.VSCollisionShapeData
 import org.valkyrienskies.core.impl.game.ships.PhysInertia
 import org.valkyrienskies.core.impl.game.ships.ShipPhysicsData
 import org.valkyrienskies.physics_api.PoseVel
@@ -56,6 +56,7 @@ data class UpdateShipInGameFrameData(
     val shipTeleportId: Int,
     val currentShipPos: Vector3dc,
     val currentShipRot: Quaterniondc,
+    // TODO: Redundant? (physicsData)
     val currentShipVel: Vector3dc,
     val currentShipOmega: Vector3dc,
 )
