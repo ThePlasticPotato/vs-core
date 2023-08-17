@@ -1,5 +1,7 @@
 package org.valkyrienskies.core.apigame.physics
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import org.joml.Vector3ic
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.apigame.physics.VSCollisionShapes.BOX
@@ -12,6 +14,19 @@ enum class VSCollisionShapes {
     VOXEL, SPHERE, WHEEL, BOX, CAPSULE
 }
 
+// Necessary so we serialize this interface with Jackson
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type"
+)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = VSVoxelCollisionShapeData::class, name = "a"),
+    JsonSubTypes.Type(value = VSSphereCollisionShapeData::class, name = "b"),
+    JsonSubTypes.Type(value = VSWheelCollisionShapeData::class, name = "c"),
+    JsonSubTypes.Type(value = VSBoxCollisionShapeData::class, name = "d"),
+    JsonSubTypes.Type(value = VSCapsuleCollisionShapeData::class, name = "e"),
+)
 interface VSCollisionShapeData {
     val shapeType: VSCollisionShapes
 }

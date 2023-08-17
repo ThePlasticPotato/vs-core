@@ -34,6 +34,8 @@ import org.joml.primitives.AABBf
 import org.joml.primitives.AABBfc
 import org.joml.primitives.AABBi
 import org.joml.primitives.AABBic
+import org.valkyrienskies.core.api.ships.properties.ShipInertiaData
+import org.valkyrienskies.core.impl.game.ships.ShipInertiaDataImpl
 
 class JOMLSerializationModule : SimpleModule() {
 
@@ -61,6 +63,8 @@ class JOMLSerializationModule : SimpleModule() {
         setupJOMLClass<AABBic, AABBi>()
         setupJOMLClass<AABBfc, AABBf>()
         setupJOMLClass<AABBdc, AABBd>()
+
+        setupJOMLClass<ShipInertiaData, ShipInertiaDataImpl>()
     }
 
     private inline fun <reified A, reified B : A> setupJOMLClass() {
