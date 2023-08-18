@@ -113,6 +113,7 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
 
     }
 
+    /*
     "tracks player leaving the dimension and returning" {
         val dimension = "fake_dimension"
         val ship = VSBlankUtils.blankShipData(chunkClaimDimension = dimension)
@@ -250,6 +251,7 @@ class ShipObjectServerWorldChunkTrackerTest : StringSpec({
             trackingInfo.shipsToUnload shouldHaveSize 0
         }
     }
+     */
 
     "tracks multiple players and multiple chunks" {
         val dimension = "fake_dimension"

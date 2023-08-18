@@ -14,13 +14,19 @@ import org.valkyrienskies.core.impl.datastructures.BlockPosSetAABBGenerator
 import org.valkyrienskies.core.impl.datastructures.IBlockPosSet
 import org.valkyrienskies.core.impl.datastructures.SmallBlockPosSet
 import org.valkyrienskies.core.impl.game.ChunkClaimImpl
-import org.valkyrienskies.core.impl.game.ships.*
+import org.valkyrienskies.core.impl.game.ships.MutableQueryableShipDataServer
+import org.valkyrienskies.core.impl.game.ships.QueryableShipDataImpl
+import org.valkyrienskies.core.impl.game.ships.ShipData
+import org.valkyrienskies.core.impl.game.ships.ShipInertiaDataImpl
+import org.valkyrienskies.core.impl.game.ships.ShipPhysicsData
+import org.valkyrienskies.core.impl.game.ships.ShipTransformImpl
 import org.valkyrienskies.core.impl.game.ships.serialization.shipinertia.dto.ShipInertiaDataV0
 import org.valkyrienskies.core.impl.game.ships.serialization.shipserver.dto.ServerShipDataV0
 import org.valkyrienskies.core.impl.game.ships.serialization.shipserver.dto.ServerShipDataV3
 import org.valkyrienskies.core.impl.game.ships.serialization.shiptransform.dto.ShipTransformDataV0
 import org.valkyrienskies.core.impl.pipelines.ShipInPhysicsFrameData
-import org.valkyrienskies.physics_api.*
+import org.valkyrienskies.physics_api.PhysicsBodyInertiaData
+import org.valkyrienskies.physics_api.PoseVel
 import kotlin.math.sqrt
 import kotlin.random.Random
 import kotlin.random.asJavaRandom
@@ -257,6 +263,7 @@ object VSRandomUtils {
                 randomVector3d()
             ),
             randomVector3d(),
+            1.0,
             randomAABBd(),
             defaultRandom.nextInt()
         )
