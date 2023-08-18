@@ -23,5 +23,12 @@ data class VSAttachmentConstraint(
         )
     }
 
+    override fun scaleLocalPositions(scale0: Double, scale1: Double): VSForceConstraint {
+        return VSAttachmentConstraint(
+            shipId0, shipId1, compliance, localPos0.mul(scale0, Vector3d()), localPos1.mul(scale1, Vector3d()),
+            maxForce, fixedDistance
+        )
+    }
+
     override val constraintType: VSConstraintType = VSConstraintType.ATTACHMENT
 }

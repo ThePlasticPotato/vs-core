@@ -164,6 +164,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val poseVel = PoseVel.createPoseVel(Vector3d(), Quaterniond())
             // No voxel offset
             val voxelOffset = Vector3d(.5, .5, .5)
+            val scaling = 1.0
             val isStatic = true
             val isVoxelsFullyLoaded = false
 
@@ -180,6 +181,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 dimensionId,
                 collisionShapeData,
                 voxelOffset,
+                scaling,
                 inertiaData,
                 ShipPhysicsData(Vector3d(), Vector3d()),
                 poseVel,
@@ -201,9 +203,8 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
 
             val scaling = it.shipData.transform.shipToWorldScaling.x()
 
-            // TODO: Support more advanced segments than just basic scaling from origin
             val poseVel = PoseVel.createPoseVel(
-                it.shipData.transform.positionInWorld.div(scaling, Vector3d()),
+                it.shipData.transform.positionInWorld,
                 it.shipData.transform.shipToWorldRotation
             )
             val voxelOffset = getShipVoxelOffset(it.shipData.inertiaData)
@@ -226,6 +227,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 it.shipData.chunkClaimDimension,
                 collisionShapeData,
                 voxelOffset,
+                scaling,
                 it.shipData.inertiaData.copyToPhyInertia(),
                 it.shipData.physicsData.copy(),
                 poseVel,
@@ -245,6 +247,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 it.shipTransform.shipToWorldRotation
             )
             val voxelOffset = getShipVoxelOffset(it.inertiaData)
+            val scaling = 1.0
             val isStatic = it.isStatic
             val shipTeleportId: Int = it.shipTeleportId
 
@@ -258,6 +261,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 dimension,
                 collisionShapeData,
                 voxelOffset,
+                scaling,
                 (it.inertiaData as ShipInertiaDataImpl).copyToPhyInertia(),
                 physicsData,
                 poseVel,
@@ -272,6 +276,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
         updatedShipObjects.forEach {
             val uuid = it.shipData.id
             val newVoxelOffset = getShipVoxelOffset(it.shipData.inertiaData)
+            val scaling = it.shipData.transform.shipToWorldScaling.x()
             val isStatic = it.shipData.isStatic
             val isVoxelsFullyLoaded = it.shipData.areVoxelsFullyLoaded()
             val shipAsWingManager: WingManager = it.getAttachment(WingManager::class.java)!!
@@ -285,6 +290,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val updateShipInGameFrameData = UpdateShipInGameFrameData(
                 uuid,
                 newVoxelOffset,
+                scaling,
                 it.shipData.inertiaData.copyToPhyInertia(),
                 it.shipData.physicsData.copy(),
                 isStatic,
@@ -303,6 +309,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
         updatedPhysicsEntities.forEach {
             val uuid = it.id
             val newVoxelOffset = getShipVoxelOffset(it.inertiaData)
+            val scaling = 1.0
             val isStatic = it.isStatic
             val isVoxelsFullyLoaded = true
             val shipTeleportId: Int = it.shipTeleportId
@@ -316,6 +323,7 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val updateShipInGameFrameData = UpdateShipInGameFrameData(
                 uuid,
                 newVoxelOffset,
+                scaling,
                 (it.inertiaData as ShipInertiaDataImpl).copyToPhyInertia(),
                 physicsData,
                 isStatic,
@@ -406,12 +414,14 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             Vector3d(-0.5, -0.5, -0.5)
         }
 
-        // Offset force constraints by the center of mass before sending them to the physics pipeline
+        val scaling0 = ship0?.shipData?.transform?.shipToWorldScaling?.x() ?: 1.0
+        val scaling1 = ship1?.shipData?.transform?.shipToWorldScaling?.x() ?: 1.0
+        // Offset force constraints by the center of mass, then scale them, then send them to the physics pipeline
         // TODO: I'm not entirely sure why I have to subtract 0.5 here, but it works
         return vsConstraint.offsetLocalPositions(
             cm0.mul(-1.0, Vector3d()).sub(0.5, 0.5, 0.5),
             cm1.mul(-1.0, Vector3d()).sub(0.5, 0.5, 0.5),
-        )
+        ).scaleLocalPositions(scaling0, scaling1)
     }
 
     companion object {
@@ -428,19 +438,18 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val poseVelFromPhysics = physicsFrameData.poseVel
             val voxelOffsetFromPhysics = physicsFrameData.shipVoxelOffset
             val voxelOffsetFromGame = getShipVoxelOffset(shipData.inertiaData)
+            val scaling = physicsFrameData.scaling
 
             val deltaVoxelOffset = poseVelFromPhysics.rot.transform(
                 voxelOffsetFromGame.sub(voxelOffsetFromPhysics, Vector3d())
             )
+            deltaVoxelOffset.mul(scaling)
 
             val shipPosAccountingForVoxelOffsetDifference =
                 poseVelFromPhysics.pos.sub(deltaVoxelOffset, Vector3d())
 
-            val scaling = 1.0 // physicsFrameData.segments.segments.values.first().segmentDisplacement.scaling
-            val shipPosAccountingForSegment = shipPosAccountingForVoxelOffsetDifference.mul(scaling, Vector3d())
-
             return ShipTransformImpl.create(
-                shipPosAccountingForSegment,
+                shipPosAccountingForVoxelOffsetDifference,
                 shipData.inertiaData.centerOfMassInShip.add(.5, .5, .5, Vector3d()),
                 poseVelFromPhysics.rot,
                 Vector3d(scaling)

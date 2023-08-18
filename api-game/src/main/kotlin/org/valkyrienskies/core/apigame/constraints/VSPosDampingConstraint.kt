@@ -23,5 +23,12 @@ data class VSPosDampingConstraint(
         )
     }
 
+    override fun scaleLocalPositions(scale0: Double, scale1: Double): VSPosDampingConstraint {
+        return VSPosDampingConstraint(
+            shipId0, shipId1, compliance, localPos0.mul(scale0, Vector3d()), localPos1.mul(scale1, Vector3d()),
+            maxForce, posDamping
+        )
+    }
+
     override val constraintType: VSConstraintType = VSConstraintType.POS_DAMPING
 }

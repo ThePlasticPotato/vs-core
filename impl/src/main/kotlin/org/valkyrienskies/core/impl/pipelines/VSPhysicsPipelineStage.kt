@@ -109,17 +109,24 @@ class VSPhysicsPipelineStage @Inject constructor() {
     var isUsingDummy = false
         private set
 
+    private val physicsWorldFactory: () -> PhysicsWorldReference
+
     init {
         var factoriesTemp: VSPhysicsFactories
         var lod1BlockRegistryTemp: Lod1BlockRegistry
+        var physicsWorldFactoryTemp: () -> PhysicsWorldReference
         // Try creating the physics engine
         try {
-            val temp = KrunchBootstrap.createKrunchPhysicsWorld()
-            // Apply physics engine settings
-            KrunchBootstrap.setKrunchSettings(
-                temp,
-                settings
-            )
+            physicsWorldFactoryTemp = {
+                val physicsWorld = KrunchBootstrap.createKrunchPhysicsWorld()
+                // Apply physics engine settings
+                KrunchBootstrap.setKrunchSettings(
+                    physicsWorld,
+                    settings
+                )
+                physicsWorld
+            }
+
             factoriesTemp = KrunchBootstrap.getKrunchFactories()
             val vsByteBuffer = factoriesTemp.vsByteBufferFactory.createVSByteBuffer(1000000)
             lod1BlockRegistryTemp = factoriesTemp.lod1BlockRegistryFactory.createLod1BlockRegistry(vsByteBuffer)
@@ -182,10 +189,11 @@ class VSPhysicsPipelineStage @Inject constructor() {
             isUsingDummy = true
             factoriesTemp = DummyVSPhysicsFactories
             lod1BlockRegistryTemp = DummyLod1BlockRegistry()
-            DummyPhysicsWorldReference()
+            physicsWorldFactoryTemp = ::DummyPhysicsWorldReference
         }
         factories = factoriesTemp
         lod1BlockRegistry = lod1BlockRegistryTemp
+        physicsWorldFactory = physicsWorldFactoryTemp
     }
 
     /**
@@ -316,7 +324,8 @@ class VSPhysicsPipelineStage @Inject constructor() {
             // TODO: Create dedicated updates for creating/deleting dimensions
             if (!(dimensionToShipIdToPhysShip.containsKey(dimensionId))) {
                 dimensionToShipIdToPhysShip[dimensionId] = HashMap()
-                physicsEngines[dimensionId] = KrunchBootstrap.createKrunchPhysicsWorld()
+                val newPhysicsWorld = physicsWorldFactory()
+                physicsEngines[dimensionId] = newPhysicsWorld
             }
             val shipIdToPhysShip = dimensionToShipIdToPhysShip[dimensionId]!!
 
@@ -369,6 +378,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             newRigidBodyReference.inertiaData = physInertiaToRigidBodyInertiaData(inertiaData)
             newRigidBodyReference.poseVel = poseVel
             newRigidBodyReference.collisionShapeOffset = newShipInGameFrameData.collisionShapeOffset
+            newRigidBodyReference.collisionShapeScaling = newShipInGameFrameData.collisionShapeScaling
             newRigidBodyReference.isStatic = isStatic
 
             val physShip =
@@ -403,6 +413,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val oldVoxelOffset = shipRigidBody.collisionShapeOffset
             val newVoxelOffset = shipUpdate.collisionShapeOffset
             val deltaVoxelOffset = oldPoseVel.rot.transform(newVoxelOffset.sub(oldVoxelOffset, Vector3d()))
+            deltaVoxelOffset.mul(shipUpdate.collisionShapeScaling)
             val isStatic = shipUpdate.isStatic
             val shipVoxelsFullyLoaded = shipUpdate.shipVoxelsFullyLoaded
             val wingManagerChanges = shipUpdate.wingManagerChanges
@@ -430,6 +441,7 @@ class VSPhysicsPipelineStage @Inject constructor() {
             shipRigidBody.collisionShapeOffset = newVoxelOffset
             shipRigidBody.poseVel = newShipPoseVel
             shipRigidBody.inertiaData = physInertiaToRigidBodyInertiaData(shipUpdate.inertiaData)
+            shipRigidBody.collisionShapeScaling = shipUpdate.collisionShapeScaling
             shipRigidBody.isStatic = isStatic
 
             val collisionShapeCopy = shipRigidBody.collisionShape
@@ -560,13 +572,14 @@ class VSPhysicsPipelineStage @Inject constructor() {
                 val inertiaData: PhysicsBodyInertiaData = rigidBodyReference.inertiaData
                 val poseVel: PoseVel = rigidBodyReference.poseVel
                 val shipVoxelOffset: Vector3dc = rigidBodyReference.collisionShapeOffset
+                val scaling = rigidBodyReference.collisionShapeScaling
                 val aabb = AABBd()
                 rigidBodyReference.getAABB(aabb)
                 val lastShipTeleportId: Int = shipIdAndRigidBodyReference.lastShipTeleportId
 
                 shipDataMap[shipId] =
                     ShipInPhysicsFrameData(
-                        shipId, inertiaData, poseVel, shipVoxelOffset, aabb, lastShipTeleportId
+                        shipId, inertiaData, poseVel, shipVoxelOffset, scaling, aabb, lastShipTeleportId
                     )
             }
         }

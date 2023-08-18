@@ -21,11 +21,11 @@ enum class VSCollisionShapes {
     property = "type"
 )
 @JsonSubTypes(
-    JsonSubTypes.Type(value = VSVoxelCollisionShapeData::class, name = "a"),
-    JsonSubTypes.Type(value = VSSphereCollisionShapeData::class, name = "b"),
-    JsonSubTypes.Type(value = VSWheelCollisionShapeData::class, name = "c"),
-    JsonSubTypes.Type(value = VSBoxCollisionShapeData::class, name = "d"),
-    JsonSubTypes.Type(value = VSCapsuleCollisionShapeData::class, name = "e"),
+    JsonSubTypes.Type(value = VSVoxelCollisionShapeData::class, name = "voxel"),
+    JsonSubTypes.Type(value = VSSphereCollisionShapeData::class, name = "sphere"),
+    JsonSubTypes.Type(value = VSWheelCollisionShapeData::class, name = "wheel"),
+    JsonSubTypes.Type(value = VSBoxCollisionShapeData::class, name = "box"),
+    JsonSubTypes.Type(value = VSCapsuleCollisionShapeData::class, name = "capsule"),
 )
 interface VSCollisionShapeData {
     val shapeType: VSCollisionShapes

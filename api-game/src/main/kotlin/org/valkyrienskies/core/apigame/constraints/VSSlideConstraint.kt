@@ -31,5 +31,12 @@ data class VSSlideConstraint(
         )
     }
 
+    override fun scaleLocalPositions(scale0: Double, scale1: Double): VSSlideConstraint {
+        return VSSlideConstraint(
+            shipId0, shipId1, compliance, localPos0.mul(scale0, Vector3d()), localPos1.mul(scale1, Vector3d()),
+            maxForce, localSlideAxis0, maxDistBetweenPoints
+        )
+    }
+
     override val constraintType: VSConstraintType = VSConstraintType.SLIDE
 }

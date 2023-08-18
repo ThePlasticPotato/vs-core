@@ -35,6 +35,7 @@ data class NewShipInGameFrameData(
     val dimension: DimensionId,
     val collisionShapeData: VSCollisionShapeData,
     val collisionShapeOffset: Vector3dc,
+    val collisionShapeScaling: Double,
     val inertiaData: PhysInertia,
     val physicsData: ShipPhysicsData,
     val poseVel: PoseVel,
@@ -47,6 +48,7 @@ data class NewShipInGameFrameData(
 data class UpdateShipInGameFrameData(
     val uuid: ShipId,
     val collisionShapeOffset: Vector3dc,
+    val collisionShapeScaling: Double,
     val inertiaData: PhysInertia,
     val physicsData: ShipPhysicsData,
     val isStatic: Boolean,
