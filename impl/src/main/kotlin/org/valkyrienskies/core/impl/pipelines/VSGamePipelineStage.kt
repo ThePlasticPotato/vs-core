@@ -15,6 +15,10 @@ import org.valkyrienskies.core.apigame.constraints.VSConstraintAndId
 import org.valkyrienskies.core.apigame.constraints.VSConstraintId
 import org.valkyrienskies.core.apigame.constraints.VSForceConstraint
 import org.valkyrienskies.core.apigame.physics.PhysicsEntityServer
+import org.valkyrienskies.core.apigame.physics.RigidBodyDefaults.DEFAULT_COLLISION_MASK
+import org.valkyrienskies.core.apigame.physics.RigidBodyDefaults.DEFAULT_DYNAMIC_FRICTION_COEFFICIENT
+import org.valkyrienskies.core.apigame.physics.RigidBodyDefaults.DEFAULT_RESTITUTION_COEFFICIENT
+import org.valkyrienskies.core.apigame.physics.RigidBodyDefaults.DEFAULT_STATIC_FRICTION_COEFFICIENT
 import org.valkyrienskies.core.apigame.physics.VSVoxelCollisionShapeData
 import org.valkyrienskies.core.impl.api.ServerShipInternal
 import org.valkyrienskies.core.impl.api.Ticked
@@ -176,6 +180,11 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 shipVoxelsFullyLoaded = isVoxelsFullyLoaded,
             )
 
+            val collisionMask = DEFAULT_COLLISION_MASK
+            val staticFrictionCoefficient = DEFAULT_STATIC_FRICTION_COEFFICIENT
+            val dynamicFrictionCoefficient = DEFAULT_DYNAMIC_FRICTION_COEFFICIENT
+            val restitutionCoefficient = DEFAULT_RESTITUTION_COEFFICIENT
+
             val newShipInGameFrameData = NewShipInGameFrameData(
                 shipId,
                 dimensionId,
@@ -189,6 +198,10 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 emptyList(),
                 null,
                 0,
+                collisionMask,
+                staticFrictionCoefficient,
+                dynamicFrictionCoefficient,
+                restitutionCoefficient,
             )
             newShips.add(newShipInGameFrameData)
         }
@@ -221,6 +234,11 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 shipVoxelsFullyLoaded = isVoxelsFullyLoaded,
             )
 
+            val collisionMask = DEFAULT_COLLISION_MASK
+            val staticFrictionCoefficient = DEFAULT_STATIC_FRICTION_COEFFICIENT
+            val dynamicFrictionCoefficient = DEFAULT_DYNAMIC_FRICTION_COEFFICIENT
+            val restitutionCoefficient = DEFAULT_RESTITUTION_COEFFICIENT
+
             // Deep copy objects from ShipData, since we don't want VSGameFrame to be modified
             val newShipInGameFrameData = NewShipInGameFrameData(
                 uuid,
@@ -235,6 +253,10 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 it.forceInducers.toMutableList(), //Copy the list
                 shipAsWingManager.getWingChanges(),
                 shipTeleportId,
+                collisionMask,
+                staticFrictionCoefficient,
+                dynamicFrictionCoefficient,
+                restitutionCoefficient,
             )
             newShips.add(newShipInGameFrameData)
         }
@@ -255,6 +277,11 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
             val collisionShapeData = it.collisionShapeData
             val physicsData = ShipPhysicsData(it.linearVelocity, it.angularVelocity)
 
+            val collisionMask = it.collisionMask
+            val staticFrictionCoefficient = it.staticFrictionCoefficient
+            val dynamicFrictionCoefficient = it.dynamicFrictionCoefficient
+            val restitutionCoefficient = it.restitutionCoefficient
+
             // Deep copy objects from ShipData, since we don't want VSGameFrame to be modified
             val newShipInGameFrameData = NewShipInGameFrameData(
                 uuid,
@@ -269,6 +296,10 @@ class VSGamePipelineStage @Inject constructor(private val shipWorld: ShipObjectS
                 listOf(),
                 null,
                 shipTeleportId,
+                collisionMask,
+                staticFrictionCoefficient,
+                dynamicFrictionCoefficient,
+                restitutionCoefficient,
             )
             newShips.add(newShipInGameFrameData)
         }

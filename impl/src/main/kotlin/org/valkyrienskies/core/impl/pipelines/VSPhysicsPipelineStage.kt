@@ -375,11 +375,20 @@ class VSPhysicsPipelineStage @Inject constructor() {
             val wingManagerChanges = newShipInGameFrameData.wingManagerChanges
             val shipTeleportId = newShipInGameFrameData.shipTeleportId
 
+            val collisionMask = newShipInGameFrameData.collisionMask
+            val staticFrictionCoefficient = newShipInGameFrameData.staticFrictionCoefficient
+            val dynamicFrictionCoefficient = newShipInGameFrameData.dynamicFrictionCoefficient
+            val restitutionCoefficient = newShipInGameFrameData.restitutionCoefficient
+
             newRigidBodyReference.inertiaData = physInertiaToRigidBodyInertiaData(inertiaData)
             newRigidBodyReference.poseVel = poseVel
             newRigidBodyReference.collisionShapeOffset = newShipInGameFrameData.collisionShapeOffset
             newRigidBodyReference.collisionShapeScaling = newShipInGameFrameData.collisionShapeScaling
             newRigidBodyReference.isStatic = isStatic
+            newRigidBodyReference.collisionMask = collisionMask
+            newRigidBodyReference.staticFrictionCoefficient = staticFrictionCoefficient
+            newRigidBodyReference.dynamicFrictionCoefficient = dynamicFrictionCoefficient
+            newRigidBodyReference.restitutionCoefficient = restitutionCoefficient
 
             val physShip =
                 PhysShipImpl(

@@ -43,6 +43,10 @@ data class NewShipInGameFrameData(
     val forcesInducers: List<ShipForcesInducer>,
     val wingManagerChanges: WingManagerChanges?,
     val shipTeleportId: Int,
+    val collisionMask: Int,
+    val staticFrictionCoefficient: Double,
+    val dynamicFrictionCoefficient: Double,
+    val restitutionCoefficient: Double,
 )
 
 data class UpdateShipInGameFrameData(

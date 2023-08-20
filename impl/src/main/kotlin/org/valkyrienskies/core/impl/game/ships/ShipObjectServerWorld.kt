@@ -486,6 +486,10 @@ class ShipObjectServerWorld @Inject constructor(
             prevTickShipTransform = physicsEntityData.transform,
             shipTeleportId = 0,
             collisionShapeData = physicsEntityData.collisionShapeData,
+            collisionMask = physicsEntityData.collisionMask,
+            staticFrictionCoefficient = physicsEntityData.staticFrictionCoefficient,
+            dynamicFrictionCoefficient = physicsEntityData.dynamicFrictionCoefficient,
+            restitutionCoefficient = physicsEntityData.restitutionCoefficient,
             isStatic = physicsEntityData.isStatic
         )
         _loadedPhysicsEntities[physicsEntityData.shipId] = physicsEntity
