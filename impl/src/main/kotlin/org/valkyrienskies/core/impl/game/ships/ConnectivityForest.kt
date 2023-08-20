@@ -50,7 +50,7 @@ interface ConnectivityForest {
     /**
      * Verifies that the connectivity forest is intact. If not, adds breakages to the break queue.
      */
-    fun verifyIntactOnLoad()
+    fun verifyIntactOnLoad(posVertex: BlockPosVertex)
 
     fun addToBreakQueue(arr : ArrayList<Vector3ic?>)
 

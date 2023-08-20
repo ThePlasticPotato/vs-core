@@ -6,7 +6,7 @@ import org.valkyrienskies.core.impl.datastructures.dynconn.dep.RedBlackNode;
  * A node in an Euler tour tree for ConnGraph (at some particular level i). See the comments for the implementation of
  * ConnGraph.
  */
-class EulerTourNode extends RedBlackNode<EulerTourNode> {
+public class EulerTourNode extends RedBlackNode<EulerTourNode> {
     /** The dummy leaf node. */
     public static final EulerTourNode LEAF = new EulerTourNode(null, null);
 

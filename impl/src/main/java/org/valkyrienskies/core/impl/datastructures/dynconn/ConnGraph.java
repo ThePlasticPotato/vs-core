@@ -933,6 +933,15 @@ public class ConnGraph {
         }
     }
 
+    public EulerTourNode getRoot(ConnVertex vertex) {
+        VertexInfo info = vertexInfo.get(vertex);
+        if (info != null) {
+            return info.vertex.arbitraryVisit.root();
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Sets the augmentation associated with the specified vertex. This method takes O(log N) time with high
      * probability.
