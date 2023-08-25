@@ -5,7 +5,6 @@ import org.joml.Vector3ic
 import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnVertex
-import org.valkyrienskies.core.impl.datastructures.dynconn.EulerTourNode
 
 class ConnectivityForestImpl(override val graph: ConnGraph,
     override val vertices: HashMap<Vector3ic, BlockPosVertex>,
@@ -61,7 +60,7 @@ class ConnectivityForestImpl(override val graph: ConnGraph,
         return true
     }
 
-    override fun split(vertlist: ArrayList<Vector3ic?>): MutableSet<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>> {
+    override fun split(vertlist: ArrayList<Vector3ic?>): Pair<MutableSet<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>>, Vector3ic> {
 
         val vertexOne = vertices[vertlist[0]]
         val vertexTwo = vertices[vertlist[1]]
@@ -131,12 +130,12 @@ class ConnectivityForestImpl(override val graph: ConnGraph,
             breaking.add(Pair(connectedToSix, vertlist[5]!!))
         }
 
-        removeLargestMap(breaking)
+        val largestMap = removeLargestMap(breaking)
 
-        return breaking
+        return Pair(breaking, largestMap.second)
     }
 
-    fun removeLargestMap(remover: MutableSet<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>>) {
+    fun removeLargestMap(remover: MutableSet<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>>): Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic> {
         var largest = 0
         var largestMap = Pair(HashMap<Vector3ic, BlockPosVertex>(), Vector3i(0, 0, 0) as Vector3ic)
         for (map in remover) {
@@ -146,6 +145,7 @@ class ConnectivityForestImpl(override val graph: ConnGraph,
             }
         }
         remover.remove(largestMap)
+        return largestMap
     }
 
     override fun merge() {

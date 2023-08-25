@@ -42,7 +42,7 @@ interface ConnectivityForest {
     /**
      * Scans a ship, and returns the smaller, split half of the graph.
      */
-    fun split(vertlist: ArrayList<Vector3ic?>): Set<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>>
+    fun split(vertlist: ArrayList<Vector3ic?>): Pair<Set<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>>, Vector3ic>
 
     // todo: later
     fun merge()
