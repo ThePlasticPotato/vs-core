@@ -60,7 +60,7 @@ class ConnectivityForestImpl(override val graph: ConnGraph,
         return true
     }
 
-    override fun split(vertlist: ArrayList<Vector3ic?>): Pair<MutableSet<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>>, Vector3ic> {
+    override fun split(vertlist: ArrayList<Vector3ic?>): MutableSet<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>> {
 
         val vertexOne = vertices[vertlist[0]]
         val vertexTwo = vertices[vertlist[1]]
@@ -130,9 +130,10 @@ class ConnectivityForestImpl(override val graph: ConnGraph,
             breaking.add(Pair(connectedToSix, vertlist[5]!!))
         }
 
-        val largestMap = removeLargestMap(breaking)
+        removeLargestMap(breaking)
 
-        return Pair(breaking, largestMap.second)
+        // return Pair(breaking, largestMap.second)
+        return breaking
     }
 
     fun removeLargestMap(remover: MutableSet<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>>): Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic> {
