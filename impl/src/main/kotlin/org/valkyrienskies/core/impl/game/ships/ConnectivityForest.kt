@@ -3,7 +3,6 @@ package org.valkyrienskies.core.impl.game.ships
 import org.joml.Vector3ic
 import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
-import java.util.concurrent.CopyOnWriteArraySet
 
 interface ConnectivityForest {
 
@@ -42,7 +41,7 @@ interface ConnectivityForest {
     /**
      * Scans a ship, and returns the smaller, split half of the graph.
      */
-    fun split(vertlist: ArrayList<Vector3ic?>): Set<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>>
+    fun split(vertlist: ArrayList<Vector3ic?>): Pair<Set<Pair<HashMap<Vector3ic, BlockPosVertex>, Vector3ic>>, Vector3ic>
 
     // todo: later
     fun merge()

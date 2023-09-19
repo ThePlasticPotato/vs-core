@@ -1,5 +1,8 @@
 package org.valkyrienskies.core.impl.datastructures.dynconn;
 
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
+
 public class BlockPosVertex extends ConnVertex {
     int posX;
     int posY;
@@ -27,5 +30,9 @@ public class BlockPosVertex extends ConnVertex {
 
     public int getPosZ() {
         return posZ;
+    }
+
+    public Vector3ic toJOML() {
+        return new Vector3i(posX, posY, posZ);
     }
 }
