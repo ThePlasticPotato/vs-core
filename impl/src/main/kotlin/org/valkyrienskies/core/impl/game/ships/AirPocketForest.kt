@@ -2,6 +2,7 @@ package org.valkyrienskies.core.impl.game.ships
 
 import org.joml.Vector3ic
 import org.joml.primitives.AABBic
+import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
 
@@ -41,6 +42,11 @@ interface AirPocketForest {
      * The current AABB of the ship.
      */
     var currentShipAABB: AABBic
+
+    /**
+     * The ID of the ship this is attached to. Not exactly sure I should be storing this...
+     */
+    val hostShipId: ShipId
 
     /**
      * Returns whether the given position is within one of the air pockets listed in airPockets.

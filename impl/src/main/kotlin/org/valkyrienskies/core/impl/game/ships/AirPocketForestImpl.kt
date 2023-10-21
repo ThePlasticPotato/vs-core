@@ -3,16 +3,20 @@ package org.valkyrienskies.core.impl.game.ships
 import org.joml.Vector3i
 import org.joml.Vector3ic
 import org.joml.primitives.AABBic
+import org.valkyrienskies.core.api.ships.properties.ShipId
 import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnVertex
+import org.valkyrienskies.core.impl.hooks.VSEvents
+import org.valkyrienskies.core.impl.hooks.VSEvents.AirPocketModifyEvent
 
 class AirPocketForestImpl(
     override val graph: ConnGraph, override val airVertices: HashMap<Vector3ic, BlockPosVertex>,
     public override val outsideAirVertices: HashMap<Vector3ic, BlockPosVertex>,
     override val sealedAirBlocks: HashMap<Vector3ic, BlockPosVertex>,
     override val individualAirPockets: HashMap<Int, HashMap<Vector3ic, BlockPosVertex>>,
-    override var currentShipAABB: AABBic
+    override var currentShipAABB: AABBic,
+    override val hostShipId: ShipId
 ) : AirPocketForest {
 
     var nextId: Int = 0
@@ -73,6 +77,7 @@ class AirPocketForestImpl(
             sealedAirBlocks.remove(vertex)
         }
         individualAirPockets.remove(toRemove)
+        VSEvents.airPocketModifyEvent.emit(AirPocketModifyEvent(this.hostShipId, toRemove, true))
     }
 
     fun mergeAirPockets(newPocket: HashMap<Vector3ic, BlockPosVertex>) {
@@ -91,15 +96,17 @@ class AirPocketForestImpl(
                 }
                 if (shouldRemove) {
                     updatedPocket.putAll(airPocket)
-                    toRemoveFromIndividualAirPockets.add(airPocketId)
                     if (idToUse == null) {
                         idToUse = airPocketId
+                    } else {
+                        toRemoveFromIndividualAirPockets.add(airPocketId)
                     }
                 }
             }
         }
         for (id in toRemoveFromIndividualAirPockets) {
             individualAirPockets.remove(id)
+            VSEvents.airPocketModifyEvent.emit(AirPocketModifyEvent(this.hostShipId, id, true))
         }
         if (idToUse == null) {
             idToUse = nextId
@@ -108,6 +115,8 @@ class AirPocketForestImpl(
         } else {
             individualAirPockets.replace(idToUse, updatedPocket)
         }
+        VSEvents.airPocketModifyEvent.emit(AirPocketModifyEvent(this.hostShipId, idToUse, false))
+
     }
 
     fun getPocketFromPos(x: Int, y: Int, z: Int): Int? {

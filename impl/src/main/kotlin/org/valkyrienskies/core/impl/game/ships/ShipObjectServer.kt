@@ -2,6 +2,7 @@ package org.valkyrienskies.core.impl.game.ships
 
 import com.google.common.collect.MutableClassToInstanceMap
 import org.joml.Vector3ic
+import org.joml.primitives.AABBi
 import org.valkyrienskies.core.api.ships.WingManager
 import org.valkyrienskies.core.apigame.ShipTeleportData
 import org.valkyrienskies.core.impl.api.LoadedServerShipInternal
@@ -45,10 +46,10 @@ class ShipObjectServer(
         val wingManager = WingManagerImpl()
         wingManager.createWingGroup()
         val connManager = ConnectivityForestImpl(ConnGraph(), HashMap<Vector3ic, BlockPosVertex>(), mutableSetOf(), mutableSetOf(), mutableSetOf())
-        // val airManager = AirPocketForestImpl(ConnGraph(), HashMap<Vector3ic, BlockPosVertex>(), HashMap<Vector3ic, BlockPosVertex>(), HashMap<Vector3ic, BlockPosVertex>(), mutableSetOf(), AABBi(shipAABB))
+        val airManager = AirPocketForestImpl(ConnGraph(), HashMap<Vector3ic, BlockPosVertex>(), HashMap<Vector3ic, BlockPosVertex>(), HashMap<Vector3ic, BlockPosVertex>(), hashMapOf(), AABBi(shipAABB), shipData.id)
         setAttachment(WingManager::class.java, wingManager)
         setAttachment(ConnectivityForest::class.java, connManager)
-        // setAttachment(AirPocketForest::class.java, airManager)
+        setAttachment(AirPocketForest::class.java, airManager)
     }
 
     override fun <T> setAttachment(clazz: Class<T>, value: T?) {
