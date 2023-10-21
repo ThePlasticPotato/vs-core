@@ -1,9 +1,11 @@
 package org.valkyrienskies.core.impl.game.ships
 
+import org.joml.Vector3fc
 import org.joml.Vector3i
 import org.joml.Vector3ic
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.impl.datastructures.AirPocket
 import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnVertex
@@ -14,7 +16,7 @@ class AirPocketForestImpl(
     override val graph: ConnGraph, override val airVertices: HashMap<Vector3ic, BlockPosVertex>,
     public override val outsideAirVertices: HashMap<Vector3ic, BlockPosVertex>,
     override val sealedAirBlocks: HashMap<Vector3ic, BlockPosVertex>,
-    override val individualAirPockets: HashMap<Int, HashMap<Vector3ic, BlockPosVertex>>,
+    override val individualAirPockets: HashMap<Int, AirPocket>,
     override var currentShipAABB: AABBic,
     override val hostShipId: ShipId
 ) : AirPocketForest {
@@ -73,7 +75,7 @@ class AirPocketForestImpl(
     fun removeAirPocket(toRemove: Int) {
         if (individualAirPockets[toRemove] == null) return
         val delete = individualAirPockets[toRemove]!!
-        for (vertex in delete.keys) {
+        for (vertex in delete.pocket.keys) {
             sealedAirBlocks.remove(vertex)
         }
         individualAirPockets.remove(toRemove)
@@ -84,18 +86,19 @@ class AirPocketForestImpl(
         val toRemoveFromIndividualAirPockets: HashSet<Int> = HashSet()
         val updatedPocket: HashMap<Vector3ic, BlockPosVertex> = HashMap(newPocket)
         var idToUse: Int? = null
+        var mergedExtraData: HashMap<String, Double> = HashMap()
         for (sealedAirBlock in newPocket.keys) {
             for (airPocketId in individualAirPockets.keys) {
                 val airPocket = individualAirPockets[airPocketId]!!
                 var shouldRemove = false
-                for (otherSealedAirBlock in airPocket.keys) {
+                for (otherSealedAirBlock in airPocket.pocket.keys) {
                     if (sealedAirBlock.equals(otherSealedAirBlock)) {
                         shouldRemove = true
                         break
                     }
                 }
                 if (shouldRemove) {
-                    updatedPocket.putAll(airPocket)
+                    updatedPocket.putAll(airPocket.pocket)
                     if (idToUse == null) {
                         idToUse = airPocketId
                     } else {
@@ -105,15 +108,16 @@ class AirPocketForestImpl(
             }
         }
         for (id in toRemoveFromIndividualAirPockets) {
+            mergedExtraData.putAll(individualAirPockets[id]!!.extraData)
             individualAirPockets.remove(id)
             VSEvents.airPocketModifyEvent.emit(AirPocketModifyEvent(this.hostShipId, id, true))
         }
         if (idToUse == null) {
             idToUse = nextId
             nextId++
-            individualAirPockets[idToUse] = updatedPocket
+            individualAirPockets[idToUse] = AirPocket(idToUse, updatedPocket, mergedExtraData)
         } else {
-            individualAirPockets.replace(idToUse, updatedPocket)
+            individualAirPockets[idToUse]!!.addToPocket(updatedPocket)
         }
         VSEvents.airPocketModifyEvent.emit(AirPocketModifyEvent(this.hostShipId, idToUse, false))
 
@@ -122,10 +126,21 @@ class AirPocketForestImpl(
     fun getPocketFromPos(x: Int, y: Int, z: Int): Int? {
         for (airPocketId in individualAirPockets.keys) {
             val airPocket = individualAirPockets[airPocketId]!!
-            for (vertex in airPocket.values) {
-                if (vertex.posX == x && vertex.posY == y && vertex.posZ == z) {
-                    return airPocketId
-                }
+            if (airPocket.containsPoint(x, y, z)) {
+                return airPocketId
+            }
+        }
+        return null
+    }
+    fun getPocketFromPos(pos: Vector3ic): Int? {
+        return getPocketFromPos(pos.x(), pos.y(), pos.z())
+    }
+
+    fun getPocketFromPosF(pos: Vector3fc): Int? {
+        for (airPocketId in individualAirPockets.keys) {
+            val airPocket = individualAirPockets[airPocketId]!!
+            if (airPocket.containsPoint(pos)) {
+                return airPocketId
             }
         }
         return null

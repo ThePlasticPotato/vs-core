@@ -3,6 +3,7 @@ package org.valkyrienskies.core.impl.game.ships
 import org.joml.Vector3ic
 import org.joml.primitives.AABBic
 import org.valkyrienskies.core.api.ships.properties.ShipId
+import org.valkyrienskies.core.impl.datastructures.AirPocket
 import org.valkyrienskies.core.impl.datastructures.dynconn.BlockPosVertex
 import org.valkyrienskies.core.impl.datastructures.dynconn.ConnGraph
 
@@ -31,7 +32,7 @@ interface AirPocketForest {
     /**
      * A set of each individual air pocket as a set.
      */
-    val individualAirPockets: HashMap<Int, HashMap<Vector3ic, BlockPosVertex>>
+    val individualAirPockets: HashMap<Int, AirPocket>
 
     /**
      * A boolean that is set to true if the outside air vertices need to be updated. For VS2 communication.
