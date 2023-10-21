@@ -11,9 +11,11 @@ class AirPocketForestImpl(
     override val graph: ConnGraph, override val airVertices: HashMap<Vector3ic, BlockPosVertex>,
     public override val outsideAirVertices: HashMap<Vector3ic, BlockPosVertex>,
     override val sealedAirBlocks: HashMap<Vector3ic, BlockPosVertex>,
-    override val individualAirPockets: MutableSet<HashMap<Vector3ic, BlockPosVertex>>,
+    override val individualAirPockets: HashMap<Int, HashMap<Vector3ic, BlockPosVertex>>,
     override var currentShipAABB: AABBic
 ) : AirPocketForest {
+
+    var nextId: Int = 0
 
     override var shouldUpdateOutsideAir: Boolean = false
     override fun isInAirPocket(posX: Int, posY: Int, posZ: Int): Boolean {
@@ -45,7 +47,8 @@ class AirPocketForestImpl(
             addAirPocket(set)
             true
         } else {
-            removeAirPocket(set)
+            val pocketId = getPocketFromPos(changed.x(), changed.y(), changed.z()) ?: return false
+            removeAirPocket(pocketId)
             false
         }
     }
@@ -56,47 +59,29 @@ class AirPocketForestImpl(
             if (airVertices[vertex] == null) {
                 continue
             }
-            sealedAirBlocks.put(vertex, airVertices[vertex]!!)
-            newPocket.put(vertex, airVertices[vertex]!!)
+            sealedAirBlocks[vertex] = airVertices[vertex]!!
+            newPocket[vertex] = airVertices[vertex]!!
         }
         if (newPocket.isEmpty()) return
         mergeAirPockets(newPocket)
     }
 
-    fun removeAirPocket(toRemove: MutableSet<Vector3ic>) {
-        while (toRemove.isNotEmpty()) {
-            val remove: MutableSet<Vector3ic> = mutableSetOf()
-            for (vector in toRemove) {
-                val retrievedPocket = getPocketFromPos(vector.x(), vector.y(), vector.z())
-                if (retrievedPocket != null) {
-                    remove.addAll(retrievedPocket.keys)
-                    individualAirPockets.remove(retrievedPocket)
-                    break
-                }
-            }
-            if (remove.isEmpty()) {
-                for (vector in toRemove) {
-                    sealedAirBlocks.remove(vector)
-                }
-                toRemove.clear()
-                return
-            }
-            toRemove.removeAll(remove)
-            for (removeVector in remove) {
-                sealedAirBlocks.remove(removeVector)
-                // delVertex(removeVector.x(), removeVector.y(), removeVector.z(), false)
-                }
-            remove.clear()
-
+    fun removeAirPocket(toRemove: Int) {
+        if (individualAirPockets[toRemove] == null) return
+        val delete = individualAirPockets[toRemove]!!
+        for (vertex in delete.keys) {
+            sealedAirBlocks.remove(vertex)
         }
-
+        individualAirPockets.remove(toRemove)
     }
 
     fun mergeAirPockets(newPocket: HashMap<Vector3ic, BlockPosVertex>) {
-        var toRemoveFromIndividualAirPockets: MutableSet<HashMap<Vector3ic, BlockPosVertex>> = mutableSetOf()
-        var updatedPocket: HashMap<Vector3ic, BlockPosVertex> = HashMap(newPocket)
+        val toRemoveFromIndividualAirPockets: HashSet<Int> = HashSet()
+        val updatedPocket: HashMap<Vector3ic, BlockPosVertex> = HashMap(newPocket)
+        var idToUse: Int? = null
         for (sealedAirBlock in newPocket.keys) {
-            for (airPocket in individualAirPockets) {
+            for (airPocketId in individualAirPockets.keys) {
+                val airPocket = individualAirPockets[airPocketId]!!
                 var shouldRemove = false
                 for (otherSealedAirBlock in airPocket.keys) {
                     if (sealedAirBlock.equals(otherSealedAirBlock)) {
@@ -106,19 +91,31 @@ class AirPocketForestImpl(
                 }
                 if (shouldRemove) {
                     updatedPocket.putAll(airPocket)
-                    toRemoveFromIndividualAirPockets.add(airPocket)
+                    toRemoveFromIndividualAirPockets.add(airPocketId)
+                    if (idToUse == null) {
+                        idToUse = airPocketId
+                    }
                 }
             }
         }
-        individualAirPockets.add(updatedPocket)
-        individualAirPockets.removeAll(toRemoveFromIndividualAirPockets)
+        for (id in toRemoveFromIndividualAirPockets) {
+            individualAirPockets.remove(id)
+        }
+        if (idToUse == null) {
+            idToUse = nextId
+            nextId++
+            individualAirPockets[idToUse] = updatedPocket
+        } else {
+            individualAirPockets.replace(idToUse, updatedPocket)
+        }
     }
 
-    fun getPocketFromPos(x: Int, y: Int, z: Int): HashMap<Vector3ic, BlockPosVertex>? {
-        for (airPocket in individualAirPockets) {
+    fun getPocketFromPos(x: Int, y: Int, z: Int): Int? {
+        for (airPocketId in individualAirPockets.keys) {
+            val airPocket = individualAirPockets[airPocketId]!!
             for (vertex in airPocket.values) {
                 if (vertex.posX == x && vertex.posY == y && vertex.posZ == z) {
-                    return airPocket
+                    return airPocketId
                 }
             }
         }

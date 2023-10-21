@@ -257,12 +257,7 @@ class ShipObjectServerWorld @Inject constructor(
                         airForest.delVertex(posX, posY, posZ, false)
                     }
                     if (shipData.shipAABB != null) {
-                        var exclusion: AABBic = shipData.shipAABB!!.expand(-1, AABBi())
-                        val border: AABBic = AABBi(shipData.shipAABB)
-                        if (border.maxX()-border.minX() < 2 || border.maxY()-border.minY() < 2 || border.maxZ()-border.minZ() < 2) {
-                            exclusion = AABBi()
-                        }
-                        if (border.containsPoint(posX,posY,posZ) && !exclusion.containsPoint(posX,posY,posZ)) {
+                        if (!shipData.shipAABB!!.equals(airForest.currentShipAABB)) {
                             airForest.setUpdateOutsideAir(true)
                         }
                         airForest.currentShipAABB = AABBi(shipData.shipAABB)
