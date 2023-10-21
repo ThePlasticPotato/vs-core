@@ -112,12 +112,13 @@ class AirPocketForestImpl(
             individualAirPockets.remove(id)
             VSEvents.airPocketModifyEvent.emit(AirPocketModifyEvent(this.hostShipId, id, true))
         }
-        if (idToUse == null) {
+        var makeNew = false
+        if (idToUse != null && individualAirPockets[idToUse] != null) {
+            individualAirPockets[idToUse]?.addToPocket(updatedPocket)
+        } else {
             idToUse = nextId
             nextId++
             individualAirPockets[idToUse] = AirPocket(idToUse, updatedPocket, mergedExtraData)
-        } else {
-            individualAirPockets[idToUse]!!.addToPocket(updatedPocket)
         }
         VSEvents.airPocketModifyEvent.emit(AirPocketModifyEvent(this.hostShipId, idToUse, false))
 

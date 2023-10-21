@@ -255,24 +255,67 @@ class ShipObjectServerWorld @Inject constructor(
                     } else {
                         airForest.delVertex(posX, posY, posZ, false)
                     }
+
                     if (shipData.shipAABB != null) {
                         if (shipData.shipAABB!! != airForest.currentShipAABB) {
                             val aabbToCheck: AABBic = shipData.shipAABB!!.expand(1, AABBi())
-                            val exclusion: AABBic = shipData.shipAABB!!
-
                             val newOutsideAirVertices: HashSet<Vector3ic> = HashSet()
+                            for (direction in 1..6) {
 
-                            for (x in aabbToCheck.minX()..aabbToCheck.maxX()) {
-                                for (y in aabbToCheck.minY()..aabbToCheck.maxY()) {
-                                    for (z in aabbToCheck.minZ()..aabbToCheck.maxZ()) {
-                                        val pos = Vector3i(x, y, z)
-                                        if (!exclusion.containsPoint(pos)) {
-                                            newOutsideAirVertices.add(pos)
+                                val minX = when (direction) {
+                                    1, 2 -> aabbToCheck.minX()
+                                    3, 4 -> aabbToCheck.minX()
+                                    else -> aabbToCheck.minZ()
+                                }
+                                val maxX = when (direction) {
+                                    1, 2 -> aabbToCheck.maxX()
+                                    3, 4 -> aabbToCheck.maxX()
+                                    else -> aabbToCheck.maxZ()
+                                }
+
+                                val minY = when (direction) {
+                                    1, 2 -> aabbToCheck.minZ()
+                                    else -> aabbToCheck.minY()
+                                }
+                                val maxY = when (direction) {
+                                    1, 2 -> aabbToCheck.maxZ()
+                                    else -> aabbToCheck.maxY()
+                                }
+
+                                val offset = when (direction) {
+                                    1 -> aabbToCheck.maxY()
+                                    2 -> aabbToCheck.minY()
+                                    3 -> aabbToCheck.minZ()
+                                    4 -> aabbToCheck.maxZ()
+                                    5 -> aabbToCheck.maxX()
+                                    else -> aabbToCheck.minX()
+                                }
+
+                                for (x in minX..maxX) {
+                                    for (y in minY..maxY) {
+                                        val pos = Vector3i()
+                                        when (direction) {
+                                            1, 2 -> pos.set(x, offset, y)
+                                            3, 4 -> pos.set(x, y, offset)
+                                            else -> pos.set(offset, x, y)
                                         }
+                                        newOutsideAirVertices.add(pos)
                                     }
                                 }
                             }
                             airForest.updateOutsideAirVertices(newOutsideAirVertices)
+
+                            // for (x in aabbToCheck.minX()..aabbToCheck.maxX()) {
+                            //     for (y in aabbToCheck.minY()..aabbToCheck.maxY()) {
+                            //         for (z in aabbToCheck.minZ()..aabbToCheck.maxZ()) {
+                            //             val pos = Vector3i(x, y, z)
+                            //             if (!exclusion.containsPoint(pos)) {
+                            //                 newOutsideAirVertices.add(pos)
+                            //             }
+                            //         }
+                            //     }
+                            // }
+
                         }
                         airForest.currentShipAABB = AABBi(shipData.shipAABB)
 
