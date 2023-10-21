@@ -156,21 +156,39 @@ class AirPocketForestImpl(
 
         if (airVertices.contains(Vector3i(posX + 1, posY, posZ))) {
             graph.addEdge(vertex, airVertices[Vector3i(posX + 1, posY, posZ)]!!)
+            if (!silent) {
+                verifyAirPocket(Vector3i(posX + 1, posY, posZ))
+            }
         }
         if (airVertices.contains(Vector3i(posX - 1, posY, posZ))) {
             graph.addEdge(vertex, airVertices[Vector3i(posX - 1, posY, posZ)]!!)
+            if (!silent) {
+                verifyAirPocket(Vector3i(posX - 1, posY, posZ))
+            }
         }
         if (airVertices.contains(Vector3i(posX, posY + 1, posZ))) {
             graph.addEdge(vertex, airVertices[Vector3i(posX, posY + 1, posZ)]!!)
+            if (!silent) {
+                verifyAirPocket(Vector3i(posX, posY + 1, posZ))
+            }
         }
         if (airVertices.contains(Vector3i(posX, posY - 1, posZ))) {
             graph.addEdge(vertex, airVertices[Vector3i(posX, posY - 1, posZ)]!!)
+            if (!silent) {
+                verifyAirPocket(Vector3i(posX, posY - 1, posZ))
+            }
         }
         if (airVertices.contains(Vector3i(posX, posY, posZ + 1))) {
             graph.addEdge(vertex, airVertices[Vector3i(posX, posY, posZ + 1)]!!)
+            if (!silent) {
+                verifyAirPocket(Vector3i(posX, posY, posZ + 1))
+            }
         }
         if (airVertices.contains(Vector3i(posX, posY, posZ - 1))) {
             graph.addEdge(vertex, airVertices[Vector3i(posX, posY, posZ - 1)]!!)
+            if (!silent) {
+                verifyAirPocket(Vector3i(posX, posY, posZ - 1))
+            }
         }
         if (!silent) {
             verifyAirPocket(Vector3i(posX, posY, posZ))

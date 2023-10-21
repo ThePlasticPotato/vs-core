@@ -315,19 +315,22 @@ class ShipObjectServerWorld @Inject constructor(
                             //         }
                             //     }
                             // }
+                            val toClear: HashSet<Vector3ic> = HashSet()
+                            for (vertex in airForest.airVertices.keys) {
+                                if (!shipData.shipAABB!!.expand(2).containsPoint(vertex)) {
+                                    toClear.add(vertex)
+                                }
+                            }
+                            for (vertex in toClear) {
+                                airForest.delVertex(vertex.x(), vertex.y(), vertex.z(), true)
+                            }
 
+                            airForest.setUpdateOutsideAir(true)
                         }
                         airForest.currentShipAABB = AABBi(shipData.shipAABB)
 
-                        val toClear: HashSet<Vector3ic> = HashSet()
-                        for (vertex in airForest.airVertices.keys) {
-                            if (!shipData.shipAABB!!.expand(1).containsPoint(vertex)) {
-                                toClear.add(vertex)
-                            }
-                        }
-                        for (vertex in toClear) {
-                            airForest.delVertex(vertex.x(), vertex.y(), vertex.z(), true)
-                        }
+
+
                     }
 
                     for (vector in airForest.sealedAirBlocks.keys) {
