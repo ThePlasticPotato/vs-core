@@ -243,7 +243,6 @@ class ShipObjectServerWorld @Inject constructor(
 
 
             if (shipData != null && loadedShips.getById(shipId) != null) {
-                // val serverShip : ServerShip  = allShips.getById(shipId) as ServerShip
                 val serverShip : LoadedServerShip = loadedShips.getById(shipId) as LoadedServerShip
 
                 if (serverShip.getAttachment(AirPocketForest::class.java) != null) {
@@ -257,15 +256,41 @@ class ShipObjectServerWorld @Inject constructor(
                         airForest.delVertex(posX, posY, posZ, false)
                     }
                     if (shipData.shipAABB != null) {
-                        if (!shipData.shipAABB!!.equals(airForest.currentShipAABB)) {
-                            airForest.setUpdateOutsideAir(true)
+                        if (shipData.shipAABB!! != airForest.currentShipAABB) {
+                            val aabbToCheck: AABBic = shipData.shipAABB!!.expand(1, AABBi())
+                            val exclusion: AABBic = shipData.shipAABB!!
+
+                            val newOutsideAirVertices: HashSet<Vector3ic> = HashSet()
+
+                            for (x in aabbToCheck.minX()..aabbToCheck.maxX()) {
+                                for (y in aabbToCheck.minY()..aabbToCheck.maxY()) {
+                                    for (z in aabbToCheck.minZ()..aabbToCheck.maxZ()) {
+                                        val pos = Vector3i(x, y, z)
+                                        if (!exclusion.containsPoint(pos)) {
+                                            newOutsideAirVertices.add(pos)
+                                        }
+                                    }
+                                }
+                            }
+                            airForest.updateOutsideAirVertices(newOutsideAirVertices)
                         }
                         airForest.currentShipAABB = AABBi(shipData.shipAABB)
+
+                        val toClear: HashSet<Vector3ic> = HashSet()
+                        for (vertex in airForest.airVertices.keys) {
+                            if (!shipData.shipAABB!!.expand(1).containsPoint(vertex)) {
+                                toClear.add(vertex)
+                            }
+                        }
+                        for (vertex in toClear) {
+                            airForest.delVertex(vertex.x(), vertex.y(), vertex.z(), true)
+                        }
                     }
 
                     for (vector in airForest.sealedAirBlocks.keys) {
                         logger.info("Sealed air block at $vector")
                     }
+
                 }
 
 
